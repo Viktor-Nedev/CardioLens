@@ -71,15 +71,21 @@ export function Segmented<T extends string | number>({
   onChange,
   size = "sm",
   ariaLabel,
+  className,
 }: {
   options: { value: T; label: ReactNode; title?: string }[];
   value: T | null | undefined;
   onChange: (v: T) => void;
   size?: "xs" | "sm";
   ariaLabel?: string;
+  className?: string;
 }) {
   return (
-    <div role="radiogroup" aria-label={ariaLabel} className="inline-flex flex-wrap gap-0.5 rounded-lg border border-line bg-page/60 p-0.5">
+    <div
+      role="radiogroup"
+      aria-label={ariaLabel}
+      className={clsx("inline-flex flex-wrap gap-0.5 rounded-lg border border-line bg-page/60 p-0.5", className)}
+    >
       {options.map((o) => {
         const active = o.value === value;
         return (
@@ -146,12 +152,13 @@ export function ChartCard({
   return (
     <figure className={clsx("panel flex flex-col p-4", className)}>
       <header className="mb-3 flex items-start justify-between gap-3">
-        <div>
+        <div className="min-w-0">
           <figcaption className="text-sm font-semibold text-ink">{title}</figcaption>
           {subtitle && <p className="mt-0.5 text-xs text-ink-3">{subtitle}</p>}
         </div>
         {table && (
           <Segmented
+            className="shrink-0"
             size="xs"
             ariaLabel="Chart or table view"
             value={showTable ? "table" : "chart"}

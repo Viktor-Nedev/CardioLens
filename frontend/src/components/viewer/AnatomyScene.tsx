@@ -1,4 +1,4 @@
-import { Html, Outlines, useGLTF } from "@react-three/drei";
+import { Html, useGLTF } from "@react-three/drei";
 import { useFrame, type ThreeEvent } from "@react-three/fiber";
 import { useEffect, useMemo, useRef } from "react";
 import * as THREE from "three";
@@ -105,10 +105,12 @@ export function AnatomyScene({ meta }: { meta: AnatomyMeta | null }) {
         color: "#dcd5c4",
         roughness: 0.85,
         transparent: true,
-        opacity: 0.42,
+        opacity: 0.2,
         depthWrite: false,
       }),
       hit: new THREE.MeshBasicMaterial({ transparent: true, opacity: 0, depthWrite: false, colorWrite: false }),
+      // Selection outline: a slightly fatter copy drawn from the inside (back faces only).
+      outline: new THREE.MeshBasicMaterial({ color: "#ffffff", side: THREE.BackSide, transparent: true, opacity: 0.9 }),
     }),
     [],
   );
@@ -116,14 +118,16 @@ export function AnatomyScene({ meta }: { meta: AnatomyMeta | null }) {
   // Fattened copies: a hair thicker for display, much thicker (invisible) for picking.
   const vesselGeo = useMemo(() => {
     const display = {} as Record<TargetId, THREE.BufferGeometry>;
+    const outline = {} as Record<TargetId, THREE.BufferGeometry>;
     const hit = {} as Record<TargetId, THREE.BufferGeometry>;
     for (const t of VESSEL_TARGETS) {
       const g = parts[TARGET_NODE[t]];
       if (!g) continue;
       display[t] = inflate(g, 0.0025);
+      outline[t] = inflate(g, 0.009);
       hit[t] = inflate(g, 0.022);
     }
-    return { display, hit };
+    return { display, outline, hit };
   }, [parts]);
 
   // Heart x-ray mode toggles transparency on the myocardium.
@@ -279,9 +283,10 @@ export function AnatomyScene({ meta }: { meta: AnatomyMeta | null }) {
         {VESSEL_TARGETS.map((t) =>
           vesselGeo.display[t] ? (
             <group key={t}>
-              <mesh geometry={vesselGeo.display[t]} material={vesselMaterials[t]} raycast={noRaycast} renderOrder={2}>
-                {selected === t && <Outlines thickness={2.2} screenspace color="#ffffff" opacity={0.9} transparent />}
-              </mesh>
+              <mesh geometry={vesselGeo.display[t]} material={vesselMaterials[t]} raycast={noRaycast} renderOrder={2} />
+              {selected === t && (
+                <mesh geometry={vesselGeo.outline[t]} material={staticMaterials.outline} raycast={noRaycast} renderOrder={1} />
+              )}
               <mesh
                 geometry={vesselGeo.hit[t]}
                 material={staticMaterials.hit}
@@ -347,7 +352,7 @@ function VesselLabels({ meta }: { meta: AnatomyMeta }) {
         const pred = prediction?.targets[t];
         const [x, y, z] = node.center;
         const len = Math.hypot(x, y, z) || 1;
-        const push = 0.62 / len;
+        const push = 0.22 / len;
         const pos: [number, number, number] = [x + x * push, y + y * push, z + z * push];
         const active = selected === t || hovered === t;
         return (

@@ -44,13 +44,13 @@ function PercentileTrack({ value }: { value: number | null }) {
   if (value == null) return <span className="text-[11px] text-ink-3">—</span>;
   return (
     <div className="flex items-center gap-1.5" title={`${ordinal(value)} percentile of the development cohort`}>
-      <div className="relative h-1 w-14 rounded-full bg-white/10">
+      <div className="relative h-1 w-10 rounded-full bg-white/10">
         <div
           className="absolute top-1/2 h-2.5 w-2.5 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-surface bg-ink-2"
           style={{ left: `${value}%` }}
         />
       </div>
-      <span className="tabular w-8 text-[11px] text-ink-3">{ordinal(value)}</span>
+      <span className="tabular w-7 text-[11px] text-ink-3">{ordinal(value)}</span>
     </div>
   );
 }
@@ -60,7 +60,7 @@ function ContributionCell({ value, max, share }: { value: number; max: number; s
   const positive = value >= 0;
   return (
     <div className="flex items-center gap-2" title={`SHAP ${signed(value, 3)} log-odds`}>
-      <div className="relative h-2.5 w-20">
+      <div className="relative h-2.5 w-14">
         <div className="absolute inset-y-0 left-1/2 w-px bg-axis" />
         <div
           className="absolute inset-y-0 transition-all duration-500"
@@ -72,7 +72,7 @@ function ContributionCell({ value, max, share }: { value: number; max: number; s
           }}
         />
       </div>
-      <span className="tabular w-9 text-right text-[11px] text-ink-2">{(share * 100).toFixed(0)}%</span>
+      <span className="tabular w-8 text-right text-[11px] text-ink-2">{(share * 100).toFixed(0)}%</span>
     </div>
   );
 }
@@ -123,21 +123,19 @@ export function PhysiologyTable() {
         its SHAP value). Reference ranges are typical adult values, shown for orientation only.
       </p>
       <div className="scroll-slim overflow-x-auto">
-        <table className="tabular w-full min-w-[560px] text-left text-xs">
+        <table className="tabular w-full min-w-[360px] text-left text-xs">
           <thead className="text-[11px] text-ink-3">
             <tr className="border-b border-line">
-              <th className="py-1.5 pr-2 font-medium">Factor</th>
-              <th className="py-1.5 pr-2 font-medium">Value</th>
-              <th className="py-1.5 pr-2 font-medium">Reference</th>
+              <th className="py-1.5 pr-2 font-medium">Factor · value (reference)</th>
               <th className="py-1.5 pr-2 font-medium">Status</th>
               <th className="py-1.5 pr-2 font-medium">Cohort</th>
-              <th className="py-1.5 font-medium">Contribution · {targetShort}</th>
+              <th className="py-1.5 font-medium">{targetShort} share</th>
             </tr>
           </thead>
           {groups.map((g) => (
             <tbody key={g.id}>
               <tr>
-                <td colSpan={6} className="pb-1 pt-3 text-[11px] font-semibold uppercase tracking-wider text-ink-3">
+                <td colSpan={4} className="pb-1 pt-3 text-[11px] font-semibold uppercase tracking-wider text-ink-3">
                   {g.label}
                 </td>
               </tr>
@@ -145,9 +143,13 @@ export function PhysiologyTable() {
                 const c = r.contributions[selected] ?? 0;
                 return (
                   <tr key={r.feature} className="border-t border-line/60 hover:bg-hover/60">
-                    <td className="py-1.5 pr-2 text-ink">{r.label}</td>
-                    <td className="py-1.5 pr-2 text-ink-2">{r.display}</td>
-                    <td className="py-1.5 pr-2 text-ink-3">{r.ref ? `${r.ref[0]}–${r.ref[1]}` : "—"}</td>
+                    <td className="py-1.5 pr-2">
+                      <p className="text-ink">{r.label}</p>
+                      <p className="text-[11px] text-ink-3">
+                        <span className="text-ink-2">{r.display}</span>
+                        {r.ref ? ` (${r.ref[0]}–${r.ref[1]})` : ""}
+                      </p>
+                    </td>
                     <td className="py-1.5 pr-2">
                       <Flag row={r} />
                     </td>

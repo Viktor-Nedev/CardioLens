@@ -71,7 +71,7 @@ varying vec3 vTerritory;`,
 }
 
 /** Fresnel rim shader for the translucent torso surface. */
-export function createHologramMaterial(color = "#5cc8f5", opacity = 0.55): THREE.ShaderMaterial {
+export function createHologramMaterial(color = "#5cc8f5", opacity = 0.2): THREE.ShaderMaterial {
   return new THREE.ShaderMaterial({
     uniforms: {
       uColor: { value: new THREE.Color(color) },
@@ -94,7 +94,7 @@ export function createHologramMaterial(color = "#5cc8f5", opacity = 0.55): THREE
       varying vec3 vViewDir;
       void main() {
         float f = 1.0 - abs(dot(normalize(vNormalV), normalize(vViewDir)));
-        f = pow(f, 2.4);
+        f = pow(f, 3.2);
         gl_FragColor = vec4(uColor * f, f * uOpacity);
         #include <colorspace_fragment>
       }

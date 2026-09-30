@@ -94,6 +94,21 @@ function readAccepted(): boolean {
   }
 }
 
+/**
+ * Opening case: a hold-out patient with CAD where the vessel findings are mixed and
+ * every model agrees with angiography, so the first screen shows contrast between arteries.
+ */
+function pickShowcase(cases: Case[]): Case | undefined {
+  const vessels: TargetId[] = ["lad", "lcx", "rca"];
+  const agrees = (c: Case, t: TargetId, thr = 0.5) => (c.predicted[t] >= thr) === Boolean(c.truth[t]);
+  const mixed = cases.filter((c) => {
+    const n = vessels.filter((v) => c.truth[v]).length;
+    return c.truth.cad === 1 && n >= 1 && n <= 2 && agrees(c, "cad") && vessels.every((v) => agrees(c, v));
+  });
+  const pool = mixed.length ? mixed : cases;
+  return [...pool].sort((a, b) => b.predicted.cad - a.predicted.cad)[0];
+}
+
 const TARGET_NODE: Record<TargetId, string> = {
   cad: "overview_heart",
   lad: "vessel_LAD",
@@ -126,8 +141,7 @@ export const useStore = create<AppState>((set, get) => ({
   disclaimerAccepted: readAccepted(),
 
   setBoot: ({ schema, cases, metrics, importance }) => {
-    // Start from the highest-risk hold-out patient so the demo opens on a finding.
-    const initial = cases.length ? cases[cases.length - 1] : undefined;
+    const initial = pickShowcase(cases);
     set({ schema, cases, metrics, importance });
     if (initial) get().loadPatient(initial.features, initial.title, initial.id);
     else get().loadPatient(schema.default_patient, "Cohort median");

@@ -57,7 +57,7 @@ function OverviewTable() {
 
 function ConfusionMatrix({ r }: { r: TargetReport }) {
   const { tn, fp, fn, tp } = r.holdout.confusion;
-  const pos = r.short === "CAD" ? "CAD" : "Stenotic";
+  const pos = r.short === "CAD" ? "CAD" : "stenotic";
   const cells = [
     { label: "True negative", v: tn, row: tn + fp },
     { label: "False positive", v: fp, row: tn + fp },
@@ -70,10 +70,10 @@ function ConfusionMatrix({ r }: { r: TargetReport }) {
       subtitle={`Hold-out set at the ${pct(r.threshold)} decision threshold`}
       table={
         <DataTable
-          head={["", `Predicted normal`, `Predicted ${pos.toLowerCase()}`]}
+          head={["", "Predicted normal", `Predicted ${pos}`]}
           rows={[
             ["Actual normal", tn, fp],
-            [`Actual ${pos.toLowerCase()}`, fn, tp],
+            [`Actual ${pos}`, fn, tp],
           ]}
         />
       }
@@ -81,10 +81,10 @@ function ConfusionMatrix({ r }: { r: TargetReport }) {
       <div className="grid grid-cols-[auto_1fr_1fr] gap-0.5 text-xs">
         <span />
         <span className="pb-1 text-center text-[11px] text-ink-3">Predicted normal</span>
-        <span className="pb-1 text-center text-[11px] text-ink-3">Predicted {pos.toLowerCase()}</span>
+        <span className="pb-1 text-center text-[11px] text-ink-3">Predicted {pos}</span>
         {[0, 1].map((row) => (
           <div key={row} className="contents">
-            <span className="flex items-center pr-2 text-[11px] text-ink-3">{row ? `Actual ${pos.toLowerCase()}` : "Actual normal"}</span>
+            <span className="flex items-center pr-2 text-[11px] text-ink-3">{row ? `Actual ${pos}` : "Actual normal"}</span>
             {cells.slice(row * 2, row * 2 + 2).map((c) => {
               const share = c.row ? c.v / c.row : 0;
               return (

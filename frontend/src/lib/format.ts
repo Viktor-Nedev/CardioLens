@@ -1,4 +1,9 @@
-export const pct = (p: number, digits = 0) => `${(p * 100).toFixed(digits)}%`;
+/** Probability as a percentage; extremes are shown as <1% / >99% rather than a false 0% / 100%. */
+export const pct = (p: number, digits = 0) => {
+  if (p > 0.995) return ">99%";
+  if (p < 0.005) return "<1%";
+  return `${(p * 100).toFixed(digits)}%`;
+};
 
 export const signed = (v: number, digits = 2) => `${v >= 0 ? "+" : "−"}${Math.abs(v).toFixed(digits)}`;
 

@@ -1,0 +1,25 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+backend/.venv/
+.pytest_cache/
+*.egg-info/
+
+# Node
+frontend/node_modules/
+frontend/dist/
+
+# Anatomy build cache (downloaded BodyParts3D STL files)
+anatomy/.cache/
+
+# Logs and local files
+*.log
+.env
+.env.*
+
+# OS / editors
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/

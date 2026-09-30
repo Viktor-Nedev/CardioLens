@@ -1,0 +1,51 @@
+# Prediction targets.
+#
+# Each target is trained as an independent binary classifier. `structure` links
+# the target to a node in the 3D anatomy (frontend/src/anatomy/registry.ts), so
+# the viewer and the model outputs always refer to the same vessel.
+#
+# Every column listed under `leakage_columns` is removed from the model inputs
+# for every target (angiography results must never be used as predictors).
+
+leakage_columns: [Cath, LAD, LCX, RCA]
+
+risk_bands:
+  - {id: low, label: Low, max: 0.3}
+  - {id: moderate, label: Moderate, max: 0.6}
+  - {id: high, label: High, max: 1.0}
+
+targets:
+  - id: cad
+    column: Cath
+    positive: CAD
+    label: Coronary artery disease
+    short: CAD
+    kind: overall
+    structure: heart_wall
+    description: >-
+      Overall CAD status from coronary angiography (at least 50% diameter
+      narrowing in one or more major coronary vessels).
+  - id: lad
+    column: LAD
+    positive: Stenotic
+    label: Left anterior descending artery
+    short: LAD
+    kind: vessel
+    structure: vessel_LAD
+    territory: Anterior wall, anterior septum and apex
+  - id: lcx
+    column: LCX
+    positive: Stenotic
+    label: Left circumflex artery
+    short: LCX
+    kind: vessel
+    structure: vessel_LCX
+    territory: Lateral and posterolateral wall
+  - id: rca
+    column: RCA
+    positive: Stenotic
+    label: Right coronary artery
+    short: RCA
+    kind: vessel
+    structure: vessel_RCA
+    territory: Inferior wall, right ventricle and inferior septum

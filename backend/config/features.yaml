@@ -1,0 +1,421 @@
+# Clinical feature catalog.
+#
+# Every model input is declared here. The training pipeline, the API schema and
+# the dashboard form are all generated from this file, so adding a feature is a
+# matter of adding an entry and re-running `python -m cardiolens.train`.
+#
+# kind:
+#   numeric     continuous measurement (median-imputed, standardised)
+#   binary      0/1 flag; `map` converts raw dataset codes to 0/1
+#   ordinal     ordered integer scale; `options` gives the labels
+#   categorical unordered category, one-hot encoded
+#
+# ref: adult reference interval used for the physiology breakdown (display only,
+#      never used by the model).
+
+groups:
+  - id: demographics
+    label: Demographics
+  - id: history
+    label: History & risk factors
+  - id: exam
+    label: Symptoms & examination
+  - id: ecg
+    label: ECG
+  - id: labs
+    label: Laboratory
+  - id: echo
+    label: Echocardiography
+
+features:
+  # --- Demographics -----------------------------------------------------------
+  - id: age
+    column: Age
+    label: Age
+    group: demographics
+    kind: numeric
+    unit: years
+    range: [18, 95]
+    step: 1
+  - id: weight
+    column: Weight
+    label: Weight
+    group: demographics
+    kind: numeric
+    unit: kg
+    range: [35, 160]
+    step: 1
+  - id: height
+    column: Length
+    label: Height
+    group: demographics
+    kind: numeric
+    unit: cm
+    range: [130, 210]
+    step: 1
+  - id: sex_male
+    column: Sex
+    label: Sex
+    group: demographics
+    kind: binary
+    map: {Male: 1, Fmale: 0}
+    options: [{value: 0, label: Female}, {value: 1, label: Male}]
+  - id: bmi
+    column: BMI
+    label: BMI
+    group: demographics
+    kind: numeric
+    unit: kg/m²
+    range: [15, 50]
+    step: 0.1
+    ref: [18.5, 25]
+
+  # --- History & risk factors -------------------------------------------------
+  - id: dm
+    column: DM
+    label: Diabetes mellitus
+    group: history
+    kind: binary
+  - id: htn
+    column: HTN
+    label: Hypertension
+    group: history
+    kind: binary
+  - id: current_smoker
+    column: Current Smoker
+    label: Current smoker
+    group: history
+    kind: binary
+  - id: ex_smoker
+    column: EX-Smoker
+    label: Ex-smoker
+    group: history
+    kind: binary
+  - id: family_history
+    column: FH
+    label: Family history of CAD
+    group: history
+    kind: binary
+  - id: obesity
+    column: Obesity
+    label: Obesity
+    group: history
+    kind: binary
+    description: BMI above 25 as recorded in the source dataset.
+  - id: crf
+    column: CRF
+    label: Chronic renal failure
+    group: history
+    kind: binary
+  - id: cva
+    column: CVA
+    label: Prior stroke (CVA)
+    group: history
+    kind: binary
+  - id: airway_disease
+    column: Airway disease
+    label: Airway disease
+    group: history
+    kind: binary
+  - id: thyroid_disease
+    column: Thyroid Disease
+    label: Thyroid disease
+    group: history
+    kind: binary
+  - id: chf
+    column: CHF
+    label: Congestive heart failure
+    group: history
+    kind: binary
+  - id: dyslipidemia
+    column: DLP
+    label: Dyslipidemia
+    group: history
+    kind: binary
+
+  # --- Symptoms & examination -------------------------------------------------
+  - id: bp
+    column: BP
+    label: Blood pressure (systolic)
+    group: exam
+    kind: numeric
+    unit: mmHg
+    range: [80, 220]
+    step: 1
+    ref: [90, 130]
+  - id: pulse_rate
+    column: PR
+    label: Pulse rate
+    group: exam
+    kind: numeric
+    unit: bpm
+    range: [40, 140]
+    step: 1
+    ref: [60, 100]
+  - id: edema
+    column: Edema
+    label: Edema
+    group: exam
+    kind: binary
+  - id: weak_peripheral_pulse
+    column: Weak Peripheral Pulse
+    label: Weak peripheral pulse
+    group: exam
+    kind: binary
+  - id: lung_rales
+    column: Lung rales
+    label: Lung rales
+    group: exam
+    kind: binary
+  - id: systolic_murmur
+    column: Systolic Murmur
+    label: Systolic murmur
+    group: exam
+    kind: binary
+  - id: diastolic_murmur
+    column: Diastolic Murmur
+    label: Diastolic murmur
+    group: exam
+    kind: binary
+  - id: typical_chest_pain
+    column: Typical Chest Pain
+    label: Typical chest pain
+    group: exam
+    kind: binary
+  - id: atypical_chest_pain
+    column: Atypical
+    label: Atypical chest pain
+    group: exam
+    kind: binary
+  - id: nonanginal_pain
+    column: Nonanginal
+    label: Non-anginal chest pain
+    group: exam
+    kind: binary
+  - id: low_threshold_angina
+    column: LowTH Ang
+    label: Low-threshold angina
+    group: exam
+    kind: binary
+  - id: dyspnea
+    column: Dyspnea
+    label: Dyspnea
+    group: exam
+    kind: binary
+  - id: function_class
+    column: Function Class
+    label: Functional class (NYHA-style)
+    group: exam
+    kind: ordinal
+    options:
+      - {value: 0, label: "None"}
+      - {value: 1, label: "I"}
+      - {value: 2, label: "II"}
+      - {value: 3, label: "III"}
+  # `Exertional CP` is constant ("N") for all 303 patients, so it carries no
+  # information and is excluded.
+
+  # --- ECG ----------------------------------------------------------------------
+  - id: q_wave
+    column: Q Wave
+    label: Pathological Q wave
+    group: ecg
+    kind: binary
+  - id: st_elevation
+    column: St Elevation
+    label: ST elevation
+    group: ecg
+    kind: binary
+  - id: st_depression
+    column: St Depression
+    label: ST depression
+    group: ecg
+    kind: binary
+  - id: t_inversion
+    column: Tinversion
+    label: T-wave inversion
+    group: ecg
+    kind: binary
+  - id: lvh
+    column: LVH
+    label: Left ventricular hypertrophy
+    group: ecg
+    kind: binary
+  - id: poor_r_progression
+    column: Poor R Progression
+    label: Poor R-wave progression
+    group: ecg
+    kind: binary
+  - id: bbb
+    column: BBB
+    label: Bundle branch block
+    group: ecg
+    kind: categorical
+    options:
+      - {value: N, label: None}
+      - {value: LBBB, label: Left (LBBB)}
+      - {value: RBBB, label: Right (RBBB)}
+
+  # --- Laboratory ---------------------------------------------------------------
+  - id: fbs
+    column: FBS
+    label: Fasting blood sugar
+    group: labs
+    kind: numeric
+    unit: mg/dL
+    range: [50, 450]
+    step: 1
+    ref: [70, 100]
+  - id: creatinine
+    column: CR
+    label: Creatinine
+    group: labs
+    kind: numeric
+    unit: mg/dL
+    range: [0.3, 5]
+    step: 0.1
+    ref: [0.6, 1.3]
+  - id: triglycerides
+    column: TG
+    label: Triglycerides
+    group: labs
+    kind: numeric
+    unit: mg/dL
+    range: [30, 1100]
+    step: 1
+    ref: [0, 150]
+  - id: ldl
+    column: LDL
+    label: LDL cholesterol
+    group: labs
+    kind: numeric
+    unit: mg/dL
+    range: [15, 300]
+    step: 1
+    ref: [0, 130]
+  - id: hdl
+    column: HDL
+    label: HDL cholesterol
+    group: labs
+    kind: numeric
+    unit: mg/dL
+    range: [10, 120]
+    step: 0.1
+    ref: [40, 120]
+  - id: bun
+    column: BUN
+    label: Blood urea nitrogen
+    group: labs
+    kind: numeric
+    unit: mg/dL
+    range: [3, 80]
+    step: 1
+    ref: [7, 20]
+  - id: esr
+    column: ESR
+    label: ESR
+    group: labs
+    kind: numeric
+    unit: mm/h
+    range: [0, 120]
+    step: 1
+    ref: [0, 20]
+  - id: hemoglobin
+    column: HB
+    label: Hemoglobin
+    group: labs
+    kind: numeric
+    unit: g/dL
+    range: [6, 20]
+    step: 0.1
+    ref: [12, 17.5]
+  - id: potassium
+    column: K
+    label: Potassium
+    group: labs
+    kind: numeric
+    unit: mEq/L
+    range: [2.5, 7]
+    step: 0.1
+    ref: [3.5, 5.0]
+  - id: sodium
+    column: Na
+    label: Sodium
+    group: labs
+    kind: numeric
+    unit: mEq/L
+    range: [120, 160]
+    step: 1
+    ref: [135, 145]
+  - id: wbc
+    column: WBC
+    label: White blood cells
+    group: labs
+    kind: numeric
+    unit: cells/µL
+    range: [2000, 25000]
+    step: 100
+    ref: [4000, 11000]
+  - id: lymphocytes
+    column: Lymph
+    label: Lymphocytes
+    group: labs
+    kind: numeric
+    unit: "%"
+    range: [0, 80]
+    step: 1
+    ref: [20, 40]
+  - id: neutrophils
+    column: Neut
+    label: Neutrophils
+    group: labs
+    kind: numeric
+    unit: "%"
+    range: [20, 95]
+    step: 1
+    ref: [40, 70]
+  - id: platelets
+    column: PLT
+    label: Platelets
+    group: labs
+    kind: numeric
+    unit: ×10³/µL
+    range: [20, 800]
+    step: 1
+    ref: [150, 450]
+
+  # --- Echocardiography -----------------------------------------------------------
+  - id: ejection_fraction
+    column: EF-TTE
+    label: Ejection fraction (TTE)
+    group: echo
+    kind: numeric
+    unit: "%"
+    range: [10, 75]
+    step: 1
+    ref: [50, 75]
+  - id: region_rwma
+    column: Region RWMA
+    label: Regions with wall-motion abnormality
+    group: echo
+    kind: ordinal
+    description: >-
+      Number of myocardial regions with regional wall-motion abnormality on
+      echocardiography. Used as a model input only; it is not a spatial lesion map.
+    options:
+      - {value: 0, label: "0"}
+      - {value: 1, label: "1"}
+      - {value: 2, label: "2"}
+      - {value: 3, label: "3"}
+      - {value: 4, label: "4"}
+  - id: vhd
+    column: VHD
+    label: Valvular heart disease
+    group: echo
+    kind: ordinal
+    map: {N: 0, mild: 1, Moderate: 2, Severe: 3}
+    options:
+      - {value: 0, label: None}
+      - {value: 1, label: Mild}
+      - {value: 2, label: Moderate}
+      - {value: 3, label: Severe}

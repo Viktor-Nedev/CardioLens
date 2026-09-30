@@ -1,0 +1,147 @@
+@import "tailwindcss";
+@import "@fontsource-variable/inter";
+
+/* Design tokens. The UI is dark-only: the 3D viewer is the centrepiece and all
+   chart colours are validated against the dark surfaces below. */
+@theme {
+  --font-sans: "Inter Variable", system-ui, -apple-system, "Segoe UI", sans-serif;
+
+  --color-page: #0a0e15;
+  --color-surface: #101722;
+  --color-raised: #161f2d;
+  --color-hover: #1b2636;
+  --color-line: rgb(255 255 255 / 0.08);
+  --color-line-strong: rgb(255 255 255 / 0.15);
+
+  --color-ink: #f3f5f9;
+  --color-ink-2: #b2bccb;
+  --color-ink-3: #7f8a9b;
+
+  --color-accent: #5cc8f5;
+  --color-accent-soft: rgb(92 200 245 / 0.14);
+
+  /* Risk scale (semantic heat): low -> moderate -> high. */
+  --color-risk-low: #199e70;
+  --color-risk-mid: #c98500;
+  --color-risk-high: #d03b3b;
+
+  /* Diverging pair for SHAP contributions. */
+  --color-lowers: #3987e5;
+  --color-raises: #e66767;
+  --color-neutral: #383835;
+
+  /* Chart chrome. */
+  --color-grid: #1d2634;
+  --color-axis: #2c3749;
+  --color-series: #3987e5;
+  --color-context: #5b6576;
+
+  --color-warn: #fab219;
+}
+
+@layer base {
+  html,
+  body,
+  #root {
+    height: 100%;
+  }
+  body {
+    @apply bg-page text-ink font-sans antialiased;
+    font-feature-settings: "cv11", "ss01";
+  }
+  ::selection {
+    background: rgb(92 200 245 / 0.35);
+  }
+  :focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
+  }
+}
+
+@layer components {
+  .panel {
+    @apply rounded-xl border border-line bg-surface;
+  }
+  .label-caps {
+    @apply text-[11px] font-semibold uppercase tracking-[0.08em] text-ink-3;
+  }
+  .tabular {
+    font-variant-numeric: tabular-nums;
+  }
+  .scroll-slim {
+    scrollbar-width: thin;
+    scrollbar-color: rgb(255 255 255 / 0.14) transparent;
+  }
+  .btn {
+    @apply inline-flex items-center gap-1.5 rounded-lg border border-line bg-raised px-2.5 py-1.5 text-xs font-medium text-ink-2 transition-colors hover:bg-hover hover:text-ink disabled:opacity-40;
+  }
+  .btn-ghost {
+    @apply inline-flex items-center gap-1.5 rounded-lg px-2 py-1 text-xs font-medium text-ink-3 transition-colors hover:bg-hover hover:text-ink;
+  }
+  .chip {
+    @apply inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[11px] font-medium;
+  }
+}
+
+/* Range input styling shared by the patient form. */
+input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  background: transparent;
+  height: 18px;
+}
+input[type="range"]::-webkit-slider-runnable-track {
+  height: 4px;
+  border-radius: 999px;
+  background: linear-gradient(
+    to right,
+    var(--color-accent) 0%,
+    var(--color-accent) var(--fill, 0%),
+    rgb(255 255 255 / 0.12) var(--fill, 0%)
+  );
+}
+input[type="range"]::-moz-range-track {
+  height: 4px;
+  border-radius: 999px;
+  background: rgb(255 255 255 / 0.12);
+}
+input[type="range"]::-moz-range-progress {
+  height: 4px;
+  border-radius: 999px;
+  background: var(--color-accent);
+}
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 14px;
+  height: 14px;
+  margin-top: -5px;
+  border-radius: 999px;
+  background: #fff;
+  border: 3px solid var(--color-accent);
+}
+input[type="range"]::-moz-range-thumb {
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  background: #fff;
+  border: 3px solid var(--color-accent);
+}
+
+@keyframes pulse-soft {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.55;
+  }
+}
+.animate-pulse-soft {
+  animation: pulse-soft 1.6s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-pulse-soft {
+    animation: none;
+  }
+}

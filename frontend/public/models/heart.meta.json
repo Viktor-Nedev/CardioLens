@@ -1,0 +1,281 @@
+{
+ "units": "1 scene unit = 10 cm",
+ "source": "BodyParts3D (DBCLS), CC BY-SA 2.1 JP",
+ "nodes": {
+  "heart_wall": {
+   "label": "Heart wall (myocardium)",
+   "fma": [
+    "FMA7274"
+   ],
+   "faces": 59998,
+   "anchor": [
+    -0.0364,
+    -0.0094,
+    0.0024
+   ],
+   "center": [
+    -0.0,
+    0.0002,
+    -0.0002
+   ],
+   "radius": 0.9547
+  },
+  "vessel_LM": {
+   "label": "Left main coronary artery",
+   "fma": [
+    "FMA4685"
+   ],
+   "faces": 252,
+   "anchor": [
+    0.0828,
+    0.304,
+    0.0049
+   ],
+   "center": [
+    0.0749,
+    0.3039,
+    -0.0149
+   ],
+   "radius": 0.0724
+  },
+  "vessel_LAD": {
+   "label": "Left anterior descending artery",
+   "fma": [
+    "FMA3862nsn",
+    "FMA71670"
+   ],
+   "faces": 10434,
+   "anchor": [
+    0.2728,
+    -0.0237,
+    0.3459
+   ],
+   "center": [
+    0.3271,
+    -0.0848,
+    0.2437
+   ],
+   "radius": 0.5362
+  },
+  "vessel_LCX": {
+   "label": "Left circumflex artery",
+   "fma": [
+    "FMA3895"
+   ],
+   "faces": 3542,
+   "anchor": [
+    0.4326,
+    -0.0903,
+    -0.2269
+   ],
+   "center": [
+    0.3433,
+    -0.0495,
+    -0.069
+   ],
+   "radius": 0.4913
+  },
+  "vessel_RCA": {
+   "label": "Right coronary artery",
+   "fma": [
+    "FMA3802",
+    "FMA3818",
+    "FMA76994",
+    "FMA3840nsn",
+    "FMA71669"
+   ],
+   "faces": 16148,
+   "anchor": [
+    0.0605,
+    -0.3117,
+    0.0956
+   ],
+   "center": [
+    0.045,
+    -0.0902,
+    0.1072
+   ],
+   "radius": 0.7787
+  },
+  "aorta": {
+   "label": "Aorta",
+   "fma": [
+    "FMA3736",
+    "FMA3768",
+    "FMA3784"
+   ],
+   "faces": 9000,
+   "anchor": [
+    -0.0569,
+    0.2156,
+    -0.1649
+   ],
+   "center": [
+    -0.097,
+    -0.1166,
+    -0.2809
+   ],
+   "radius": 1.2448
+  },
+  "vena_cava": {
+   "label": "Superior and inferior vena cava",
+   "fma": [
+    "FMA4720",
+    "FMA10951"
+   ],
+   "faces": 3393,
+   "anchor": [
+    -0.4097,
+    -0.3621,
+    -0.0326
+   ],
+   "center": [
+    -0.3682,
+    -0.2479,
+    -0.0646
+   ],
+   "radius": 1.0924
+  },
+  "cardiac_veins": {
+   "label": "Cardiac veins",
+   "fma": [
+    "FMA4707",
+    "FMA4706",
+    "FMA4713",
+    "FMA71567",
+    "FMA76751"
+   ],
+   "faces": 8000,
+   "anchor": [
+    0.0372,
+    -0.4575,
+    0.0629
+   ],
+   "center": [
+    0.0688,
+    -0.1301,
+    0.0695
+   ],
+   "radius": 0.7916
+  },
+  "lungs": {
+   "label": "Lungs",
+   "fma": [
+    "FMA7333",
+    "FMA7383",
+    "FMA7337",
+    "FMA7370",
+    "FMA7371"
+   ],
+   "faces": 23998,
+   "anchor": [
+    -0.3596,
+    -0.1075,
+    -0.33
+   ],
+   "center": [
+    -0.2266,
+    0.0706,
+    -0.1479
+   ],
+   "radius": 2.0242
+  },
+  "ribs": {
+   "label": "Rib cage",
+   "fma": [
+    "FMA7987",
+    "FMA8012",
+    "FMA8039",
+    "FMA8148",
+    "FMA8093",
+    "FMA8202",
+    "FMA8256",
+    "FMA8310",
+    "FMA8391",
+    "FMA8472",
+    "FMA8532",
+    "FMA8534",
+    "FMA7857",
+    "FMA7882",
+    "FMA7909",
+    "FMA7957",
+    "FMA8066",
+    "FMA8175",
+    "FMA8229",
+    "FMA8283",
+    "FMA8364",
+    "FMA8445",
+    "FMA8531",
+    "FMA8533"
+   ],
+   "faces": 35998,
+   "anchor": [
+    -0.0327,
+    -0.3795,
+    -0.6944
+   ],
+   "center": [
+    -0.2255,
+    -0.3831,
+    -0.217
+   ],
+   "radius": 2.5234
+  },
+  "sternum": {
+   "label": "Sternum",
+   "fma": [
+    "FMA7486",
+    "FMA7487",
+    "FMA7488"
+   ],
+   "faces": 5000,
+   "anchor": [
+    -0.2202,
+    0.2722,
+    0.5155
+   ],
+   "center": [
+    -0.2208,
+    0.2064,
+    0.4567
+   ],
+   "radius": 1.0074
+  },
+  "trachea": {
+   "label": "Trachea",
+   "fma": [
+    "FMA7394"
+   ],
+   "faces": 2500,
+   "anchor": [
+    -0.2375,
+    1.236,
+    -0.2721
+   ],
+   "center": [
+    -0.2197,
+    1.2099,
+    -0.2353
+   ],
+   "radius": 0.6392
+  },
+  "skin": {
+   "label": "Torso surface",
+   "fma": [
+    "FMA7163"
+   ],
+   "faces": 22000,
+   "anchor": [
+    -0.2213,
+    -0.2833,
+    -0.497
+   ],
+   "center": [
+    -0.2232,
+    -0.2635,
+    -0.258
+   ],
+   "radius": 3.2157
+  }
+ }
+}

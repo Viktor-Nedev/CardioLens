@@ -1,0 +1,9 @@
+services:
+  cardiolens:
+    build: .
+    image: cardiolens:latest
+    ports:
+      - "7860:7860"
+    environment:
+      PORT: "7860"
+    restart: unless-stopped

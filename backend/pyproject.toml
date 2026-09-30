@@ -1,0 +1,18 @@
+[project]
+name = "cardiolens"
+version = "1.0.0"
+description = "Explainable coronary artery disease and vessel-level stenosis prediction mapped onto a 3D heart."
+requires-python = ">=3.11"
+license = { text = "MIT" }
+
+[tool.setuptools]
+packages = ["cardiolens", "cardiolens.api"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
+filterwarnings = [
+    "ignore::DeprecationWarning",
+    "ignore::FutureWarning",
+    "ignore::UserWarning",
+]

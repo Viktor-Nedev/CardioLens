@@ -1,0 +1,1738 @@
+{
+ "cad": [
+  {
+   "feature": "typical_chest_pain",
+   "label": "Typical chest pain",
+   "mean_abs_shap": 1.59723,
+   "mean_shap": -0.00903,
+   "permutation_auc_drop": 0.05989,
+   "permutation_auc_drop_std": 0.04277
+  },
+  {
+   "feature": "region_rwma",
+   "label": "Regions with wall-motion abnormality",
+   "mean_abs_shap": 0.80622,
+   "mean_shap": 0.12526,
+   "permutation_auc_drop": 0.0553,
+   "permutation_auc_drop_std": 0.03021
+  },
+  {
+   "feature": "age",
+   "label": "Age",
+   "mean_abs_shap": 0.78859,
+   "mean_shap": 0.00188,
+   "permutation_auc_drop": 0.00798,
+   "permutation_auc_drop_std": 0.02212
+  },
+  {
+   "feature": "htn",
+   "label": "Hypertension",
+   "mean_abs_shap": 0.48059,
+   "mean_shap": 0.01814,
+   "permutation_auc_drop": 0.0098,
+   "permutation_auc_drop_std": 0.00914
+  },
+  {
+   "feature": "t_inversion",
+   "label": "T-wave inversion",
+   "mean_abs_shap": 0.44893,
+   "mean_shap": -0.05713,
+   "permutation_auc_drop": 0.01872,
+   "permutation_auc_drop_std": 0.00916
+  },
+  {
+   "feature": "esr",
+   "label": "ESR",
+   "mean_abs_shap": 0.40565,
+   "mean_shap": -0.046,
+   "permutation_auc_drop": -0.01791,
+   "permutation_auc_drop_std": 0.00956
+  },
+  {
+   "feature": "pulse_rate",
+   "label": "Pulse rate",
+   "mean_abs_shap": 0.2863,
+   "mean_shap": 0.00034,
+   "permutation_auc_drop": 0.00579,
+   "permutation_auc_drop_std": 0.01048
+  },
+  {
+   "feature": "triglycerides",
+   "label": "Triglycerides",
+   "mean_abs_shap": 0.264,
+   "mean_shap": -0.03567,
+   "permutation_auc_drop": 0.01622,
+   "permutation_auc_drop_std": 0.00702
+  },
+  {
+   "feature": "dm",
+   "label": "Diabetes mellitus",
+   "mean_abs_shap": 0.26303,
+   "mean_shap": -0.0026,
+   "permutation_auc_drop": 0.01243,
+   "permutation_auc_drop_std": 0.00549
+  },
+  {
+   "feature": "family_history",
+   "label": "Family history of CAD",
+   "mean_abs_shap": 0.21892,
+   "mean_shap": -0.01593,
+   "permutation_auc_drop": 0.00824,
+   "permutation_auc_drop_std": 0.00486
+  },
+  {
+   "feature": "bp",
+   "label": "Blood pressure (systolic)",
+   "mean_abs_shap": 0.12636,
+   "mean_shap": 0.00131,
+   "permutation_auc_drop": 0.00267,
+   "permutation_auc_drop_std": 0.00537
+  },
+  {
+   "feature": "vhd",
+   "label": "Valvular heart disease",
+   "mean_abs_shap": 0.11009,
+   "mean_shap": -0.00498,
+   "permutation_auc_drop": -0.00192,
+   "permutation_auc_drop_std": 0.00358
+  },
+  {
+   "feature": "sex_male",
+   "label": "Sex",
+   "mean_abs_shap": 0.10471,
+   "mean_shap": 0.00993,
+   "permutation_auc_drop": 0.00049,
+   "permutation_auc_drop_std": 0.00264
+  },
+  {
+   "feature": "nonanginal_pain",
+   "label": "Non-anginal chest pain",
+   "mean_abs_shap": 0.1022,
+   "mean_shap": -0.00681,
+   "permutation_auc_drop": 0.0082,
+   "permutation_auc_drop_std": 0.00736
+  },
+  {
+   "feature": "ejection_fraction",
+   "label": "Ejection fraction (TTE)",
+   "mean_abs_shap": 0.0745,
+   "mean_shap": -0.00078,
+   "permutation_auc_drop": 0.00312,
+   "permutation_auc_drop_std": 0.00264
+  },
+  {
+   "feature": "atypical_chest_pain",
+   "label": "Atypical chest pain",
+   "mean_abs_shap": 0.07112,
+   "mean_shap": -0.00337,
+   "permutation_auc_drop": -0.00299,
+   "permutation_auc_drop_std": 0.00358
+  },
+  {
+   "feature": "fbs",
+   "label": "Fasting blood sugar",
+   "mean_abs_shap": 0.06892,
+   "mean_shap": -0.0122,
+   "permutation_auc_drop": -0.00027,
+   "permutation_auc_drop_std": 0.0023
+  },
+  {
+   "feature": "ldl",
+   "label": "LDL cholesterol",
+   "mean_abs_shap": 0.06749,
+   "mean_shap": -0.00413,
+   "permutation_auc_drop": -4e-05,
+   "permutation_auc_drop_std": 0.00313
+  },
+  {
+   "feature": "neutrophils",
+   "label": "Neutrophils",
+   "mean_abs_shap": 0.06663,
+   "mean_shap": -0.00165,
+   "permutation_auc_drop": -0.00053,
+   "permutation_auc_drop_std": 0.0031
+  },
+  {
+   "feature": "dyspnea",
+   "label": "Dyspnea",
+   "mean_abs_shap": 0.04844,
+   "mean_shap": 0.0052,
+   "permutation_auc_drop": 0.00214,
+   "permutation_auc_drop_std": 0.0016
+  },
+  {
+   "feature": "platelets",
+   "label": "Platelets",
+   "mean_abs_shap": 0.04206,
+   "mean_shap": -0.00506,
+   "permutation_auc_drop": 0.00067,
+   "permutation_auc_drop_std": 0.00203
+  },
+  {
+   "feature": "bmi",
+   "label": "BMI",
+   "mean_abs_shap": 0.0359,
+   "mean_shap": 0.0021,
+   "permutation_auc_drop": -0.00085,
+   "permutation_auc_drop_std": 0.00225
+  },
+  {
+   "feature": "poor_r_progression",
+   "label": "Poor R-wave progression",
+   "mean_abs_shap": 0.02674,
+   "mean_shap": 0.00134,
+   "permutation_auc_drop": 0.00111,
+   "permutation_auc_drop_std": 0.00104
+  },
+  {
+   "feature": "current_smoker",
+   "label": "Current smoker",
+   "mean_abs_shap": 0.01098,
+   "mean_shap": -3e-05,
+   "permutation_auc_drop": -0.00111,
+   "permutation_auc_drop_std": 0.0005
+  },
+  {
+   "feature": "diastolic_murmur",
+   "label": "Diastolic murmur",
+   "mean_abs_shap": 0.00906,
+   "mean_shap": 0.00291,
+   "permutation_auc_drop": 0.0,
+   "permutation_auc_drop_std": 0.0
+  },
+  {
+   "feature": "airway_disease",
+   "label": "Airway disease",
+   "mean_abs_shap": 0.00876,
+   "mean_shap": 0.00144,
+   "permutation_auc_drop": -0.00125,
+   "permutation_auc_drop_std": 0.00077
+  },
+  {
+   "feature": "lung_rales",
+   "label": "Lung rales",
+   "mean_abs_shap": 0.00841,
+   "mean_shap": 0.00138,
+   "permutation_auc_drop": -9e-05,
+   "permutation_auc_drop_std": 0.00084
+  },
+  {
+   "feature": "edema",
+   "label": "Edema",
+   "mean_abs_shap": 0.00704,
+   "mean_shap": 0.0015,
+   "permutation_auc_drop": -0.00272,
+   "permutation_auc_drop_std": 0.00064
+  },
+  {
+   "feature": "weight",
+   "label": "Weight",
+   "mean_abs_shap": 0.0,
+   "mean_shap": 0.0,
+   "permutation_auc_drop": 0.0,
+   "permutation_auc_drop_std": 0.0
+  },
+  {
+   "feature": "height",
+   "label": "Height",
+   "mean_abs_shap": 0.0,
+   "mean_shap": 0.0,
+   "permutation_auc_drop": 0.0,
+   "permutation_auc_drop_std": 0.0
+  },
+  {
+   "feature": "ex_smoker",
+   "label": "Ex-smoker",
+   "mean_abs_shap": 0.0,
+   "mean_shap": 0.0,
+   "permutation_auc_drop": 0.0,
+   "permutation_auc_drop_std": 0.0
+  },
+  {
+   "feature": "obesity",
+   "label": "Obesity",
+   "mean_abs_shap": 0.0,
+   "mean_shap": 0.0,
+   "permutation_auc_drop": 0.0,
+   "permutation_auc_drop_std": 0.0
+  },
+  {
+   "feature": "crf",
+   "label": "Chronic renal failure",
+   "mean_abs_shap": 0.0,
+   "mean_shap": 0.0,
+   "permutation_auc_drop": 0.0,
+   "permutation_auc_drop_std": 0.0
+  },
+  {
+   "feature": "cva",
+   "label": "Prior stroke (CVA)",
+   "mean_abs_shap": 0.0,
+   "mean_shap": 0.0,
+   "permutation_auc_drop": 0.0,
+   "permutation_auc_drop_std": 0.0
+  },
+  {
+   "feature": "thyroid_disease",
+   "label": "Thyroid disease",
+   "mean_abs_shap": 0.0,
+   "mean_shap": 0.0,
+   "permutation_auc_drop": 0.0,
+   "permutation_auc_drop_std": 0.0
+  },
+  {
+   "feature": "chf",
+   "label": "Congestive heart failure",
+   "mean_abs_shap": 0.0,
+   "mean_shap": 0.0,
+   "permutation_auc_drop": 0.0,
+   "permutation_auc_drop_std": 0.0
+  },
+  {
+   "feature": "dyslipidemia",
+   "label": "Dyslipidemia",
+   "mean_abs_shap": 0.0,
+   "mean_shap": 0.0,
+   "permutation_auc_drop": 0.0,
+   "permutation_auc_drop_std": 0.0
+  },
+  {
+   "feature": "weak_peripheral_pulse",
+   "label": "Weak peripheral pulse",
+   "mean_abs_shap": 0.0,
+   "mean_shap": 0.0,
+   "permutation_auc_drop": 0.0,
+   "permutation_auc_drop_std": 0.0
+  },
+  {
+   "feature": "systolic_murmur",
+   "label": "Systolic murmur",
+   "mean_abs_shap": 0.0,
+   "mean_shap": 0.0,
+   "permutation_auc_drop": 0.0,
+   "permutation_auc_drop_std": 0.0
+  },
+  {
+   "feature": "low_threshold_angina",
+   "label": "Low-threshold angina",
+   "mean_abs_shap": 0.0,
+   "mean_shap": 0.0,
+   "permutation_auc_drop": 0.0,
+   "permutation_auc_drop_std": 0.0
+  },
+  {
+   "feature": "function_class",
+   "label": "Functional class (NYHA-style)",
+   "mean_abs_shap": 0.0,
+   "mean_shap": 0.0,
+   "permutation_auc_drop": 0.0,
+   "permutation_auc_drop_std": 0.0
+  },
+  {
+   "feature": "q_wave",
+   "label": "Pathological Q wave",
+   "mean_abs_shap": 0.0,
+   "mean_shap": 0.0,
+   "permutation_auc_drop": 0.0,
+   "permutation_auc_drop_std": 0.0
+  },
+  {
+   "feature": "st_elevation",
+   "label": "ST elevation",
+   "mean_abs_shap": 0.0,
+   "mean_shap": 0.0,
+   "permutation_auc_drop": 0.0,
+   "permutation_auc_drop_std": 0.0
+  },
+  {
+   "feature": "st_depression",
+   "label": "ST depression",
+   "mean_abs_shap": 0.0,
+   "mean_shap": 0.0,
+   "permutation_auc_drop": 0.0,
+   "permutation_auc_drop_std": 0.0
+  },
+  {
+   "feature": "lvh",
+   "label": "Left ventricular hypertrophy",
+   "mean_abs_shap": 0.0,
+   "mean_shap": 0.0,
+   "permutation_auc_drop": 0.0,
+   "permutation_auc_drop_std": 0.0
+  },
+  {
+   "feature": "bbb",
+   "label": "Bundle branch block",
+   "mean_abs_shap": 0.0,
+   "mean_shap": 0.0,
+   "permutation_auc_drop": 0.0,
+   "permutation_auc_drop_std": 0.0
+  },
+  {
+   "feature": "creatinine",
+   "label": "Creatinine",
+   "mean_abs_shap": 0.0,
+   "mean_shap": 0.0,
+   "permutation_auc_drop": 0.0,
+   "permutation_auc_drop_std": 0.0
+  },
+  {
+   "feature": "hdl",
+   "label": "HDL cholesterol",
+   "mean_abs_shap": 0.0,
+   "mean_shap": 0.0,
+   "permutation_auc_drop": 0.0,
+   "permutation_auc_drop_std": 0.0
+  },
+  {
+   "feature": "bun",
+   "label": "Blood urea nitrogen",
+   "mean_abs_shap": 0.0,
+   "mean_shap": 0.0,
+   "permutation_auc_drop": 0.0,
+   "permutation_auc_drop_std": 0.0
+  },
+  {
+   "feature": "hemoglobin",
+   "label": "Hemoglobin",
+   "mean_abs_shap": 0.0,
+   "mean_shap": 0.0,
+   "permutation_auc_drop": 0.0,
+   "permutation_auc_drop_std": 0.0
+  },
+  {
+   "feature": "potassium",
+   "label": "Potassium",
+   "mean_abs_shap": 0.0,
+   "mean_shap": 0.0,
+   "permutation_auc_drop": 0.0,
+   "permutation_auc_drop_std": 0.0
+  },
+  {
+   "feature": "sodium",
+   "label": "Sodium",
+   "mean_abs_shap": 0.0,
+   "mean_shap": 0.0,
+   "permutation_auc_drop": 0.0,
+   "permutation_auc_drop_std": 0.0
+  },
+  {
+   "feature": "wbc",
+   "label": "White blood cells",
+   "mean_abs_shap": 0.0,
+   "mean_shap": 0.0,
+   "permutation_auc_drop": 0.0,
+   "permutation_auc_drop_std": 0.0
+  },
+  {
+   "feature": "lymphocytes",
+   "label": "Lymphocytes",
+   "mean_abs_shap": 0.0,
+   "mean_shap": 0.0,
+   "permutation_auc_drop": 0.0,
+   "permutation_auc_drop_std": 0.0
+  }
+ ],
+ "lad": [
+  {
+   "feature": "typical_chest_pain",
+   "label": "Typical chest pain",
+   "mean_abs_shap": 1.23767,
+   "mean_shap": -0.007,
+   "permutation_auc_drop": 0.10963,
+   "permutation_auc_drop_std": 0.05609
+  },
+  {
+   "feature": "region_rwma",
+   "label": "Regions with wall-motion abnormality",
+   "mean_abs_shap": 0.80161,
+   "mean_shap": 0.12455,
+   "permutation_auc_drop": 0.0743,
+   "permutation_auc_drop_std": 0.04676
+  },
+  {
+   "feature": "age",
+   "label": "Age",
+   "mean_abs_shap": 0.53549,
+   "mean_shap": 0.00127,
+   "permutation_auc_drop": 0.01893,
+   "permutation_auc_drop_std": 0.01987
+  },
+  {
+   "feature": "esr",
+   "label": "ESR",
+   "mean_abs_shap": 0.30656,
+   "mean_shap": -0.03477,
+   "permutation_auc_drop": -0.02307,
+   "permutation_auc_drop_std": 0.01176
+  },
+  {
+   "feature": "ejection_fraction",
+   "label": "Ejection fraction (TTE)",
+   "mean_abs_shap": 0.26187,
+   "mean_shap": -0.00274,
+   "permutation_auc_drop": 0.01733,
+   "permutation_auc_drop_std": 0.01039
+  },
+  {
+   "feature": "lymphocytes",
+   "label": "Lymphocytes",
+   "mean_abs_shap": 0.0836,
+   "mean_shap": 0.00012,
+   "permutation_auc_drop": 0.00148,
+   "permutation_auc_drop_std": 0.00363
+  },
+  {
+   "feature": "poor_r_progression",
+   "label": "Poor R-wave progression",
+   "mean_abs_shap": 0.06766,
+   "mean_shap": 0.00339,
+   "permutation_auc_drop": -0.00526,
+   "permutation_auc_drop_std": 0.0033
+  },
+  {
+   "feature": "edema",
+   "label": "Edema",
+   "mean_abs_shap": 0.03202,
+   "mean_shap": 0.0068,
+   "permutation_auc_drop": -0.00322,
+   "permutation_auc_drop_std": 0.00263
+  },
+  {
+   "feature": "t_inversion",
+   "label": "T-wave inversion",
+   "mean_abs_shap": 0.00494,
+   "mean_shap": -0.00063,
+   "permutation_auc_drop": -0.0,
+   "permutation_auc_drop_std": 0.0
+  },
+  {
+   "feature": "thyroid_disease",
+   "label": "Thyroid disease",
+   "mean_abs_shap": 0.00429,
+   "mean_shap": -0.00047,
+   "permutation_auc_drop": -0.00107,
+   "permutation_auc_drop_std": 0.00045
+  },
+  {
+   "feature": "weight",
+   "label": "Weight",
+   "mean_abs_shap": 0.0,
+   "mean_shap": 0.0,
+   "permutation_auc_drop": 0.0,
+   "permutation_auc_drop_std": 0.0
+  },
+  {
+   "feature": "height",
+   "label": "Height",
+   "mean_abs_shap": 0.0,
+   "mean_shap": 0.0,
+   "permutation_auc_drop": 0.0,
+   "permutation_auc_drop_std": 0.0
+  },
+  {
+   "feature": "sex_male",
+   "label": "Sex",
+   "mean_abs_shap": 0.0,
+   "mean_shap": 0.0,
+   "permutation_auc_drop": 0.0,
+   "permutation_auc_drop_std": 0.0
+  },
+  {
+   "feature": "bmi",
+   "label": "BMI",
+   "mean_abs_shap": 0.0,
+   "mean_shap": 0.0,
+   "permutation_auc_drop": 0.0,
+   "permutation_auc_drop_std": 0.0
+  },
+  {
+   "feature": "dm",
+   "label": "Diabetes mellitus",
+   "mean_abs_shap": 0.0,
+   "mean_shap": 0.0,
+   "permutation_auc_drop": 0.0,
+   "permutation_auc_drop_std": 0.0
+  },
+  {
+   "feature": "htn",
+   "label": "Hypertension",
+   "mean_abs_shap": 0.0,
+   "mean_shap": 0.0,
+   "permutation_auc_drop": 0.0,
+   "permutation_auc_drop_std": 0.0
+  },
+  {
+   "feature": "current_smoker",
+   "label": "Current smoker",
+   "mean_abs_shap": 0.0,
+   "mean_shap": 0.0,
+   "permutation_auc_drop": 0.0,
+   "permutation_auc_drop_std": 0.0
+  },
+  {
+   "feature": "ex_smoker",
+   "label": "Ex-smoker",
+   "mean_abs_shap": 0.0,
+   "mean_shap": 0.0,
+   "permutation_auc_drop": 0.0,
+   "permutation_auc_drop_std": 0.0
+  },
+  {
+   "feature": "family_history",
+   "label": "Family history of CAD",
+   "mean_abs_shap": 0.0,
+   "mean_shap": 0.0,
+   "permutation_auc_drop": 0.0,
+   "permutation_auc_drop_std": 0.0
+  },
+  {
+   "feature": "obesity",
+   "label": "Obesity",
+   "mean_abs_shap": 0.0,
+   "mean_shap": 0.0,
+   "permutation_auc_drop": 0.0,
+   "permutation_auc_drop_std": 0.0
+  },
+  {
+   "feature": "crf",
+   "label": "Chronic renal failure",
+   "mean_abs_shap": 0.0,
+   "mean_shap": 0.0,
+   "permutation_auc_drop": 0.0,
+   "permutation_auc_drop_std": 0.0
+  },
+  {
+   "feature": "cva",
+   "label": "Prior stroke (CVA)",
+   "mean_abs_shap": 0.0,
+   "mean_shap": 0.0,
+   "permutation_auc_drop": 0.0,
+   "permutation_auc_drop_std": 0.0
+  },
+  {
+   "feature": "airway_disease",
+   "label": "Airway disease",
+   "mean_abs_shap": 0.0,
+   "mean_shap": 0.0,
+   "permutation_auc_drop": 0.0,
+   "permutation_auc_drop_std": 0.0
+  },
+  {
+   "feature": "chf",
+   "label": "Congestive heart failure",
+   "mean_abs_shap": 0.0,
+   "mean_shap": 0.0,
+   "permutation_auc_drop": 0.0,
+   "permutation_auc_drop_std": 0.0
+  },
+  {
+   "feature": "dyslipidemia",
+   "label": "Dyslipidemia",
+   "mean_abs_shap": 0.0,
+   "mean_shap": 0.0,
+   "permutation_auc_drop": 0.0,
+   "permutation_auc_drop_std": 0.0
+  },
+  {
+   "feature": "bp",
+   "label": "Blood pressure (systolic)",
+   "mean_abs_shap": 0.0,
+   "mean_shap": 0.0,
+   "permutation_auc_drop": 0.0,
+   "permutation_auc_drop_std": 0.0
+  },
+  {
+   "feature": "pulse_rate",
+   "label": "Pulse rate",
+   "mean_abs_shap": 0.0,
+   "mean_shap": 0.0,
+   "permutation_auc_drop": 0.0,
+   "permutation_auc_drop_std": 0.0
+  },
+  {
+   "feature": "weak_peripheral_pulse",
+   "label": "Weak peripheral pulse",
+   "mean_abs_shap": 0.0,
+   "mean_shap": 0.0,
+   "permutation_auc_drop": 0.0,
+   "permutation_auc_drop_std": 0.0
+  },
+  {
+   "feature": "lung_rales",
+   "label": "Lung rales",
+   "mean_abs_shap": 0.0,
+   "mean_shap": 0.0,
+   "permutation_auc_drop": 0.0,
+   "permutation_auc_drop_std": 0.0
+  },
+  {
+   "feature": "systolic_murmur",
+   "label": "Systolic murmur",
+   "mean_abs_shap": 0.0,
+   "mean_shap": 0.0,
+   "permutation_auc_drop": 0.0,
+   "permutation_auc_drop_std": 0.0
+  },
+  {
+   "feature": "diastolic_murmur",
+   "label": "Diastolic murmur",
+   "mean_abs_shap": 0.0,
+   "mean_shap": 0.0,
+   "permutation_auc_drop": 0.0,
+   "permutation_auc_drop_std": 0.0
+  },
+  {
+   "feature": "atypical_chest_pain",
+   "label": "Atypical chest pain",
+   "mean_abs_shap": 0.0,
+   "mean_shap": 0.0,
+   "permutation_auc_drop": 0.0,
+   "permutation_auc_drop_std": 0.0
+  },
+  {
+   "feature": "nonanginal_pain",
+   "label": "Non-anginal chest pain",
+   "mean_abs_shap": 0.0,
+   "mean_shap": 0.0,
+   "permutation_auc_drop": 0.0,
+   "permutation_auc_drop_std": 0.0
+  },
+  {
+   "feature": "low_threshold_angina",
+   "label": "Low-threshold angina",
+   "mean_abs_shap": 0.0,
+   "mean_shap": 0.0,
+   "permutation_auc_drop": 0.0,
+   "permutation_auc_drop_std": 0.0
+  },
+  {
+   "feature": "dyspnea",
+   "label": "Dyspnea",
+   "mean_abs_shap": 0.0,
+   "mean_shap": 0.0,
+   "permutation_auc_drop": 0.0,
+   "permutation_auc_drop_std": 0.0
+  },
+  {
+   "feature": "function_class",
+   "label": "Functional class (NYHA-style)",
+   "mean_abs_shap": 0.0,
+   "mean_shap": 0.0,
+   "permutation_auc_drop": 0.0,
+   "permutation_auc_drop_std": 0.0
+  },
+  {
+   "feature": "q_wave",
+   "label": "Pathological Q wave",
+   "mean_abs_shap": 0.0,
+   "mean_shap": 0.0,
+   "permutation_auc_drop": 0.0,
+   "permutation_auc_drop_std": 0.0
+  },
+  {
+   "feature": "st_elevation",
+   "label": "ST elevation",
+   "mean_abs_shap": 0.0,
+   "mean_shap": 0.0,
+   "permutation_auc_drop": 0.0,
+   "permutation_auc_drop_std": 0.0
+  },
+  {
+   "feature": "st_depression",
+   "label": "ST depression",
+   "mean_abs_shap": 0.0,
+   "mean_shap": 0.0,
+   "permutation_auc_drop": 0.0,
+   "permutation_auc_drop_std": 0.0
+  },
+  {
+   "feature": "lvh",
+   "label": "Left ventricular hypertrophy",
+   "mean_abs_shap": 0.0,
+   "mean_shap": 0.0,
+   "permutation_auc_drop": 0.0,
+   "permutation_auc_drop_std": 0.0
+  },
+  {
+   "feature": "bbb",
+   "label": "Bundle branch block",
+   "mean_abs_shap": 0.0,
+   "mean_shap": 0.0,
+   "permutation_auc_drop": 0.0,
+   "permutation_auc_drop_std": 0.0
+  },
+  {
+   "feature": "fbs",
+   "label": "Fasting blood sugar",
+   "mean_abs_shap": 0.0,
+   "mean_shap": 0.0,
+   "permutation_auc_drop": 0.0,
+   "permutation_auc_drop_std": 0.0
+  },
+  {
+   "feature": "creatinine",
+   "label": "Creatinine",
+   "mean_abs_shap": 0.0,
+   "mean_shap": 0.0,
+   "permutation_auc_drop": 0.0,
+   "permutation_auc_drop_std": 0.0
+  },
+  {
+   "feature": "triglycerides",
+   "label": "Triglycerides",
+   "mean_abs_shap": 0.0,
+   "mean_shap": 0.0,
+   "permutation_auc_drop": 0.0,
+   "permutation_auc_drop_std": 0.0
+  },
+  {
+   "feature": "ldl",
+   "label": "LDL cholesterol",
+   "mean_abs_shap": 0.0,
+   "mean_shap": 0.0,
+   "permutation_auc_drop": 0.0,
+   "permutation_auc_drop_std": 0.0
+  },
+  {
+   "feature": "hdl",
+   "label": "HDL cholesterol",
+   "mean_abs_shap": 0.0,
+   "mean_shap": 0.0,
+   "permutation_auc_drop": 0.0,
+   "permutation_auc_drop_std": 0.0
+  },
+  {
+   "feature": "bun",
+   "label": "Blood urea nitrogen",
+   "mean_abs_shap": 0.0,
+   "mean_shap": 0.0,
+   "permutation_auc_drop": 0.0,
+   "permutation_auc_drop_std": 0.0
+  },
+  {
+   "feature": "hemoglobin",
+   "label": "Hemoglobin",
+   "mean_abs_shap": 0.0,
+   "mean_shap": 0.0,
+   "permutation_auc_drop": 0.0,
+   "permutation_auc_drop_std": 0.0
+  },
+  {
+   "feature": "potassium",
+   "label": "Potassium",
+   "mean_abs_shap": 0.0,
+   "mean_shap": 0.0,
+   "permutation_auc_drop": 0.0,
+   "permutation_auc_drop_std": 0.0
+  },
+  {
+   "feature": "sodium",
+   "label": "Sodium",
+   "mean_abs_shap": 0.0,
+   "mean_shap": 0.0,
+   "permutation_auc_drop": 0.0,
+   "permutation_auc_drop_std": 0.0
+  },
+  {
+   "feature": "wbc",
+   "label": "White blood cells",
+   "mean_abs_shap": 0.0,
+   "mean_shap": 0.0,
+   "permutation_auc_drop": 0.0,
+   "permutation_auc_drop_std": 0.0
+  },
+  {
+   "feature": "neutrophils",
+   "label": "Neutrophils",
+   "mean_abs_shap": 0.0,
+   "mean_shap": 0.0,
+   "permutation_auc_drop": 0.0,
+   "permutation_auc_drop_std": 0.0
+  },
+  {
+   "feature": "platelets",
+   "label": "Platelets",
+   "mean_abs_shap": 0.0,
+   "mean_shap": 0.0,
+   "permutation_auc_drop": 0.0,
+   "permutation_auc_drop_std": 0.0
+  },
+  {
+   "feature": "vhd",
+   "label": "Valvular heart disease",
+   "mean_abs_shap": 0.0,
+   "mean_shap": 0.0,
+   "permutation_auc_drop": 0.0,
+   "permutation_auc_drop_std": 0.0
+  }
+ ],
+ "lcx": [
+  {
+   "feature": "age",
+   "label": "Age",
+   "mean_abs_shap": 0.36157,
+   "mean_shap": -0.00763,
+   "permutation_auc_drop": 0.109,
+   "permutation_auc_drop_std": 0.04162
+  },
+  {
+   "feature": "typical_chest_pain",
+   "label": "Typical chest pain",
+   "mean_abs_shap": 0.33175,
+   "mean_shap": -0.00457,
+   "permutation_auc_drop": 0.05641,
+   "permutation_auc_drop_std": 0.02868
+  },
+  {
+   "feature": "fbs",
+   "label": "Fasting blood sugar",
+   "mean_abs_shap": 0.26822,
+   "mean_shap": -0.02878,
+   "permutation_auc_drop": 0.00107,
+   "permutation_auc_drop_std": 0.0169
+  },
+  {
+   "feature": "triglycerides",
+   "label": "Triglycerides",
+   "mean_abs_shap": 0.23969,
+   "mean_shap": -0.00054,
+   "permutation_auc_drop": 0.05656,
+   "permutation_auc_drop_std": 0.02179
+  },
+  {
+   "feature": "creatinine",
+   "label": "Creatinine",
+   "mean_abs_shap": 0.21903,
+   "mean_shap": -0.0095,
+   "permutation_auc_drop": 0.05904,
+   "permutation_auc_drop_std": 0.02023
+  },
+  {
+   "feature": "platelets",
+   "label": "Platelets",
+   "mean_abs_shap": 0.21115,
+   "mean_shap": -0.01285,
+   "permutation_auc_drop": 0.00393,
+   "permutation_auc_drop_std": 0.02164
+  },
+  {
+   "feature": "hdl",
+   "label": "HDL cholesterol",
+   "mean_abs_shap": 0.18957,
+   "mean_shap": 0.00809,
+   "permutation_auc_drop": -0.00152,
+   "permutation_auc_drop_std": 0.01761
+  },
+  {
+   "feature": "height",
+   "label": "Height",
+   "mean_abs_shap": 0.16677,
+   "mean_shap": 0.0153,
+   "permutation_auc_drop": -0.03193,
+   "permutation_auc_drop_std": 0.02496
+  },
+  {
+   "feature": "bmi",
+   "label": "BMI",
+   "mean_abs_shap": 0.15088,
+   "mean_shap": -0.00049,
+   "permutation_auc_drop": -0.00256,
+   "permutation_auc_drop_std": 0.01806
+  },
+  {
+   "feature": "hemoglobin",
+   "label": "Hemoglobin",
+   "mean_abs_shap": 0.11478,
+   "mean_shap": -0.01175,
+   "permutation_auc_drop": 0.00081,
+   "permutation_auc_drop_std": 0.0249
+  },
+  {
+   "feature": "esr",
+   "label": "ESR",
+   "mean_abs_shap": 0.10449,
+   "mean_shap": -0.01033,
+   "permutation_auc_drop": 0.00867,
+   "permutation_auc_drop_std": 0.00966
+  },
+  {
+   "feature": "ldl",
+   "label": "LDL cholesterol",
+   "mean_abs_shap": 0.10099,
+   "mean_shap": 0.01082,
+   "permutation_auc_drop": -0.00904,
+   "permutation_auc_drop_std": 0.0082
+  },
+  {
+   "feature": "sodium",
+   "label": "Sodium",
+   "mean_abs_shap": 0.09314,
+   "mean_shap": 0.00041,
+   "permutation_auc_drop": 0.00815,
+   "permutation_auc_drop_std": 0.01296
+  },
+  {
+   "feature": "lymphocytes",
+   "label": "Lymphocytes",
+   "mean_abs_shap": 0.08576,
+   "mean_shap": 0.01078,
+   "permutation_auc_drop": -0.00848,
+   "permutation_auc_drop_std": 0.00927
+  },
+  {
+   "feature": "bp",
+   "label": "Blood pressure (systolic)",
+   "mean_abs_shap": 0.08574,
+   "mean_shap": -0.0038,
+   "permutation_auc_drop": 0.00411,
+   "permutation_auc_drop_std": 0.01169
+  },
+  {
+   "feature": "bun",
+   "label": "Blood urea nitrogen",
+   "mean_abs_shap": 0.08224,
+   "mean_shap": 0.00968,
+   "permutation_auc_drop": -0.00437,
+   "permutation_auc_drop_std": 0.00978
+  },
+  {
+   "feature": "current_smoker",
+   "label": "Current smoker",
+   "mean_abs_shap": 0.07236,
+   "mean_shap": -0.00145,
+   "permutation_auc_drop": -0.00885,
+   "permutation_auc_drop_std": 0.00692
+  },
+  {
+   "feature": "weight",
+   "label": "Weight",
+   "mean_abs_shap": 0.06281,
+   "mean_shap": -0.00408,
+   "permutation_auc_drop": 0.0167,
+   "permutation_auc_drop_std": 0.00885
+  },
+  {
+   "feature": "potassium",
+   "label": "Potassium",
+   "mean_abs_shap": 0.03662,
+   "mean_shap": 0.01888,
+   "permutation_auc_drop": -0.0093,
+   "permutation_auc_drop_std": 0.0168
+  },
+  {
+   "feature": "wbc",
+   "label": "White blood cells",
+   "mean_abs_shap": 0.01995,
+   "mean_shap": -0.00014,
+   "permutation_auc_drop": -0.00244,
+   "permutation_auc_drop_std": 0.00336
+  },
+  {
+   "feature": "dyspnea",
+   "label": "Dyspnea",
+   "mean_abs_shap": 0.01323,
+   "mean_shap": 0.00089,
+   "permutation_auc_drop": -0.00011,
+   "permutation_auc_drop_std": 0.00316
+  },
+  {
+   "feature": "t_inversion",
+   "label": "T-wave inversion",
+   "mean_abs_shap": 0.01307,
+   "mean_shap": 0.00213,
+   "permutation_auc_drop": -0.00033,
+   "permutation_auc_drop_std": 0.00205
+  },
+  {
+   "feature": "lvh",
+   "label": "Left ventricular hypertrophy",
+   "mean_abs_shap": 0.01218,
+   "mean_shap": 0.0017,
+   "permutation_auc_drop": -0.00156,
+   "permutation_auc_drop_std": 0.00298
+  },
+  {
+   "feature": "sex_male",
+   "label": "Sex",
+   "mean_abs_shap": 0.00833,
+   "mean_shap": 0.00081,
+   "permutation_auc_drop": -0.00567,
+   "permutation_auc_drop_std": 0.00204
+  },
+  {
+   "feature": "vhd",
+   "label": "Valvular heart disease",
+   "mean_abs_shap": 0.00809,
+   "mean_shap": -0.0006,
+   "permutation_auc_drop": -0.00167,
+   "permutation_auc_drop_std": 0.00146
+  },
+  {
+   "feature": "neutrophils",
+   "label": "Neutrophils",
+   "mean_abs_shap": 0.00772,
+   "mean_shap": 0.00069,
+   "permutation_auc_drop": -0.001,
+   "permutation_auc_drop_std": 0.00247
+  },
+  {
+   "feature": "ejection_fraction",
+   "label": "Ejection fraction (TTE)",
+   "mean_abs_shap": 0.00721,
+   "mean_shap": 0.00062,
+   "permutation_auc_drop": -0.00133,
+   "permutation_auc_drop_std": 0.0023
+  },
+  {
+   "feature": "pulse_rate",
+   "label": "Pulse rate",
+   "mean_abs_shap": 0.00652,
+   "mean_shap": 0.00015,
+   "permutation_auc_drop": -0.00244,
+   "permutation_auc_drop_std": 0.00156
+  },
+  {
+   "feature": "htn",
+   "label": "Hypertension",
+   "mean_abs_shap": 0.00619,
+   "mean_shap": -0.00015,
+   "permutation_auc_drop": 0.00063,
+   "permutation_auc_drop_std": 0.00143
+  },
+  {
+   "feature": "function_class",
+   "label": "Functional class (NYHA-style)",
+   "mean_abs_shap": 0.00509,
+   "mean_shap": 0.00245,
+   "permutation_auc_drop": 0.00119,
+   "permutation_auc_drop_std": 0.00186
+  },
+  {
+   "feature": "edema",
+   "label": "Edema",
+   "mean_abs_shap": 0.00442,
+   "mean_shap": 0.00129,
+   "permutation_auc_drop": -0.00259,
+   "permutation_auc_drop_std": 0.00139
+  },
+  {
+   "feature": "systolic_murmur",
+   "label": "Systolic murmur",
+   "mean_abs_shap": 0.00385,
+   "mean_shap": 0.00083,
+   "permutation_auc_drop": -0.00296,
+   "permutation_auc_drop_std": 0.00133
+  },
+  {
+   "feature": "poor_r_progression",
+   "label": "Poor R-wave progression",
+   "mean_abs_shap": 0.00318,
+   "mean_shap": -7e-05,
+   "permutation_auc_drop": -0.00111,
+   "permutation_auc_drop_std": 0.00095
+  },
+  {
+   "feature": "st_elevation",
+   "label": "ST elevation",
+   "mean_abs_shap": 0.00198,
+   "mean_shap": -7e-05,
+   "permutation_auc_drop": 0.00167,
+   "permutation_auc_drop_std": 0.00151
+  },
+  {
+   "feature": "airway_disease",
+   "label": "Airway disease",
+   "mean_abs_shap": 0.00096,
+   "mean_shap": 0.0,
+   "permutation_auc_drop": -0.00041,
+   "permutation_auc_drop_std": 0.00145
+  },
+  {
+   "feature": "ex_smoker",
+   "label": "Ex-smoker",
+   "mean_abs_shap": 0.00013,
+   "mean_shap": -5e-05,
+   "permutation_auc_drop": -7e-05,
+   "permutation_auc_drop_std": 0.00028
+  },
+  {
+   "feature": "dm",
+   "label": "Diabetes mellitus",
+   "mean_abs_shap": 0.00011,
+   "mean_shap": -3e-05,
+   "permutation_auc_drop": 0.0,
+   "permutation_auc_drop_std": 0.0
+  },
+  {
+   "feature": "region_rwma",
+   "label": "Regions with wall-motion abnormality",
+   "mean_abs_shap": 4e-05,
+   "mean_shap": -3e-05,
+   "permutation_auc_drop": 0.0,
+   "permutation_auc_drop_std": 0.0
+  },
+  {
+   "feature": "family_history",
+   "label": "Family history of CAD",
+   "mean_abs_shap": 0.0,
+   "mean_shap": 0.0,
+   "permutation_auc_drop": 0.0,
+   "permutation_auc_drop_std": 0.0
+  },
+  {
+   "feature": "obesity",
+   "label": "Obesity",
+   "mean_abs_shap": 0.0,
+   "mean_shap": 0.0,
+   "permutation_auc_drop": 0.0,
+   "permutation_auc_drop_std": 0.0
+  },
+  {
+   "feature": "crf",
+   "label": "Chronic renal failure",
+   "mean_abs_shap": 0.0,
+   "mean_shap": 0.0,
+   "permutation_auc_drop": 0.0,
+   "permutation_auc_drop_std": 0.0
+  },
+  {
+   "feature": "cva",
+   "label": "Prior stroke (CVA)",
+   "mean_abs_shap": 0.0,
+   "mean_shap": 0.0,
+   "permutation_auc_drop": 0.0,
+   "permutation_auc_drop_std": 0.0
+  },
+  {
+   "feature": "thyroid_disease",
+   "label": "Thyroid disease",
+   "mean_abs_shap": 0.0,
+   "mean_shap": 0.0,
+   "permutation_auc_drop": 0.0,
+   "permutation_auc_drop_std": 0.0
+  },
+  {
+   "feature": "chf",
+   "label": "Congestive heart failure",
+   "mean_abs_shap": 0.0,
+   "mean_shap": 0.0,
+   "permutation_auc_drop": 0.0,
+   "permutation_auc_drop_std": 0.0
+  },
+  {
+   "feature": "dyslipidemia",
+   "label": "Dyslipidemia",
+   "mean_abs_shap": 0.0,
+   "mean_shap": 0.0,
+   "permutation_auc_drop": 0.0,
+   "permutation_auc_drop_std": 0.0
+  },
+  {
+   "feature": "weak_peripheral_pulse",
+   "label": "Weak peripheral pulse",
+   "mean_abs_shap": 0.0,
+   "mean_shap": 0.0,
+   "permutation_auc_drop": 0.0,
+   "permutation_auc_drop_std": 0.0
+  },
+  {
+   "feature": "lung_rales",
+   "label": "Lung rales",
+   "mean_abs_shap": 0.0,
+   "mean_shap": 0.0,
+   "permutation_auc_drop": 0.0,
+   "permutation_auc_drop_std": 0.0
+  },
+  {
+   "feature": "diastolic_murmur",
+   "label": "Diastolic murmur",
+   "mean_abs_shap": 0.0,
+   "mean_shap": 0.0,
+   "permutation_auc_drop": 0.0,
+   "permutation_auc_drop_std": 0.0
+  },
+  {
+   "feature": "atypical_chest_pain",
+   "label": "Atypical chest pain",
+   "mean_abs_shap": 0.0,
+   "mean_shap": 0.0,
+   "permutation_auc_drop": 0.0,
+   "permutation_auc_drop_std": 0.0
+  },
+  {
+   "feature": "nonanginal_pain",
+   "label": "Non-anginal chest pain",
+   "mean_abs_shap": 0.0,
+   "mean_shap": 0.0,
+   "permutation_auc_drop": 0.0,
+   "permutation_auc_drop_std": 0.0
+  },
+  {
+   "feature": "low_threshold_angina",
+   "label": "Low-threshold angina",
+   "mean_abs_shap": 0.0,
+   "mean_shap": 0.0,
+   "permutation_auc_drop": 0.0,
+   "permutation_auc_drop_std": 0.0
+  },
+  {
+   "feature": "q_wave",
+   "label": "Pathological Q wave",
+   "mean_abs_shap": 0.0,
+   "mean_shap": 0.0,
+   "permutation_auc_drop": 0.0,
+   "permutation_auc_drop_std": 0.0
+  },
+  {
+   "feature": "st_depression",
+   "label": "ST depression",
+   "mean_abs_shap": 0.0,
+   "mean_shap": 0.0,
+   "permutation_auc_drop": 0.0,
+   "permutation_auc_drop_std": 0.0
+  },
+  {
+   "feature": "bbb",
+   "label": "Bundle branch block",
+   "mean_abs_shap": 0.0,
+   "mean_shap": 0.0,
+   "permutation_auc_drop": 0.0,
+   "permutation_auc_drop_std": 0.0
+  }
+ ],
+ "rca": [
+  {
+   "feature": "dm",
+   "label": "Diabetes mellitus",
+   "mean_abs_shap": 0.25795,
+   "mean_shap": -0.00255,
+   "permutation_auc_drop": 0.04134,
+   "permutation_auc_drop_std": 0.0185
+  },
+  {
+   "feature": "typical_chest_pain",
+   "label": "Typical chest pain",
+   "mean_abs_shap": 0.23924,
+   "mean_shap": -0.00135,
+   "permutation_auc_drop": -0.00492,
+   "permutation_auc_drop_std": 0.02263
+  },
+  {
+   "feature": "age",
+   "label": "Age",
+   "mean_abs_shap": 0.21562,
+   "mean_shap": 0.00051,
+   "permutation_auc_drop": 0.02662,
+   "permutation_auc_drop_std": 0.02022
+  },
+  {
+   "feature": "sex_male",
+   "label": "Sex",
+   "mean_abs_shap": 0.21543,
+   "mean_shap": 0.02044,
+   "permutation_auc_drop": 0.01568,
+   "permutation_auc_drop_std": 0.01706
+  },
+  {
+   "feature": "dyspnea",
+   "label": "Dyspnea",
+   "mean_abs_shap": 0.18598,
+   "mean_shap": 0.01998,
+   "permutation_auc_drop": 0.00195,
+   "permutation_auc_drop_std": 0.01006
+  },
+  {
+   "feature": "esr",
+   "label": "ESR",
+   "mean_abs_shap": 0.18145,
+   "mean_shap": -0.02058,
+   "permutation_auc_drop": -0.00187,
+   "permutation_auc_drop_std": 0.01992
+  },
+  {
+   "feature": "neutrophils",
+   "label": "Neutrophils",
+   "mean_abs_shap": 0.16705,
+   "mean_shap": -0.00414,
+   "permutation_auc_drop": -0.00549,
+   "permutation_auc_drop_std": 0.0204
+  },
+  {
+   "feature": "atypical_chest_pain",
+   "label": "Atypical chest pain",
+   "mean_abs_shap": 0.15625,
+   "mean_shap": -0.00741,
+   "permutation_auc_drop": 0.00153,
+   "permutation_auc_drop_std": 0.01394
+  },
+  {
+   "feature": "htn",
+   "label": "Hypertension",
+   "mean_abs_shap": 0.14546,
+   "mean_shap": 0.00549,
+   "permutation_auc_drop": 0.0029,
+   "permutation_auc_drop_std": 0.01063
+  },
+  {
+   "feature": "function_class",
+   "label": "Functional class (NYHA-style)",
+   "mean_abs_shap": 0.1329,
+   "mean_shap": 0.00839,
+   "permutation_auc_drop": 0.0209,
+   "permutation_auc_drop_std": 0.0124
+  },
+  {
+   "feature": "region_rwma",
+   "label": "Regions with wall-motion abnormality",
+   "mean_abs_shap": 0.12117,
+   "mean_shap": -0.01883,
+   "permutation_auc_drop": -0.02815,
+   "permutation_auc_drop_std": 0.01805
+  },
+  {
+   "feature": "triglycerides",
+   "label": "Triglycerides",
+   "mean_abs_shap": 0.11877,
+   "mean_shap": -0.01605,
+   "permutation_auc_drop": 0.01659,
+   "permutation_auc_drop_std": 0.01193
+  },
+  {
+   "feature": "bun",
+   "label": "Blood urea nitrogen",
+   "mean_abs_shap": 0.11203,
+   "mean_shap": 0.01235,
+   "permutation_auc_drop": -0.00397,
+   "permutation_auc_drop_std": 0.01505
+  },
+  {
+   "feature": "current_smoker",
+   "label": "Current smoker",
+   "mean_abs_shap": 0.1088,
+   "mean_shap": -0.00031,
+   "permutation_auc_drop": -0.01037,
+   "permutation_auc_drop_std": 0.01054
+  },
+  {
+   "feature": "family_history",
+   "label": "Family history of CAD",
+   "mean_abs_shap": 0.09809,
+   "mean_shap": -0.00714,
+   "permutation_auc_drop": -0.00084,
+   "permutation_auc_drop_std": 0.00756
+  },
+  {
+   "feature": "hdl",
+   "label": "HDL cholesterol",
+   "mean_abs_shap": 0.0821,
+   "mean_shap": 0.00716,
+   "permutation_auc_drop": 0.00114,
+   "permutation_auc_drop_std": 0.00965
+  },
+  {
+   "feature": "st_depression",
+   "label": "ST depression",
+   "mean_abs_shap": 0.07777,
+   "mean_shap": -0.00185,
+   "permutation_auc_drop": -0.00885,
+   "permutation_auc_drop_std": 0.00796
+  },
+  {
+   "feature": "pulse_rate",
+   "label": "Pulse rate",
+   "mean_abs_shap": 0.07688,
+   "mean_shap": 9e-05,
+   "permutation_auc_drop": -0.00744,
+   "permutation_auc_drop_std": 0.01072
+  },
+  {
+   "feature": "lymphocytes",
+   "label": "Lymphocytes",
+   "mean_abs_shap": 0.0696,
+   "mean_shap": 0.0001,
+   "permutation_auc_drop": -0.00015,
+   "permutation_auc_drop_std": 0.01026
+  },
+  {
+   "feature": "diastolic_murmur",
+   "label": "Diastolic murmur",
+   "mean_abs_shap": 0.06955,
+   "mean_shap": 0.02238,
+   "permutation_auc_drop": 0.0,
+   "permutation_auc_drop_std": 0.0
+  },
+  {
+   "feature": "poor_r_progression",
+   "label": "Poor R-wave progression",
+   "mean_abs_shap": 0.0601,
+   "mean_shap": 0.00301,
+   "permutation_auc_drop": 0.01102,
+   "permutation_auc_drop_std": 0.01056
+  },
+  {
+   "feature": "fbs",
+   "label": "Fasting blood sugar",
+   "mean_abs_shap": 0.05842,
+   "mean_shap": -0.01035,
+   "permutation_auc_drop": 0.00248,
+   "permutation_auc_drop_std": 0.00459
+  },
+  {
+   "feature": "creatinine",
+   "label": "Creatinine",
+   "mean_abs_shap": 0.05812,
+   "mean_shap": -0.00729,
+   "permutation_auc_drop": 0.01014,
+   "permutation_auc_drop_std": 0.00776
+  },
+  {
+   "feature": "wbc",
+   "label": "White blood cells",
+   "mean_abs_shap": 0.05639,
+   "mean_shap": -0.00167,
+   "permutation_auc_drop": -0.00286,
+   "permutation_auc_drop_std": 0.00823
+  },
+  {
+   "feature": "potassium",
+   "label": "Potassium",
+   "mean_abs_shap": 0.05637,
+   "mean_shap": 0.00512,
+   "permutation_auc_drop": 0.01392,
+   "permutation_auc_drop_std": 0.00757
+  },
+  {
+   "feature": "nonanginal_pain",
+   "label": "Non-anginal chest pain",
+   "mean_abs_shap": 0.04811,
+   "mean_shap": -0.00321,
+   "permutation_auc_drop": 0.00652,
+   "permutation_auc_drop_std": 0.01156
+  },
+  {
+   "feature": "height",
+   "label": "Height",
+   "mean_abs_shap": 0.0467,
+   "mean_shap": 0.00184,
+   "permutation_auc_drop": 0.0037,
+   "permutation_auc_drop_std": 0.0065
+  },
+  {
+   "feature": "weight",
+   "label": "Weight",
+   "mean_abs_shap": 0.04159,
+   "mean_shap": -0.0006,
+   "permutation_auc_drop": 0.00439,
+   "permutation_auc_drop_std": 0.00542
+  },
+  {
+   "feature": "lvh",
+   "label": "Left ventricular hypertrophy",
+   "mean_abs_shap": 0.04075,
+   "mean_shap": 0.00556,
+   "permutation_auc_drop": 0.00263,
+   "permutation_auc_drop_std": 0.00906
+  },
+  {
+   "feature": "q_wave",
+   "label": "Pathological Q wave",
+   "mean_abs_shap": 0.0401,
+   "mean_shap": 0.00454,
+   "permutation_auc_drop": 0.00713,
+   "permutation_auc_drop_std": 0.00485
+  },
+  {
+   "feature": "platelets",
+   "label": "Platelets",
+   "mean_abs_shap": 0.03048,
+   "mean_shap": -0.00367,
+   "permutation_auc_drop": 0.00313,
+   "permutation_auc_drop_std": 0.00589
+  },
+  {
+   "feature": "ex_smoker",
+   "label": "Ex-smoker",
+   "mean_abs_shap": 0.02956,
+   "mean_shap": -0.00491,
+   "permutation_auc_drop": 0.00088,
+   "permutation_auc_drop_std": 0.00783
+  },
+  {
+   "feature": "crf",
+   "label": "Chronic renal failure",
+   "mean_abs_shap": 0.02918,
+   "mean_shap": 0.00863,
+   "permutation_auc_drop": 0.01819,
+   "permutation_auc_drop_std": 0.00803
+  },
+  {
+   "feature": "dyslipidemia",
+   "label": "Dyslipidemia",
+   "mean_abs_shap": 0.0289,
+   "mean_shap": 0.00091,
+   "permutation_auc_drop": -0.00648,
+   "permutation_auc_drop_std": 0.00534
+  },
+  {
+   "feature": "bp",
+   "label": "Blood pressure (systolic)",
+   "mean_abs_shap": 0.0275,
+   "mean_shap": 0.00028,
+   "permutation_auc_drop": -0.00191,
+   "permutation_auc_drop_std": 0.00517
+  },
+  {
+   "feature": "vhd",
+   "label": "Valvular heart disease",
+   "mean_abs_shap": 0.02698,
+   "mean_shap": 0.00122,
+   "permutation_auc_drop": 0.00137,
+   "permutation_auc_drop_std": 0.00373
+  },
+  {
+   "feature": "sodium",
+   "label": "Sodium",
+   "mean_abs_shap": 0.02623,
+   "mean_shap": -0.0001,
+   "permutation_auc_drop": -0.00107,
+   "permutation_auc_drop_std": 0.00514
+  },
+  {
+   "feature": "cva",
+   "label": "Prior stroke (CVA)",
+   "mean_abs_shap": 0.02054,
+   "mean_shap": -0.00199,
+   "permutation_auc_drop": -0.00011,
+   "permutation_auc_drop_std": 0.00554
+  },
+  {
+   "feature": "airway_disease",
+   "label": "Airway disease",
+   "mean_abs_shap": 0.01464,
+   "mean_shap": 0.00241,
+   "permutation_auc_drop": 0.00053,
+   "permutation_auc_drop_std": 0.00232
+  },
+  {
+   "feature": "st_elevation",
+   "label": "ST elevation",
+   "mean_abs_shap": 0.01442,
+   "mean_shap": 0.00024,
+   "permutation_auc_drop": 0.00038,
+   "permutation_auc_drop_std": 0.00488
+  },
+  {
+   "feature": "hemoglobin",
+   "label": "Hemoglobin",
+   "mean_abs_shap": 0.01385,
+   "mean_shap": 0.00089,
+   "permutation_auc_drop": 0.00053,
+   "permutation_auc_drop_std": 0.00318
+  },
+  {
+   "feature": "lung_rales",
+   "label": "Lung rales",
+   "mean_abs_shap": 0.01352,
+   "mean_shap": 0.00222,
+   "permutation_auc_drop": -0.00038,
+   "permutation_auc_drop_std": 0.00241
+  },
+  {
+   "feature": "ldl",
+   "label": "LDL cholesterol",
+   "mean_abs_shap": 0.01306,
+   "mean_shap": 0.0008,
+   "permutation_auc_drop": 0.0013,
+   "permutation_auc_drop_std": 0.00184
+  },
+  {
+   "feature": "systolic_murmur",
+   "label": "Systolic murmur",
+   "mean_abs_shap": 0.01229,
+   "mean_shap": 0.00094,
+   "permutation_auc_drop": -0.00149,
+   "permutation_auc_drop_std": 0.00175
+  },
+  {
+   "feature": "thyroid_disease",
+   "label": "Thyroid disease",
+   "mean_abs_shap": 0.01081,
+   "mean_shap": 0.00118,
+   "permutation_auc_drop": -0.00027,
+   "permutation_auc_drop_std": 0.00302
+  },
+  {
+   "feature": "t_inversion",
+   "label": "T-wave inversion",
+   "mean_abs_shap": 0.00893,
+   "mean_shap": 0.00114,
+   "permutation_auc_drop": 4e-05,
+   "permutation_auc_drop_std": 0.00166
+  },
+  {
+   "feature": "obesity",
+   "label": "Obesity",
+   "mean_abs_shap": 0.0075,
+   "mean_shap": -0.00039,
+   "permutation_auc_drop": -0.00065,
+   "permutation_auc_drop_std": 0.00181
+  },
+  {
+   "feature": "weak_peripheral_pulse",
+   "label": "Weak peripheral pulse",
+   "mean_abs_shap": 0.00744,
+   "mean_shap": -0.0022,
+   "permutation_auc_drop": -0.00015,
+   "permutation_auc_drop_std": 0.00193
+  },
+  {
+   "feature": "low_threshold_angina",
+   "label": "Low-threshold angina",
+   "mean_abs_shap": 0.00687,
+   "mean_shap": 0.00287,
+   "permutation_auc_drop": 0.00023,
+   "permutation_auc_drop_std": 0.00372
+  },
+  {
+   "feature": "bbb",
+   "label": "Bundle branch block",
+   "mean_abs_shap": 0.0044,
+   "mean_shap": -1e-05,
+   "permutation_auc_drop": -0.00015,
+   "permutation_auc_drop_std": 0.00071
+  },
+  {
+   "feature": "edema",
+   "label": "Edema",
+   "mean_abs_shap": 0.00427,
+   "mean_shap": 0.00091,
+   "permutation_auc_drop": 0.00027,
+   "permutation_auc_drop_std": 0.00105
+  },
+  {
+   "feature": "ejection_fraction",
+   "label": "Ejection fraction (TTE)",
+   "mean_abs_shap": 0.00358,
+   "mean_shap": -4e-05,
+   "permutation_auc_drop": -0.00118,
+   "permutation_auc_drop_std": 0.00108
+  },
+  {
+   "feature": "bmi",
+   "label": "BMI",
+   "mean_abs_shap": 0.00203,
+   "mean_shap": 0.00012,
+   "permutation_auc_drop": 0.00069,
+   "permutation_auc_drop_std": 0.00056
+  },
+  {
+   "feature": "chf",
+   "label": "Congestive heart failure",
+   "mean_abs_shap": 0.0,
+   "mean_shap": 0.0,
+   "permutation_auc_drop": 0.0,
+   "permutation_auc_drop_std": 0.0
+  }
+ ]
+}

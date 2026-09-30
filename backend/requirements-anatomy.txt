@@ -1,0 +1,6 @@
+# Only needed to rebuild frontend/public/models/heart.glb (anatomy/build_heart_glb.py)
+numpy==2.5.3
+scipy==1.18.1
+trimesh==5.1.0
+fast_simplification==0.2.0
+networkx==3.7

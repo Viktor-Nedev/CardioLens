@@ -1,0 +1,11 @@
+**/node_modules
+**/__pycache__
+**/.pytest_cache
+backend/.venv
+backend/train.log
+frontend/dist
+anatomy/.cache
+.git
+docs
+*.md
+!README.md

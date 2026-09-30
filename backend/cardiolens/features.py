@@ -176,16 +176,25 @@ def build_schema(catalog: Catalog, X_reference: pd.DataFrame) -> dict[str, Any]:
     }
 
 
-def percentile(stats: dict[str, Any], value: float) -> float | None:
-    """Approximate cohort percentile (0-100) of a numeric value from stored quantiles."""
+def percentile_table(stats: dict[str, Any]) -> tuple[np.ndarray, np.ndarray] | None:
+    """(unique quantile values, their mid-rank percentiles) for fast interpolation."""
     q = stats.get("quantiles")
     if not q:
         return None
     grid = np.linspace(0, 100, len(q))
     q_arr = np.asarray(q, dtype=float)
-    # np.interp needs increasing xp; collapse ties to their mid-rank.
+    # np.interp needs increasing xp; collapse tied quantiles to their mid-rank.
     uniq, inverse = np.unique(q_arr, return_inverse=True)
     mids = np.array([grid[inverse == i].mean() for i in range(len(uniq))])
+    return uniq, mids
+
+
+def percentile(stats: dict[str, Any], value: float, table: tuple[np.ndarray, np.ndarray] | None = None) -> float | None:
+    """Approximate cohort percentile (0-100) of a numeric value from stored quantiles."""
+    table = table or percentile_table(stats)
+    if table is None:
+        return None
+    uniq, mids = table
     if len(uniq) == 1:
         return 50.0
     return round(float(np.interp(value, uniq, mids)), 1)

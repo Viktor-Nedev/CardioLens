@@ -1,6 +1,10 @@
 from fastapi.testclient import TestClient
 
+from cardiolens.config import load_catalog
+
 from .conftest import needs_artifacts
+
+N_FEATURES = len(load_catalog().features)
 
 pytestmark = needs_artifacts
 
@@ -15,7 +19,7 @@ def test_health_schema_cases_metrics():
     with make_client() as c:
         assert c.get("/api/health").json()["status"] == "ok"
         schema = c.get("/api/schema").json()
-        assert len(schema["features"]) == 55
+        assert len(schema["features"]) == N_FEATURES
         assert {t["id"] for t in schema["targets"]} == {"cad", "lad", "lcx", "rca"}
         assert schema["disclaimer"]
         cases = c.get("/api/cases").json()
@@ -33,8 +37,9 @@ def test_predict_endpoint():
         assert res.status_code == 200
         body = res.json()
         assert body["disclaimer"]
-        assert abs(body["targets"]["cad"]["probability"] - case["predicted"]["cad"]) < 1e-6
-        assert len(body["physiology"]) == 55
+        # cases.json stores values rounded to 5 decimals
+        assert abs(body["targets"]["cad"]["probability"] - case["predicted"]["cad"]) < 2e-4
+        assert len(body["physiology"]) == N_FEATURES
         assert body["latency_ms"] < 2000
 
 
@@ -42,4 +47,4 @@ def test_predict_empty_body_uses_imputation():
     with make_client() as c:
         res = c.post("/api/predict", json={})
         assert res.status_code == 200
-        assert len(res.json()["imputed"]) == 55
+        assert len(res.json()["imputed"]) == N_FEATURES

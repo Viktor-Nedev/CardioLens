@@ -24,7 +24,7 @@ def test_shap_contributions_are_additive(predictor):
         out = predictor.predict(case["features"], with_interval=False)
         for t in out["targets"].values():
             total = t["base_logit"] + sum(c["contribution"] for c in t["contributions"])
-            assert total == pytest.approx(t["logit"], abs=1e-3)
+            assert total == pytest.approx(t["logit"], abs=1e-6)
             assert 1 / (1 + math.exp(-t["logit"])) == pytest.approx(t["probability"], abs=1e-9)
 
 
@@ -32,7 +32,8 @@ def test_serving_matches_training_time_predictions(predictor):
     for case in predictor.cases:
         out = predictor.predict(case["features"], with_interval=False)
         for tid, p in case["predicted"].items():
-            assert out["targets"][tid]["probability"] == pytest.approx(p, abs=1e-6)
+            # cases.json stores inputs and probabilities rounded to 5 decimals
+            assert out["targets"][tid]["probability"] == pytest.approx(p, abs=2e-4)
 
 
 def test_partial_input_is_imputed(predictor):

@@ -12,10 +12,11 @@ from typing import Any
 import joblib
 import numpy as np
 import pandas as pd
+import sklearn
 
 from .config import ARTIFACTS_DIR, Catalog, FeatureSpec, TargetSpec, load_catalog
 from .explain import FeatureExplainer
-from .features import percentile
+from .features import percentile, percentile_table
 from .models import FAMILIES, ModelFamily, model_margin
 
 TOP_DRIVERS = 3
@@ -23,6 +24,15 @@ TOP_DRIVERS = 3
 
 def _sigmoid(z: float) -> float:
     return 1.0 / (1.0 + math.exp(-z))
+
+
+def fmt_pct(p: float) -> str:
+    """Percentages for text; extremes read as <1% / >99% rather than a false 0% / 100%."""
+    if p > 0.995:
+        return ">99%"
+    if p < 0.005:
+        return "<1%"
+    return f"{p:.0%}"
 
 
 @dataclass
@@ -36,6 +46,14 @@ class TargetModel:
     threshold: float
     ensemble: list
     explainer: FeatureExplainer
+    # Linear ensembles collapse into one matrix product: margins = Xt @ W.T + w0.
+    ens_W: np.ndarray | None = None
+    ens_w0: np.ndarray | None = None
+
+    def ensemble_margins(self, Xt: np.ndarray) -> np.ndarray:
+        if self.ens_W is not None:
+            return Xt[0] @ self.ens_W.T + self.ens_w0
+        return np.array([model_margin(e, Xt, self.family)[0] for e in self.ensemble])
 
 
 class Predictor:
@@ -47,6 +65,7 @@ class Predictor:
         self.importance = self._read_json("importance.json")
         self.cases = self._read_json("cases.json")
         self._stats = {f["id"]: f["stats"] for f in self.schema["features"]}
+        self._pct_tables = {fid: percentile_table(st) for fid, st in self._stats.items()}
         self.feature_ids = self.catalog.feature_ids
         self.models: dict[str, TargetModel] = {}
         for spec in self.catalog.targets:
@@ -58,6 +77,8 @@ class Predictor:
             family = FAMILIES[bundle["family_id"]]
             pipeline = bundle["pipeline"]
             model = pipeline.named_steps["model"]
+            ensemble = bundle["ensemble"]
+            linear = family.margin == "decision" and ensemble and all(hasattr(e, "coef_") for e in ensemble)
             self.models[spec.id] = TargetModel(
                 spec=spec,
                 family=family,
@@ -66,11 +87,28 @@ class Predictor:
                 a=bundle["calibrator"]["a"],
                 b=bundle["calibrator"]["b"],
                 threshold=bundle["threshold"],
-                ensemble=bundle["ensemble"],
+                ensemble=ensemble,
                 explainer=FeatureExplainer(
                     family, model, bundle["background"], bundle["owners"], self.feature_ids
                 ),
+                ens_W=np.vstack([e.coef_[0] for e in ensemble]) if linear else None,
+                ens_w0=np.array([e.intercept_[0] for e in ensemble]) if linear else None,
             )
+        self._prep_groups = self._group_preprocessors()
+
+    def _group_preprocessors(self) -> list[tuple[Any, list[str]]]:
+        """Targets whose fitted preprocessors transform identically share one transform call."""
+        probe = pd.concat([self.encode(c["features"])[0] for c in self.cases[:20]] + [self.encode({})[0]])
+        groups: list[tuple[Any, list[str], np.ndarray]] = []
+        for tid, tm in self.models.items():
+            out = tm.prep.transform(probe)
+            for prep, members, ref in groups:
+                if ref.shape == out.shape and np.allclose(ref, out, atol=0, rtol=0):
+                    members.append(tid)
+                    break
+            else:
+                groups.append((tm.prep, [tid], out))
+        return [(prep, members) for prep, members, _ in groups]
 
     def _read_json(self, name: str) -> Any:
         return json.loads((self.artifacts_dir / name).read_text(encoding="utf-8"))
@@ -100,12 +138,12 @@ class Predictor:
                 row[spec.id] = None if spec.kind == "categorical" else np.nan
                 imputed.append(spec.id)
 
-        frame = pd.DataFrame([row], columns=self.feature_ids)
-        for spec in self.catalog.features:
-            if spec.kind == "categorical":
-                frame[spec.id] = frame[spec.id].astype(object)
-            else:
-                frame[spec.id] = frame[spec.id].astype(float)
+        frame = pd.DataFrame(
+            {
+                spec.id: np.array([row[spec.id]], dtype=object if spec.kind == "categorical" else float)
+                for spec in self.catalog.features
+            }
+        )
         return frame, imputed, warnings
 
     @staticmethod
@@ -154,17 +192,20 @@ class Predictor:
         return f"{text} {spec.unit}" if spec.unit else text
 
     def _filled_values(self, frame: pd.DataFrame, imputed: list[str]) -> dict[str, Any]:
-        values = {}
-        for spec in self.catalog.features:
-            v = frame.iloc[0][spec.id]
-            if spec.id in imputed:
-                v = self._stats[spec.id]["default"]
-            values[spec.id] = v
-        return values
+        row = frame.iloc[0].to_dict()
+        return {
+            spec.id: self._stats[spec.id]["default"] if spec.id in imputed else row[spec.id]
+            for spec in self.catalog.features
+        }
 
     # ---------------------------------------------------------------- prediction
 
     def predict(self, payload: dict[str, Any], with_interval: bool = True) -> dict[str, Any]:
+        # Inputs are validated in `encode`; skip sklearn's per-call re-validation.
+        with sklearn.config_context(assume_finite=True, skip_parameter_validation=True):
+            return self._predict(payload, with_interval)
+
+    def _predict(self, payload: dict[str, Any], with_interval: bool) -> dict[str, Any]:
         t0 = time.perf_counter()
         frame, imputed, warnings = self.encode(payload)
         values = self._filled_values(frame, imputed)
@@ -172,8 +213,14 @@ class Predictor:
 
         targets: dict[str, Any] = {}
         per_feature: dict[str, dict[str, float]] = {fid: {} for fid in self.feature_ids}
+        transformed: dict[str, np.ndarray] = {}
+        for prep, members in self._prep_groups:
+            out = prep.transform(frame)
+            for tid in members:
+                transformed[tid] = out
+
         for tid, tm in self.models.items():
-            Xt = tm.prep.transform(frame)
+            Xt = transformed[tid]
             m = float(model_margin(tm.model, Xt, tm.family)[0])
             logit = tm.a * m + tm.b
             p = _sigmoid(logit)
@@ -183,7 +230,7 @@ class Predictor:
 
             interval = None
             if with_interval and tm.ensemble:
-                ens = np.array([model_margin(e, Xt, tm.family)[0] for e in tm.ensemble])
+                ens = tm.ensemble_margins(Xt)
                 probs = 1.0 / (1.0 + np.exp(-(tm.a * ens + tm.b)))
                 interval = [float(np.percentile(probs, 10)), float(np.percentile(probs, 90))]
 
@@ -240,7 +287,7 @@ class Predictor:
         numeric_value = None
         if spec.kind == "numeric" and value is not None:
             numeric_value = float(value)
-            pct = percentile(stats, numeric_value)
+            pct = percentile(stats, numeric_value, self._pct_tables[spec.id])
             if spec.ref:
                 lo, hi = spec.ref
                 flag = "low" if numeric_value < lo else "high" if numeric_value > hi else "normal"
@@ -275,7 +322,7 @@ class Predictor:
             return ", ".join(f"{c['label'].lower()} ({c['display']})" for c in items)
 
         parts = [
-            f"{subject} probability is {p:.0%} ({band.lower()} band, {relation} the decision threshold of {threshold:.0%})."
+            f"{subject} probability is {fmt_pct(p)} ({band.lower()} band, {relation} the decision threshold of {fmt_pct(threshold)})."
         ]
         if up:
             parts.append(f"Factors increasing the estimate: {fmt(up)}.")

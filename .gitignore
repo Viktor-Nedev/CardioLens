@@ -23,3 +23,6 @@ anatomy/.cache/
 Thumbs.db
 .idea/
 .vscode/
+
+# TypeScript build info
+*.tsbuildinfo

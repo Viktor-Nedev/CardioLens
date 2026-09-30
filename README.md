@@ -12,7 +12,12 @@ and explains every estimate with SHAP and a physiological breakdown.
 > estimates and do not replace coronary angiography, CT angiography or clinical
 > judgement. The UI shows this disclaimer permanently and on first visit.
 
-![CardioLens analysis view](docs/figures/screenshot_analysis.png)
+![CardioLens analysis view: LAD selected, coronary arteries coloured by predicted stenosis probability](docs/figures/screenshot_analysis.jpg)
+
+<p align="center">
+  <img src="docs/figures/screenshot_xray.jpg" alt="X-ray mode, inferior view of the coronary tree" width="49%">
+  <img src="docs/figures/screenshot_model.png" alt="Model performance dashboard" width="49%">
+</p>
 
 Multimodal AI Hackathon 2026, Track A: Cardiovascular Risk Visualization & Prediction.
 
@@ -33,7 +38,25 @@ Multimodal AI Hackathon 2026, Track A: Cardiovascular Risk Visualization & Predi
 
 ## Results
 
-RESULTS_PLACEHOLDER
+Hold-out set: 61 patients never used for training, model selection, calibration or
+threshold choice. Brackets show the bootstrap 95% CI.
+
+| Target | Selected model | Nested CV ROC-AUC (dev) | Hold-out ROC-AUC | Recall | Specificity | F1 | Brier |
+|---|---|---|---|---|---|---|---|
+| CAD | Elastic-net logistic regression | 0.929 ± 0.039 | **0.88** [0.76–0.97] | 0.86 | 0.76 | 0.88 | 0.121 |
+| LAD | Elastic-net logistic regression | 0.860 ± 0.044 | **0.74** [0.61–0.86] | 0.78 | 0.60 | 0.76 | 0.231 |
+| LCX | Gradient boosting | 0.735 ± 0.052 | **0.75** [0.61–0.87] | 0.76 | 0.61 | 0.66 | 0.197 |
+| RCA | Elastic-net logistic regression | 0.703 ± 0.057 | **0.75** [0.61–0.86] | 0.87 | 0.50 | 0.65 | 0.188 |
+
+- **CAD** is predicted well.
+- **LAD** is the most predictable artery.
+- **LCX and RCA** remain hard with 303 patients.
+- **Baseline.** A logistic regression on eight classic risk factors stays competitive at vessel level. The report discusses this openly.
+- **Top SHAP drivers:** typical chest pain, regional wall-motion abnormality and age (CAD, LAD); age and metabolic markers (LCX); diabetes (RCA).
+
+<p align="center">
+  <img src="docs/figures/roc_calibration.png" alt="ROC and calibration curves per target" width="100%">
+</p>
 
 Full per-target curves, confusion matrices and model comparisons are shown in the
 dashboard (**Model performance** tab) and in [`docs/REPORT.md`](docs/REPORT.md).
@@ -72,10 +95,11 @@ without retraining.
 
 ```bash
 cd backend
-python -m cardiolens.train        # ~50 min on 8 cores (5x repeated nested CV, 4 families x 4 targets)
+python -m cardiolens.train        # ~55 min on 8 cores (5x repeated nested CV, 4 families x 4 targets)
 python -m cardiolens.train --quick   # smoke test, fewer folds and families
 python -m cardiolens.report       # Markdown tables from artifacts/metrics.json
-pytest                            # 18 tests: data, leakage, SHAP additivity, API
+python -m cardiolens.train --explain-only   # recompute SHAP importance + figures from saved models
+pytest                            # 15 tests: data, leakage, SHAP additivity, train/serve parity, API
 ```
 
 The pipeline downloads the UCI dataset if the committed copy is missing. It is

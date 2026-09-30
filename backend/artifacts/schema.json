@@ -2080,7 +2080,7 @@
    "label": "Coronary artery disease",
    "short": "CAD",
    "kind": "overall",
-   "structure": "heart",
+   "structure": "heart_wall",
    "description": "Overall CAD status from coronary angiography (at least 50% diameter narrowing in one or more major coronary vessels).",
    "territory": null
   },

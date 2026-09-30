@@ -160,6 +160,26 @@ def bootstrap_ensemble(model, Xt_dev: np.ndarray, y_dev: np.ndarray, n: int, see
     )
 
 
+# Validated categorical palette (light surface) and chart chrome for the report figures.
+PALETTE = ["#2a78d6", "#eb6834", "#1baf7a", "#eda100"]
+CONTEXT_GRAY = "#898781"
+INK, INK_2, GRID, AXIS, SURFACE = "#0b0b0b", "#52514e", "#e1e0d9", "#c3c2b7", "#fcfcfb"
+
+
+def _style_axes(ax) -> None:
+    ax.set_facecolor(SURFACE)
+    ax.grid(color=GRID, linewidth=0.8, linestyle="-")
+    ax.set_axisbelow(True)
+    for side in ("top", "right"):
+        ax.spines[side].set_visible(False)
+    for side in ("left", "bottom"):
+        ax.spines[side].set_color(AXIS)
+    ax.tick_params(colors=INK_2, labelsize=8)
+    ax.xaxis.label.set_color(INK_2)
+    ax.yaxis.label.set_color(INK_2)
+    ax.title.set_color(INK)
+
+
 def make_figures(report: dict[str, Any], shap_payload: dict[str, Any], catalog: Catalog) -> None:
     import matplotlib
 
@@ -168,48 +188,75 @@ def make_figures(report: dict[str, Any], shap_payload: dict[str, Any], catalog: 
     import shap
 
     FIGURES_DIR.mkdir(parents=True, exist_ok=True)
-    colors = {"cad": "#e11d48", "lad": "#f59e0b", "lcx": "#8b5cf6", "rca": "#0ea5e9"}
+    targets = catalog.targets
 
-    fig, axes = plt.subplots(1, 2, figsize=(11, 4.6))
-    for t in catalog.targets:
+    # ROC (top) and calibration (bottom) as small multiples, one column per target.
+    fig, axes = plt.subplots(2, len(targets), figsize=(3.4 * len(targets), 6.6), facecolor=SURFACE)
+    for col, t in enumerate(targets):
         r = report["targets"][t.id]
+        auc = r["holdout"]["metrics"]["roc_auc"]
         roc = np.array(r["holdout"]["curves"]["roc"])
-        auc = r["holdout"]["metrics"]["roc_auc"]["value"]
-        axes[0].plot(roc[:, 0], roc[:, 1], color=colors.get(t.id), lw=2, label=f"{t.short} (AUC {auc:.2f})")
-        cal = np.array(r["dev_oof"]["curves"]["calibration"])
-        axes[1].plot(cal[:, 0], cal[:, 1], "o-", color=colors.get(t.id), lw=2, label=t.short)
-    axes[0].plot([0, 1], [0, 1], "--", color="#94a3b8")
-    axes[0].set(xlabel="False positive rate", ylabel="True positive rate", title="ROC - hold-out set")
-    axes[1].plot([0, 1], [0, 1], "--", color="#94a3b8")
-    axes[1].set(xlabel="Predicted probability", ylabel="Observed frequency", title="Calibration - dev out-of-fold")
-    for ax in axes:
-        ax.legend(loc="lower right", frameon=False)
-        ax.grid(alpha=0.25)
-    fig.tight_layout()
-    fig.savefig(FIGURES_DIR / "roc_calibration.png", dpi=160)
+        ax = axes[0, col]
+        _style_axes(ax)
+        ax.plot([0, 1], [0, 1], color=AXIS, linewidth=1)
+        ax.plot(roc[:, 0], roc[:, 1], color=PALETTE[0], linewidth=2, solid_joinstyle="round")
+        ax.set_title(f"{t.short} · hold-out AUC {auc['value']:.2f} [{auc['ci_low']:.2f}–{auc['ci_high']:.2f}]", fontsize=9)
+        ax.set_xlabel("False positive rate", fontsize=8)
+        if col == 0:
+            ax.set_ylabel("True positive rate", fontsize=8)
+        ax.set_xlim(0, 1)
+        ax.set_ylim(0, 1.02)
+
+        ax = axes[1, col]
+        _style_axes(ax)
+        ax.plot([0, 1], [0, 1], color=AXIS, linewidth=1)
+        for key, color, label in (("dev_oof", PALETTE[0], "Dev out-of-fold"), ("holdout", CONTEXT_GRAY, "Hold-out")):
+            cal = np.array(r[key]["curves"]["calibration"])
+            ax.plot(cal[:, 0], cal[:, 1], "-o", color=color, linewidth=2, markersize=6,
+                    markeredgecolor=SURFACE, markeredgewidth=1.5, label=label)
+        ax.set_title(f"{t.short} · calibration", fontsize=9)
+        ax.set_xlabel("Predicted probability", fontsize=8)
+        if col == 0:
+            ax.set_ylabel("Observed frequency", fontsize=8)
+        ax.set_xlim(0, 1)
+        ax.set_ylim(0, 1.02)
+    handles, labels = axes[1, 0].get_legend_handles_labels()
+    fig.legend(handles, labels, loc="lower center", ncol=2, frameon=False, fontsize=8, labelcolor=INK_2)
+    fig.tight_layout(rect=(0, 0.04, 1, 1))
+    fig.savefig(FIGURES_DIR / "roc_calibration.png", dpi=160, facecolor=SURFACE)
     plt.close(fig)
 
-    fig, ax = plt.subplots(figsize=(11, 4.2))
-    fam_ids = [f for f in FAMILIES if f in report["targets"][catalog.targets[0].id]["comparison"]]
+    # Nested-CV comparison: grouped bars (4 families, fixed palette order) + baseline marker.
+    fam_ids = [f for f in FAMILIES if f in report["targets"][targets[0].id]["comparison"]]
+    fig, ax = plt.subplots(figsize=(11, 4.2), facecolor=SURFACE)
+    _style_axes(ax)
+    ax.grid(axis="x", visible=False)
     width = 0.8 / len(fam_ids)
-    xs = np.arange(len(catalog.targets))
+    xs = np.arange(len(targets))
     for i, fid in enumerate(fam_ids):
-        means = [report["targets"][t.id]["comparison"][fid]["cv"]["roc_auc_mean"] for t in catalog.targets]
-        stds = [report["targets"][t.id]["comparison"][fid]["cv"]["roc_auc_std"] for t in catalog.targets]
-        ax.bar(xs + i * width - 0.4 + width / 2, means, width, yerr=stds, capsize=3, label=FAMILIES[fid].label)
-    base = [report["targets"][t.id]["baselines"]["risk_factors_lr"]["cv_roc_auc"] for t in catalog.targets]
-    ax.scatter(xs, base, marker="_", s=900, color="black", zorder=5, label="Risk-factor LR baseline")
-    ax.set_xticks(xs, [t.short for t in catalog.targets])
-    ax.set_ylim(0.4, 1.0)
-    ax.set_ylabel("Nested CV ROC-AUC")
-    ax.set_title("Model family comparison (dev set, nested CV, mean ± sd)")
-    ax.legend(ncol=3, fontsize=8, frameon=False, loc="upper right")
-    ax.grid(axis="y", alpha=0.25)
+        means = [report["targets"][t.id]["comparison"][fid]["cv"]["roc_auc_mean"] for t in targets]
+        stds = [report["targets"][t.id]["comparison"][fid]["cv"]["roc_auc_std"] for t in targets]
+        ax.bar(xs + i * width - 0.4 + width / 2, np.array(means) - 0.5, width * 0.92, bottom=0.5,
+               yerr=stds, capsize=2, error_kw={"elinewidth": 1, "ecolor": INK_2},
+               color=PALETTE[i % len(PALETTE)], edgecolor=SURFACE, linewidth=1.5, label=FAMILIES[fid].label)
+    base = [report["targets"][t.id]["baselines"]["risk_factors_lr"]["cv_roc_auc"] for t in targets]
+    ax.scatter(xs, base, marker="_", s=1400, color=INK, linewidths=2, zorder=5)
+    ax.set_xticks(xs, [t.short for t in targets])
+    ax.set_ylim(0.5, 1.0)
+    ax.set_ylabel("Nested CV ROC-AUC (0.5 = chance)", fontsize=9)
+    ax.set_title("Model family comparison on the development set (mean ± sd, 25 outer folds)", fontsize=10)
+    from matplotlib.lines import Line2D
+
+    handles, labels = ax.get_legend_handles_labels()
+    handles.append(Line2D([0], [0], color=INK, linewidth=2))
+    labels.append("Risk-factor LR baseline")
+    ax.legend(handles, labels, ncol=5, fontsize=8, frameon=False, loc="upper center",
+              bbox_to_anchor=(0.5, -0.1), labelcolor=INK_2)
     fig.tight_layout()
-    fig.savefig(FIGURES_DIR / "model_comparison.png", dpi=160)
+    fig.savefig(FIGURES_DIR / "model_comparison.png", dpi=160, facecolor=SURFACE)
     plt.close(fig)
 
-    for t in catalog.targets:
+    for t in targets:
         payload = shap_payload[t.id]
         plt.figure()
         shap.summary_plot(
@@ -226,21 +273,102 @@ def make_figures(report: dict[str, Any], shap_payload: dict[str, Any], catalog: 
         plt.close("all")
 
 
+def explain_target(
+    catalog: Catalog,
+    family: ModelFamily,
+    pipeline: Pipeline,
+    calibrator: PlattCalibrator,
+    background: np.ndarray,
+    X_dev: pd.DataFrame,
+    X_test: pd.DataFrame,
+    y_test: np.ndarray,
+) -> tuple[list[dict[str, Any]], dict[str, Any]]:
+    """Global SHAP importance on the dev set and permutation importance on the hold-out set."""
+    feature_ids = catalog.feature_ids
+    label_of = {f.id: f.label for f in catalog.features}
+    prep = pipeline.named_steps["prep"]
+    model = pipeline.named_steps["model"]
+    explainer = FeatureExplainer(family, model, background, output_feature_map(prep), feature_ids)
+    _, contrib_dev = explainer.explain(prep.transform(X_dev))
+    contrib_dev = contrib_dev * calibrator.a  # calibrated log-odds units
+    mean_abs = np.abs(contrib_dev).mean(axis=0)
+    mean_signed = contrib_dev.mean(axis=0)
+
+    perm = permutation_importance(
+        pipeline, X_test, y_test, scoring="roc_auc", n_repeats=30, random_state=SEED, n_jobs=-1
+    )
+    rows = sorted(
+        (
+            {
+                "feature": fid,
+                "label": label_of[fid],
+                "mean_abs_shap": float(mean_abs[i]),
+                "mean_shap": float(mean_signed[i]),
+                "permutation_auc_drop": float(perm.importances_mean[i]),
+                "permutation_auc_drop_std": float(perm.importances_std[i]),
+            }
+            for i, fid in enumerate(feature_ids)
+        ),
+        key=lambda d: -d["mean_abs_shap"],
+    )
+    display = X_dev.copy()
+    for f in catalog.features:
+        if f.kind == "categorical":
+            display[f.id] = display[f.id].astype("category").cat.codes
+    payload = {
+        "values": contrib_dev,
+        "display": display.astype(float).to_numpy(),
+        "labels": [label_of[f] for f in feature_ids],
+    }
+    return rows, payload
+
+
+def split_frames(catalog: Catalog):
+    """Load the data and reproduce the seeded development / hold-out split."""
+    raw = load_raw()
+    X, Y = build_frames(raw, catalog)
+    strat = stratification_key(Y)
+    dev_ids, test_ids = train_test_split(X.index.to_numpy(), test_size=0.2, stratify=strat, random_state=SEED)
+    dev_ids, test_ids = np.sort(dev_ids), np.sort(test_ids)
+    return raw, X, Y, dev_ids, test_ids
+
+
+def refresh_explanations() -> None:
+    """Recompute importance.json and the SHAP figures from the saved models (no refitting)."""
+    catalog = load_catalog()
+    _, X, Y, dev_ids, test_ids = split_frames(catalog)
+    report = json.loads((ARTIFACTS_DIR / "metrics.json").read_text(encoding="utf-8"))
+    importance: dict[str, Any] = {}
+    shap_payload: dict[str, Any] = {}
+    for target in catalog.targets:
+        bundle = joblib.load(MODELS_DIR / f"{target.id}.joblib")
+        calibrator = PlattCalibrator(**bundle["calibrator"])
+        importance[target.id], shap_payload[target.id] = explain_target(
+            catalog,
+            FAMILIES[bundle["family_id"]],
+            bundle["pipeline"],
+            calibrator,
+            bundle["background"],
+            X.loc[dev_ids],
+            X.loc[test_ids],
+            Y.loc[test_ids, target.id].to_numpy(),
+        )
+        log(f"   {target.short}: explanations refreshed")
+    (ARTIFACTS_DIR / "importance.json").write_text(json.dumps(to_jsonable(importance), indent=1), encoding="utf-8")
+    make_figures(report, shap_payload, catalog)
+
+
 def run(outer_repeats: int, n_bootstrap: int, quick: bool) -> dict[str, Any]:
     started = time.perf_counter()
     sklearn.set_config(skip_parameter_validation=True)
     catalog = load_catalog()
-    raw = load_raw()
-    X, Y = build_frames(raw, catalog)
+    raw, X, Y, dev_ids, test_ids = split_frames(catalog)
 
     # Leakage guard: no angiography-derived column may be a model input.
     source_columns = {f.column for f in catalog.features}
     assert not source_columns & set(catalog.leakage_columns), "target leakage"
     assert not set(X.columns) & {t.id for t in catalog.targets}, "target leakage"
 
-    strat = stratification_key(Y)
-    dev_ids, test_ids = train_test_split(X.index.to_numpy(), test_size=0.2, stratify=strat, random_state=SEED)
-    dev_ids, test_ids = np.sort(dev_ids), np.sort(test_ids)
     X_dev, X_test = X.loc[dev_ids], X.loc[test_ids]
     Y_dev, Y_test = Y.loc[dev_ids], Y.loc[test_ids]
     log(f"Split: {len(dev_ids)} development / {len(test_ids)} hold-out patients")
@@ -248,7 +376,6 @@ def run(outer_repeats: int, n_bootstrap: int, quick: bool) -> dict[str, Any]:
     families = {k: v for k, v in FAMILIES.items() if not quick or k in ("logreg", "gradient_boosting")}
     MODELS_DIR.mkdir(parents=True, exist_ok=True)
     feature_ids = catalog.feature_ids
-    label_of = {f.id: f.label for f in catalog.features}
 
     vessel_pattern = (raw[["LAD", "LCX", "RCA"]] == "Stenotic").sum(axis=1)
     report: dict[str, Any] = {
@@ -331,38 +458,9 @@ def run(outer_repeats: int, n_bootstrap: int, quick: bool) -> dict[str, Any]:
         rng = np.random.default_rng(SEED)
         bg_idx = rng.choice(len(Xt_dev), size=min(100, len(Xt_dev)), replace=False)
         background = Xt_dev[bg_idx]
-        explainer = FeatureExplainer(family, model, background, owners, feature_ids)
-        _, contrib_dev = explainer.explain(Xt_dev)
-        contrib_dev = contrib_dev * calibrator.a  # calibrated log-odds units
-        mean_abs = np.abs(contrib_dev).mean(axis=0)
-        mean_signed = contrib_dev.mean(axis=0)
-
-        perm = permutation_importance(
-            pipeline, X_test, y_test, scoring="roc_auc", n_repeats=30, random_state=SEED, n_jobs=-1
+        importance[target.id], shap_payload[target.id] = explain_target(
+            catalog, family, pipeline, calibrator, background, X_dev, X_test, y_test
         )
-        importance[target.id] = sorted(
-            (
-                {
-                    "feature": fid,
-                    "label": label_of[fid],
-                    "mean_abs_shap": float(mean_abs[i]),
-                    "mean_shap": float(mean_signed[i]),
-                    "permutation_auc_drop": float(perm.importances_mean[i]),
-                    "permutation_auc_drop_std": float(perm.importances_std[i]),
-                }
-                for i, fid in enumerate(feature_ids)
-            ),
-            key=lambda d: -d["mean_abs_shap"],
-        )
-        display = X_dev.copy()
-        for f in catalog.features:
-            if f.kind == "categorical":
-                display[f.id] = display[f.id].astype("category").cat.codes
-        shap_payload[target.id] = {
-            "values": contrib_dev,
-            "display": display.astype(float).to_numpy(),
-            "labels": [label_of[f] for f in feature_ids],
-        }
 
         # --- uncertainty ----------------------------------------------------------
         ensemble = bootstrap_ensemble(model, Xt_dev, y_dev, n_bootstrap, SEED) if n_bootstrap else []
@@ -469,7 +567,13 @@ def main() -> None:
     parser.add_argument("--outer-repeats", type=int, default=5, help="repeats of the outer 5-fold CV")
     parser.add_argument("--bootstrap", type=int, default=25, help="bootstrap ensemble size for intervals")
     parser.add_argument("--quick", action="store_true", help="fewer families and repeats (smoke test)")
+    parser.add_argument(
+        "--explain-only", action="store_true", help="recompute SHAP importance and figures from saved models"
+    )
     args = parser.parse_args()
+    if args.explain_only:
+        refresh_explanations()
+        return
     if args.quick:
         args.outer_repeats = min(args.outer_repeats, 1)
         args.bootstrap = min(args.bootstrap, 5)

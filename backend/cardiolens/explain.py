@@ -33,11 +33,10 @@ class FeatureExplainer:
         if family.explainer == "linear":
             self._explainer = shap.LinearExplainer(model, background)
         elif family.explainer == "tree":
+            # Path-dependent Tree SHAP is exact for the model's raw output (additivity to
+            # machine precision); the interventional variant drifted by up to 0.07 log-odds.
             self._explainer = shap.TreeExplainer(
-                model,
-                data=background,
-                feature_perturbation="interventional",
-                model_output="raw",
+                model, feature_perturbation="tree_path_dependent", model_output="raw"
             )
         else:
             summary = shap.kmeans(background, min(10, len(background)))
@@ -56,8 +55,6 @@ class FeatureExplainer:
             warnings.simplefilter("ignore")
             if self.family.explainer == "kernel":
                 values = self._explainer.shap_values(Xt, nsamples=300, silent=True)
-            elif self.family.explainer == "tree":
-                values = self._explainer.shap_values(Xt, check_additivity=False)
             else:
                 values = self._explainer.shap_values(Xt)
         values = np.asarray(values)

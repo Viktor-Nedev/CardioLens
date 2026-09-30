@@ -871,304 +871,304 @@
   {
    "feature": "age",
    "label": "Age",
-   "mean_abs_shap": 0.36157,
-   "mean_shap": -0.00763,
+   "mean_abs_shap": 0.35444,
+   "mean_shap": 0.00355,
    "permutation_auc_drop": 0.109,
    "permutation_auc_drop_std": 0.04162
   },
   {
    "feature": "typical_chest_pain",
    "label": "Typical chest pain",
-   "mean_abs_shap": 0.33175,
-   "mean_shap": -0.00457,
+   "mean_abs_shap": 0.33744,
+   "mean_shap": -0.00273,
    "permutation_auc_drop": 0.05641,
    "permutation_auc_drop_std": 0.02868
   },
   {
    "feature": "fbs",
    "label": "Fasting blood sugar",
-   "mean_abs_shap": 0.26822,
-   "mean_shap": -0.02878,
+   "mean_abs_shap": 0.25155,
+   "mean_shap": 0.00159,
    "permutation_auc_drop": 0.00107,
    "permutation_auc_drop_std": 0.0169
   },
   {
    "feature": "triglycerides",
    "label": "Triglycerides",
-   "mean_abs_shap": 0.23969,
-   "mean_shap": -0.00054,
+   "mean_abs_shap": 0.245,
+   "mean_shap": -0.00095,
    "permutation_auc_drop": 0.05656,
    "permutation_auc_drop_std": 0.02179
   },
   {
    "feature": "creatinine",
    "label": "Creatinine",
-   "mean_abs_shap": 0.21903,
-   "mean_shap": -0.0095,
+   "mean_abs_shap": 0.2106,
+   "mean_shap": 0.00276,
    "permutation_auc_drop": 0.05904,
    "permutation_auc_drop_std": 0.02023
   },
   {
    "feature": "platelets",
    "label": "Platelets",
-   "mean_abs_shap": 0.21115,
-   "mean_shap": -0.01285,
+   "mean_abs_shap": 0.20577,
+   "mean_shap": 0.00295,
    "permutation_auc_drop": 0.00393,
    "permutation_auc_drop_std": 0.02164
   },
   {
    "feature": "hdl",
    "label": "HDL cholesterol",
-   "mean_abs_shap": 0.18957,
-   "mean_shap": 0.00809,
+   "mean_abs_shap": 0.18999,
+   "mean_shap": 0.00056,
    "permutation_auc_drop": -0.00152,
    "permutation_auc_drop_std": 0.01761
   },
   {
    "feature": "height",
    "label": "Height",
-   "mean_abs_shap": 0.16677,
-   "mean_shap": 0.0153,
+   "mean_abs_shap": 0.1651,
+   "mean_shap": 0.00276,
    "permutation_auc_drop": -0.03193,
    "permutation_auc_drop_std": 0.02496
   },
   {
    "feature": "bmi",
    "label": "BMI",
-   "mean_abs_shap": 0.15088,
-   "mean_shap": -0.00049,
+   "mean_abs_shap": 0.15087,
+   "mean_shap": 0.00514,
    "permutation_auc_drop": -0.00256,
    "permutation_auc_drop_std": 0.01806
   },
   {
    "feature": "hemoglobin",
    "label": "Hemoglobin",
-   "mean_abs_shap": 0.11478,
-   "mean_shap": -0.01175,
+   "mean_abs_shap": 0.1127,
+   "mean_shap": -0.0035,
    "permutation_auc_drop": 0.00081,
    "permutation_auc_drop_std": 0.0249
   },
   {
    "feature": "esr",
    "label": "ESR",
-   "mean_abs_shap": 0.10449,
-   "mean_shap": -0.01033,
+   "mean_abs_shap": 0.10409,
+   "mean_shap": 0.00149,
    "permutation_auc_drop": 0.00867,
    "permutation_auc_drop_std": 0.00966
   },
   {
    "feature": "ldl",
    "label": "LDL cholesterol",
-   "mean_abs_shap": 0.10099,
-   "mean_shap": 0.01082,
+   "mean_abs_shap": 0.09881,
+   "mean_shap": -0.00132,
    "permutation_auc_drop": -0.00904,
    "permutation_auc_drop_std": 0.0082
   },
   {
    "feature": "sodium",
    "label": "Sodium",
-   "mean_abs_shap": 0.09314,
-   "mean_shap": 0.00041,
+   "mean_abs_shap": 0.09129,
+   "mean_shap": -0.00064,
    "permutation_auc_drop": 0.00815,
    "permutation_auc_drop_std": 0.01296
   },
   {
    "feature": "lymphocytes",
    "label": "Lymphocytes",
-   "mean_abs_shap": 0.08576,
-   "mean_shap": 0.01078,
+   "mean_abs_shap": 0.09035,
+   "mean_shap": -0.00129,
    "permutation_auc_drop": -0.00848,
    "permutation_auc_drop_std": 0.00927
   },
   {
    "feature": "bp",
    "label": "Blood pressure (systolic)",
-   "mean_abs_shap": 0.08574,
-   "mean_shap": -0.0038,
+   "mean_abs_shap": 0.08645,
+   "mean_shap": -0.00352,
    "permutation_auc_drop": 0.00411,
    "permutation_auc_drop_std": 0.01169
   },
   {
    "feature": "bun",
    "label": "Blood urea nitrogen",
-   "mean_abs_shap": 0.08224,
-   "mean_shap": 0.00968,
+   "mean_abs_shap": 0.08616,
+   "mean_shap": -0.00214,
    "permutation_auc_drop": -0.00437,
    "permutation_auc_drop_std": 0.00978
   },
   {
    "feature": "current_smoker",
    "label": "Current smoker",
-   "mean_abs_shap": 0.07236,
-   "mean_shap": -0.00145,
+   "mean_abs_shap": 0.07037,
+   "mean_shap": 0.00318,
    "permutation_auc_drop": -0.00885,
    "permutation_auc_drop_std": 0.00692
   },
   {
    "feature": "weight",
    "label": "Weight",
-   "mean_abs_shap": 0.06281,
-   "mean_shap": -0.00408,
+   "mean_abs_shap": 0.06387,
+   "mean_shap": 0.00074,
    "permutation_auc_drop": 0.0167,
    "permutation_auc_drop_std": 0.00885
   },
   {
    "feature": "potassium",
    "label": "Potassium",
-   "mean_abs_shap": 0.03662,
-   "mean_shap": 0.01888,
+   "mean_abs_shap": 0.04965,
+   "mean_shap": -0.00317,
    "permutation_auc_drop": -0.0093,
    "permutation_auc_drop_std": 0.0168
   },
   {
    "feature": "wbc",
    "label": "White blood cells",
-   "mean_abs_shap": 0.01995,
-   "mean_shap": -0.00014,
+   "mean_abs_shap": 0.0201,
+   "mean_shap": -0.00018,
    "permutation_auc_drop": -0.00244,
    "permutation_auc_drop_std": 0.00336
   },
   {
    "feature": "dyspnea",
    "label": "Dyspnea",
-   "mean_abs_shap": 0.01323,
-   "mean_shap": 0.00089,
+   "mean_abs_shap": 0.01279,
+   "mean_shap": -0.00096,
    "permutation_auc_drop": -0.00011,
    "permutation_auc_drop_std": 0.00316
   },
   {
-   "feature": "t_inversion",
-   "label": "T-wave inversion",
-   "mean_abs_shap": 0.01307,
-   "mean_shap": 0.00213,
-   "permutation_auc_drop": -0.00033,
-   "permutation_auc_drop_std": 0.00205
-  },
-  {
    "feature": "lvh",
    "label": "Left ventricular hypertrophy",
-   "mean_abs_shap": 0.01218,
-   "mean_shap": 0.0017,
+   "mean_abs_shap": 0.00975,
+   "mean_shap": -0.00059,
    "permutation_auc_drop": -0.00156,
    "permutation_auc_drop_std": 0.00298
   },
   {
+   "feature": "neutrophils",
+   "label": "Neutrophils",
+   "mean_abs_shap": 0.00898,
+   "mean_shap": -0.0011,
+   "permutation_auc_drop": -0.001,
+   "permutation_auc_drop_std": 0.00247
+  },
+  {
+   "feature": "t_inversion",
+   "label": "T-wave inversion",
+   "mean_abs_shap": 0.00878,
+   "mean_shap": -0.00255,
+   "permutation_auc_drop": -0.00033,
+   "permutation_auc_drop_std": 0.00205
+  },
+  {
    "feature": "sex_male",
    "label": "Sex",
-   "mean_abs_shap": 0.00833,
-   "mean_shap": 0.00081,
+   "mean_abs_shap": 0.00808,
+   "mean_shap": -5e-05,
    "permutation_auc_drop": -0.00567,
    "permutation_auc_drop_std": 0.00204
   },
   {
    "feature": "vhd",
    "label": "Valvular heart disease",
-   "mean_abs_shap": 0.00809,
-   "mean_shap": -0.0006,
+   "mean_abs_shap": 0.00782,
+   "mean_shap": -6e-05,
    "permutation_auc_drop": -0.00167,
    "permutation_auc_drop_std": 0.00146
   },
   {
-   "feature": "neutrophils",
-   "label": "Neutrophils",
-   "mean_abs_shap": 0.00772,
-   "mean_shap": 0.00069,
-   "permutation_auc_drop": -0.001,
-   "permutation_auc_drop_std": 0.00247
-  },
-  {
    "feature": "ejection_fraction",
    "label": "Ejection fraction (TTE)",
-   "mean_abs_shap": 0.00721,
-   "mean_shap": 0.00062,
+   "mean_abs_shap": 0.00743,
+   "mean_shap": 0.00024,
    "permutation_auc_drop": -0.00133,
    "permutation_auc_drop_std": 0.0023
   },
   {
+   "feature": "function_class",
+   "label": "Functional class (NYHA-style)",
+   "mean_abs_shap": 0.00659,
+   "mean_shap": 0.0005,
+   "permutation_auc_drop": 0.00119,
+   "permutation_auc_drop_std": 0.00186
+  },
+  {
    "feature": "pulse_rate",
    "label": "Pulse rate",
-   "mean_abs_shap": 0.00652,
-   "mean_shap": 0.00015,
+   "mean_abs_shap": 0.00657,
+   "mean_shap": 0.00012,
    "permutation_auc_drop": -0.00244,
    "permutation_auc_drop_std": 0.00156
   },
   {
    "feature": "htn",
    "label": "Hypertension",
-   "mean_abs_shap": 0.00619,
-   "mean_shap": -0.00015,
+   "mean_abs_shap": 0.00596,
+   "mean_shap": 0.00027,
    "permutation_auc_drop": 0.00063,
    "permutation_auc_drop_std": 0.00143
   },
   {
-   "feature": "function_class",
-   "label": "Functional class (NYHA-style)",
-   "mean_abs_shap": 0.00509,
-   "mean_shap": 0.00245,
-   "permutation_auc_drop": 0.00119,
-   "permutation_auc_drop_std": 0.00186
-  },
-  {
    "feature": "edema",
    "label": "Edema",
-   "mean_abs_shap": 0.00442,
-   "mean_shap": 0.00129,
+   "mean_abs_shap": 0.00513,
+   "mean_shap": 0.00044,
    "permutation_auc_drop": -0.00259,
    "permutation_auc_drop_std": 0.00139
   },
   {
-   "feature": "systolic_murmur",
-   "label": "Systolic murmur",
-   "mean_abs_shap": 0.00385,
-   "mean_shap": 0.00083,
-   "permutation_auc_drop": -0.00296,
-   "permutation_auc_drop_std": 0.00133
-  },
-  {
    "feature": "poor_r_progression",
    "label": "Poor R-wave progression",
-   "mean_abs_shap": 0.00318,
-   "mean_shap": -7e-05,
+   "mean_abs_shap": 0.00327,
+   "mean_shap": -0.00027,
    "permutation_auc_drop": -0.00111,
    "permutation_auc_drop_std": 0.00095
   },
   {
+   "feature": "systolic_murmur",
+   "label": "Systolic murmur",
+   "mean_abs_shap": 0.00317,
+   "mean_shap": -0.00019,
+   "permutation_auc_drop": -0.00296,
+   "permutation_auc_drop_std": 0.00133
+  },
+  {
    "feature": "st_elevation",
    "label": "ST elevation",
-   "mean_abs_shap": 0.00198,
-   "mean_shap": -7e-05,
+   "mean_abs_shap": 0.00164,
+   "mean_shap": -0.00029,
    "permutation_auc_drop": 0.00167,
    "permutation_auc_drop_std": 0.00151
   },
   {
    "feature": "airway_disease",
    "label": "Airway disease",
-   "mean_abs_shap": 0.00096,
-   "mean_shap": 0.0,
+   "mean_abs_shap": 0.00118,
+   "mean_shap": -0.00034,
    "permutation_auc_drop": -0.00041,
    "permutation_auc_drop_std": 0.00145
   },
   {
+   "feature": "dm",
+   "label": "Diabetes mellitus",
+   "mean_abs_shap": 0.00012,
+   "mean_shap": -0.0,
+   "permutation_auc_drop": 0.0,
+   "permutation_auc_drop_std": 0.0
+  },
+  {
    "feature": "ex_smoker",
    "label": "Ex-smoker",
-   "mean_abs_shap": 0.00013,
+   "mean_abs_shap": 0.00012,
    "mean_shap": -5e-05,
    "permutation_auc_drop": -7e-05,
    "permutation_auc_drop_std": 0.00028
   },
   {
-   "feature": "dm",
-   "label": "Diabetes mellitus",
-   "mean_abs_shap": 0.00011,
-   "mean_shap": -3e-05,
-   "permutation_auc_drop": 0.0,
-   "permutation_auc_drop_std": 0.0
-  },
-  {
    "feature": "region_rwma",
    "label": "Regions with wall-motion abnormality",
-   "mean_abs_shap": 4e-05,
-   "mean_shap": -3e-05,
+   "mean_abs_shap": 0.0001,
+   "mean_shap": 2e-05,
    "permutation_auc_drop": 0.0,
    "permutation_auc_drop_std": 0.0
   },

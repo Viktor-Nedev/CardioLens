@@ -1,5 +1,6 @@
 import { Html, useGLTF } from "@react-three/drei";
 import { useFrame, type ThreeEvent } from "@react-three/fiber";
+import { motion } from "motion/react";
 import { useEffect, useMemo, useRef } from "react";
 import * as THREE from "three";
 import {
@@ -13,9 +14,11 @@ import { riskColor } from "../../lib/colors";
 import { pct } from "../../lib/format";
 import type { TargetId } from "../../lib/types";
 import { useStore } from "../../state/store";
-import { createHeartMaterial, createHologramMaterial, inflate } from "./materials";
+import { AnimatedNumber } from "../ui/primitives";
+import { addFlowAttribute, createHeartMaterial, createHologramMaterial, createVesselMaterial, inflate } from "./materials";
 
 const NEUTRAL = "#8a93a3";
+const SCAN_SECONDS = 2.2;
 const VESSEL_TARGETS: TargetId[] = ["lad", "lcx", "rca"];
 
 interface Parts {
@@ -74,18 +77,21 @@ export function AnatomyScene({ meta }: { meta: AnatomyMeta | null }) {
   const hologram = useMemo(() => createHologramMaterial(), []);
 
   const vesselMaterials = useMemo(() => {
-    const out = {} as Record<TargetId, THREE.MeshStandardMaterial>;
-    for (const t of VESSEL_TARGETS) {
-      out[t] = new THREE.MeshStandardMaterial({
-        color: NEUTRAL,
-        emissive: new THREE.Color(NEUTRAL),
-        emissiveIntensity: 0.2,
-        roughness: 0.32,
-        metalness: 0.08,
-      });
-    }
+    const out = {} as Record<TargetId, ReturnType<typeof createVesselMaterial>>;
+    for (const t of VESSEL_TARGETS) out[t] = createVesselMaterial(NEUTRAL);
     return out;
   }, []);
+  const scanRingMaterial = useMemo(
+    () =>
+      new THREE.MeshBasicMaterial({
+        color: "#5cc8f5",
+        transparent: true,
+        opacity: 0,
+        blending: THREE.AdditiveBlending,
+        depthWrite: false,
+      }),
+    [],
+  );
 
   const staticMaterials = useMemo(
     () => ({
@@ -102,10 +108,10 @@ export function AnatomyScene({ meta }: { meta: AnatomyMeta | null }) {
         roughness: 0.9,
       }),
       bone: new THREE.MeshStandardMaterial({
-        color: "#dcd5c4",
-        roughness: 0.85,
+        color: "#a9a293",
+        roughness: 0.9,
         transparent: true,
-        opacity: 0.2,
+        opacity: 0.1,
         depthWrite: false,
       }),
       hit: new THREE.MeshBasicMaterial({ transparent: true, opacity: 0, depthWrite: false, colorWrite: false }),
@@ -123,7 +129,7 @@ export function AnatomyScene({ meta }: { meta: AnatomyMeta | null }) {
     for (const t of VESSEL_TARGETS) {
       const g = parts[TARGET_NODE[t]];
       if (!g) continue;
-      display[t] = inflate(g, 0.0025);
+      display[t] = addFlowAttribute(inflate(g, 0.0025));
       outline[t] = inflate(g, 0.009);
       hit[t] = inflate(g, 0.022);
     }
@@ -150,15 +156,30 @@ export function AnatomyScene({ meta }: { meta: AnatomyMeta | null }) {
   }, [prediction]);
 
   const heartGroup = useRef<THREE.Group>(null);
+  const scanRing = useRef<THREE.Mesh>(null);
   const bpm = typeof pulseRate === "number" && pulseRate > 30 ? pulseRate : 72;
+
+  // Every new prediction triggers a top-to-bottom "re-analysis" scan of the myocardium.
+  const scanNonce = useStore((s) => s.scanNonce);
+  const scanPending = useRef(false);
+  const scanStart = useRef(-100);
+  useEffect(() => {
+    if (scanNonce > 0) scanPending.current = true;
+  }, [scanNonce]);
 
   useFrame((state, delta) => {
     const k = 1 - Math.exp(-delta * 5);
     const t = state.clock.elapsedTime;
 
+    const effects = !viewer.performance;
+    const flowTarget = effects && viewer.flow ? 1 : 0;
+
     // Vessel colours ease towards the new prediction; brightness also rises with risk.
     for (const v of VESSEL_TARGETS) {
-      const m = vesselMaterials[v];
+      const { material: m, uniforms: u } = vesselMaterials[v];
+      u.uTime.value = t;
+      u.uBeat.value = bpm / 60;
+      u.uFlow.value = THREE.MathUtils.lerp(u.uFlow.value, flowTarget, k);
       m.color.lerp(targetColors[v], k);
       m.emissive.lerp(targetColors[v], k);
       const pred = prediction?.targets[v];
@@ -179,6 +200,25 @@ export function AnatomyScene({ meta }: { meta: AnatomyMeta | null }) {
     const selIdx = TERRITORY_TARGETS.indexOf(selected);
     heart.uniforms.uSelected.value.set(selIdx === 0 ? 1 : 0, selIdx === 1 ? 1 : 0, selIdx === 2 ? 1 : 0);
     heart.uniforms.uPulse.value = 0.12 + 0.12 * (0.5 + 0.5 * Math.sin(t * 3));
+    staticMaterials.outline.opacity = 0.55 + 0.35 * (0.5 + 0.5 * Math.sin(t * 3.2));
+
+    // Scan sweep (ease in-out) after each prediction update.
+    if (scanPending.current) {
+      scanPending.current = false;
+      if (t - scanStart.current > SCAN_SECONDS) scanStart.current = t;
+    }
+    const progress = (t - scanStart.current) / SCAN_SECONDS;
+    const scanning = effects && progress >= 0 && progress <= 1;
+    const eased = progress < 0.5 ? 2 * progress * progress : 1 - (-2 * progress + 2) ** 2 / 2;
+    const scanY = 0.6 - 1.2 * Math.min(1, Math.max(0, eased));
+    const strength = scanning ? Math.sin(Math.PI * Math.min(1, progress)) : 0;
+    heart.uniforms.uScanY.value = scanY;
+    heart.uniforms.uScanStrength.value = strength;
+    if (scanRing.current) {
+      scanRing.current.position.y = scanY;
+      scanRing.current.visible = strength > 0.01;
+      scanRingMaterial.opacity = 0.75 * strength;
+    }
 
     // Heartbeat at the patient's recorded pulse rate.
     if (heartGroup.current) {
@@ -283,7 +323,7 @@ export function AnatomyScene({ meta }: { meta: AnatomyMeta | null }) {
         {VESSEL_TARGETS.map((t) =>
           vesselGeo.display[t] ? (
             <group key={t}>
-              <mesh geometry={vesselGeo.display[t]} material={vesselMaterials[t]} raycast={noRaycast} renderOrder={2} />
+              <mesh geometry={vesselGeo.display[t]} material={vesselMaterials[t].material} raycast={noRaycast} renderOrder={2} />
               {selected === t && (
                 <mesh geometry={vesselGeo.outline[t]} material={staticMaterials.outline} raycast={noRaycast} renderOrder={1} />
               )}
@@ -332,6 +372,10 @@ export function AnatomyScene({ meta }: { meta: AnatomyMeta | null }) {
       {viewer.ribs && parts.sternum && <mesh geometry={parts.sternum} material={staticMaterials.bone} raycast={noRaycast} />}
       {viewer.torso && parts.skin && <mesh geometry={parts.skin} material={hologram} raycast={noRaycast} renderOrder={10} />}
 
+      <mesh ref={scanRing} rotation-x={Math.PI / 2} material={scanRingMaterial} raycast={noRaycast} visible={false}>
+        <torusGeometry args={[0.74, 0.0035, 8, 160]} />
+      </mesh>
+
       {viewer.labels && meta && <VesselLabels meta={meta} />}
     </group>
   );
@@ -357,7 +401,10 @@ function VesselLabels({ meta }: { meta: AnatomyMeta }) {
         const active = selected === t || hovered === t;
         return (
           <Html key={t} position={pos} center zIndexRange={[30, 0]}>
-            <button
+            <motion.button
+              initial={{ opacity: 0, scale: 0.6, y: 6 }}
+              animate={{ opacity: 1, scale: active ? 1.08 : 1, y: 0 }}
+              transition={{ type: "spring", stiffness: 380, damping: 22, delay: 0.1 * VESSEL_TARGETS.indexOf(t) }}
               type="button"
               onClick={() => select(t)}
               onPointerEnter={() => setHovered(t)}
@@ -368,12 +415,19 @@ function VesselLabels({ meta }: { meta: AnatomyMeta }) {
               aria-label={`Select ${pred?.short ?? t}`}
             >
               <span
-                className="inline-block h-2 w-2 rounded-full"
-                style={{ background: pred ? riskColor(pred.probability) : NEUTRAL }}
+                className="inline-block h-2 w-2 rounded-full transition-colors duration-700"
+                style={{
+                  background: pred ? riskColor(pred.probability) : NEUTRAL,
+                  boxShadow: pred ? `0 0 8px ${riskColor(pred.probability)}` : "none",
+                }}
               />
               {pred?.short ?? t.toUpperCase()}
-              <span className="tabular font-medium text-ink">{pred ? pct(pred.probability) : "…"}</span>
-            </button>
+              {pred ? (
+                <AnimatedNumber value={pred.probability} format={pct} className="tabular font-medium text-ink" />
+              ) : (
+                <span className="text-ink-3">…</span>
+              )}
+            </motion.button>
           </Html>
         );
       })}

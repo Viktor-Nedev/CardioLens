@@ -34,18 +34,25 @@ export function CameraRig({ meta }: { meta: AnatomyMeta | null }) {
   const autoRotate = useStore((s) => s.viewer.autoRotate);
   const interacting = useRef(false);
 
-  // Intro: start on the torso, then glide into the heart.
+  // Intro: hold on the torso while the welcome screen is open, then glide into the heart.
+  const accepted = useStore((s) => s.disclaimerAccepted);
+  const introDone = useRef(false);
   useEffect(() => {
     const c = controls.current;
-    if (!c) return;
+    if (!c || introDone.current) return;
     const { position: p, target: t } = VIEW_PRESETS.overview_torso;
     void c.setLookAt(...p, ...t, false);
+    if (!accepted) return;
     const id = window.setTimeout(() => {
+      introDone.current = true;
       const h = VIEW_PRESETS.overview_heart;
-      void c.setLookAt(...h.position, ...h.target, true);
-    }, 700);
+      c.smoothTime = 1.1;
+      void c.setLookAt(...h.position, ...h.target, true).then(() => {
+        c.smoothTime = 0.45;
+      });
+    }, 450);
     return () => window.clearTimeout(id);
-  }, []);
+  }, [accepted]);
 
   useEffect(() => {
     const c = controls.current;

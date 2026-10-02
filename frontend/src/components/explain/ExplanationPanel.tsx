@@ -1,7 +1,7 @@
 import { ArrowRight, BrainCircuit, Info } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import { useMemo, useState } from "react";
-import { LOWERS, RAISES } from "../../lib/colors";
+import { LOWERS, RAISES, riskColor } from "../../lib/colors";
 import { pct, pp, signed } from "../../lib/format";
 import { TARGET_ORDER, type Contribution, type TargetId } from "../../lib/types";
 import { useStore } from "../../state/store";
@@ -87,6 +87,43 @@ function ContributionRow({ c, max, index }: { c: Contribution; max: number; inde
   );
 }
 
+/** Where the patient lands relative to the average patient; the bar is the net SHAP push. */
+function ShiftTrack({ from, to }: { from: number; to: number }) {
+  const lo = Math.min(from, to);
+  const hi = Math.max(from, to);
+  const up = to >= from;
+  const color = up ? RAISES : LOWERS;
+  return (
+    <div className="relative mx-1 mt-3 h-1.5 rounded-full bg-white/[0.07]" aria-hidden>
+      <motion.div
+        className="absolute inset-y-0 rounded-full"
+        initial={false}
+        animate={{ left: `${lo * 100}%`, width: `${Math.max(0.6, (hi - lo) * 100)}%` }}
+        transition={BAR_SPRING}
+        style={{
+          background: up ? `linear-gradient(90deg, ${color}33, ${color})` : `linear-gradient(270deg, ${color}33, ${color})`,
+          boxShadow: `0 0 10px ${color}66`,
+        }}
+      />
+      <motion.span
+        className="absolute top-1/2 h-2.5 w-2.5 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-surface bg-ink-3"
+        initial={false}
+        animate={{ left: `${from * 100}%` }}
+        transition={BAR_SPRING}
+        title="Average patient"
+      />
+      <motion.span
+        className="absolute top-1/2 h-3.5 w-3.5 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-surface"
+        initial={false}
+        animate={{ left: `${to * 100}%`, backgroundColor: riskColor(to) }}
+        transition={BAR_SPRING}
+        style={{ boxShadow: `0 0 10px ${riskColor(to)}` }}
+        title="This patient"
+      />
+    </div>
+  );
+}
+
 export function ExplanationPanel() {
   const prediction = useStore((s) => s.prediction);
   const selected = useStore((s) => s.selected);
@@ -137,6 +174,7 @@ export function ExplanationPanel() {
         <AnimatedNumber value={pred.probability} format={pct} className="tabular font-semibold text-ink" />
         <span className="ml-auto truncate text-[11px] text-ink-3">{pred.model}</span>
       </div>
+      <ShiftTrack from={pred.base_probability} to={pred.probability} />
 
       <div className="mt-3 flex items-center justify-between">
         <div className="flex gap-4 text-[11px] text-ink-2">

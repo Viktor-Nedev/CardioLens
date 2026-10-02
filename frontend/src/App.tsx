@@ -3,7 +3,7 @@ import { CheckCircle2, Stethoscope, X } from "lucide-react";
 import { AnimatePresence, motion, MotionConfig, type Variants } from "motion/react";
 import { lazy, Suspense, useEffect, useState } from "react";
 import { ExplanationPanel } from "./components/explain/ExplanationPanel";
-import { DisclaimerBanner, Header, IntroSplash } from "./components/layout/Chrome";
+import { DisclaimerBanner, Header, IntroSplash, ShortcutsDialog } from "./components/layout/Chrome";
 import { PatientPanel } from "./components/patient/PatientPanel";
 import { PhysiologyTable } from "./components/physiology/PhysiologyTable";
 import { RiskOverview } from "./components/risk/RiskOverview";
@@ -25,6 +25,8 @@ type MobilePane = "patient" | "viewer" | "insights";
 
 const columns: Variants = {
   hidden: { opacity: 0, y: 22 },
+  // The 3D view already plays, blurred, behind the welcome screen.
+  preview: { opacity: 0.85, y: 0, transition: { duration: 1.2 } },
   show: (i: number) => ({ opacity: 1, y: 0, transition: { delay: 0.15 + i * 0.12, duration: 0.7, ease: EASE_OUT } }),
 };
 
@@ -62,7 +64,7 @@ function Analysis({ active }: { active: boolean }) {
           variants={columns}
           custom={1}
           initial="hidden"
-          animate={reveal}
+          animate={ready ? "show" : "preview"}
           className={clsx("h-[62vh] min-h-[380px] xl:block xl:h-auto xl:min-h-0", pane === "viewer" ? "block" : "hidden")}
         >
           <Suspense fallback={<Fallback />}>
@@ -207,6 +209,7 @@ export default function App() {
         )}
       </div>
       <ToastHost />
+      <ShortcutsDialog />
       <IntroSplash />
     </MotionConfig>
   );

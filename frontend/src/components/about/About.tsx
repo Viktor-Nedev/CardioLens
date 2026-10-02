@@ -3,6 +3,7 @@ import { motion } from "motion/react";
 import type { ReactNode } from "react";
 import { useStore } from "../../state/store";
 import { PageHeader } from "../ui/PageHeader";
+import { spotlightMove } from "../ui/effects";
 
 function Card({ title, index, children }: { title: string; index: number; children: ReactNode }) {
   return (
@@ -11,7 +12,8 @@ function Card({ title, index, children }: { title: string; index: number; childr
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.07, duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
       whileHover={{ y: -2 }}
-      className="panel p-5"
+      onPointerMove={spotlightMove}
+      className="panel spotlight p-5"
     >
       <h2 className="text-sm font-semibold text-ink">{title}</h2>
       <div className="mt-2 space-y-2 text-sm leading-relaxed text-ink-2">{children}</div>

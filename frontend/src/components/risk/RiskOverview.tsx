@@ -7,6 +7,7 @@ import { pct, pp } from "../../lib/format";
 import { VESSELS, type TargetId, type TargetPrediction } from "../../lib/types";
 import { useIsModified, useStore } from "../../state/store";
 import { RadialGauge } from "../ui/RadialGauge";
+import { ChangeRing, FloatingDelta, spotlightMove, useValueChange } from "../ui/effects";
 import { AnimatedNumber, BandChip, EASE_OUT, Meter } from "../ui/primitives";
 
 function Delta({ target }: { target: TargetId }) {
@@ -48,18 +49,24 @@ function CadHero({ pred }: { pred: TargetPrediction }) {
   const select = useStore((s) => s.select);
   const selected = useStore((s) => s.selected);
   const active = selected === "cad";
+  const change = useValueChange(pred.probability);
   return (
     <motion.button
       type="button"
       onClick={() => select("cad")}
+      onPointerMove={spotlightMove}
       whileHover={{ y: -2 }}
       whileTap={{ scale: 0.99 }}
       className={clsx(
-        "grid w-full grid-cols-[auto_1fr] items-center gap-3 rounded-2xl border p-3 text-left transition-colors",
+        "spotlight grid w-full grid-cols-[auto_1fr] items-center gap-3 rounded-2xl border p-3 text-left transition-colors",
         active ? "glow-border" : "border-line bg-white/[0.02] hover:bg-white/[0.04]",
       )}
     >
-      <RadialGauge value={pred.probability} threshold={pred.threshold} interval={pred.interval} label="CAD probability" />
+      <ChangeRing change={change} color={riskColor(pred.probability)} />
+      <div className="relative">
+        <RadialGauge value={pred.probability} threshold={pred.threshold} interval={pred.interval} label="CAD probability" />
+        <FloatingDelta change={change} placement="top" />
+      </div>
       <div className="min-w-0 space-y-2">
         <p className="text-xs font-medium text-ink-2">Overall coronary artery disease</p>
         <BandChip band={pred.risk_band.id} label={pred.risk_band.label} />
@@ -86,19 +93,21 @@ function VesselRow({ pred, index }: { pred: TargetPrediction; index: number }) {
   const setHovered = useStore((s) => s.setHovered);
   const active = selected === pred.id;
   const color = riskColor(pred.probability);
+  const change = useValueChange(pred.probability);
   return (
     <motion.button
       type="button"
       onClick={() => select(pred.id)}
       onMouseEnter={() => setHovered(pred.id)}
       onMouseLeave={() => setHovered(null)}
+      onPointerMove={spotlightMove}
       initial={{ opacity: 0, x: 16 }}
       animate={{ opacity: 1, x: 0 }}
       transition={{ delay: 0.15 + index * 0.08, duration: 0.45, ease: EASE_OUT }}
       whileHover={{ y: -2 }}
       whileTap={{ scale: 0.99 }}
       className={clsx(
-        "w-full rounded-xl border px-3 py-2.5 text-left transition-colors",
+        "spotlight w-full rounded-xl border px-3 py-2.5 text-left transition-colors",
         active
           ? "glow-border"
           : hovered === pred.id
@@ -106,6 +115,7 @@ function VesselRow({ pred, index }: { pred: TargetPrediction; index: number }) {
             : "border-line bg-white/[0.02] hover:bg-white/[0.04]",
       )}
     >
+      <ChangeRing change={change} color={color} />
       <div className="flex items-center justify-between gap-2">
         <div className="flex min-w-0 items-center gap-2">
           <span className="relative flex h-2.5 w-2.5 shrink-0" aria-hidden>
@@ -117,7 +127,10 @@ function VesselRow({ pred, index }: { pred: TargetPrediction; index: number }) {
           <span className="text-sm font-semibold text-ink">{pred.short}</span>
           <span className="truncate text-[11px] text-ink-3">{STRUCTURE_BY_NODE[TARGET_NODE[pred.id]].label}</span>
         </div>
-        <AnimatedNumber value={pred.probability} format={pct} className="text-lg font-semibold text-ink" />
+        <span className="relative">
+          <AnimatedNumber value={pred.probability} format={pct} className="text-lg font-semibold text-ink" />
+          <FloatingDelta change={change} />
+        </span>
       </div>
       <div className="mt-2">
         <Meter value={pred.probability} threshold={pred.threshold} interval={pred.interval} size="sm" label={`${pred.short} probability`} />

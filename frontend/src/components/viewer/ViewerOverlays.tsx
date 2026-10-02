@@ -205,7 +205,7 @@ export function HoverCard() {
             exit={{ opacity: 0 }}
             className="glass-chip pointer-events-none absolute bottom-3 right-3 z-10 hidden items-center gap-1.5 px-2.5 py-1.5 text-[11px] text-ink-3 lg:flex"
           >
-            <MousePointerClick size={13} /> Drag · scroll · click to inspect · keys 0–3
+            <MousePointerClick size={13} /> Drag · scroll · click to inspect · press ? for keys
           </motion.div>
         )}
       </AnimatePresence>

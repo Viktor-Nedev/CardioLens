@@ -7,6 +7,7 @@ import { TARGET_ORDER, type MetricCI, type TargetId, type TargetReport } from ".
 import { useStore } from "../../state/store";
 import { AnimatedNumber, ChartCard, DataTable, EASE_OUT, LegendKey, Segmented } from "../ui/primitives";
 import { PageHeader } from "../ui/PageHeader";
+import { spotlightMove } from "../ui/effects";
 import { CurveChart } from "./CurveChart";
 
 const ci = (m: MetricCI, digits = 2) => `${num(m.value, digits)} [${num(m.ci_low, digits)}–${num(m.ci_high, digits)}]`;
@@ -18,7 +19,8 @@ function StatTile({ label, metric, hint, index = 0 }: { label: string; metric: M
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.06, duration: 0.45, ease: EASE_OUT }}
       whileHover={{ y: -2 }}
-      className="panel px-3 py-2.5"
+      onPointerMove={spotlightMove}
+      className="panel spotlight px-3 py-2.5"
       title={hint}
     >
       <p className="text-[11px] text-ink-3">{label}</p>
@@ -322,7 +324,8 @@ export function ModelPerformance() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: i * 0.07, duration: 0.5, ease: EASE_OUT }}
             whileHover={{ y: -2 }}
-            className="panel px-4 py-3"
+            onPointerMove={spotlightMove}
+            className="panel spotlight px-4 py-3"
           >
             <p className="text-[11px] text-ink-3">{label}</p>
             <p className="mt-0.5 text-xl font-semibold text-ink">{value}</p>

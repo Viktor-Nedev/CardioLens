@@ -29,20 +29,45 @@ function NumericField({ f }: { f: FeatureSchema }) {
   };
 
   const outOfRef = num != null && f.ref ? num < f.ref[0] || num > f.ref[1] : false;
+  const [dragging, setDragging] = useState(false);
+  const clampedFill = Math.min(100, Math.max(0, fill));
+  const shown = num ?? (f.stats.default as number);
 
   return (
     <div className="flex items-center gap-2">
-      <input
-        type="range"
-        min={lo}
-        max={hi}
-        step={f.step ?? 1}
-        value={num ?? (f.stats.default as number)}
-        onChange={(e) => setFeature(f.id, Number(e.target.value))}
-        style={{ ["--fill" as string]: `${Math.min(100, Math.max(0, fill))}%` }}
-        className={clsx("min-w-0 flex-1", num == null && "opacity-40")}
-        aria-label={`${f.label} slider`}
-      />
+      <div className="relative min-w-0 flex-1">
+        <AnimatePresence>
+          {dragging && (
+            <motion.span
+              initial={{ opacity: 0, y: 4, scale: 0.9 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 4, scale: 0.9 }}
+              transition={{ duration: 0.15 }}
+              className="tabular pointer-events-none absolute -top-6 z-10 -translate-x-1/2 whitespace-nowrap rounded-md border border-accent/40 bg-[#0b111bf2] px-1.5 py-0.5 text-[11px] font-semibold text-ink shadow-[0_0_14px_-4px_rgb(92_200_245/0.8)]"
+              style={{ left: `calc(${clampedFill}% + ${7 - clampedFill * 0.14}px)` }}
+              aria-hidden
+            >
+              {shown}
+              {f.unit ? ` ${f.unit}` : ""}
+            </motion.span>
+          )}
+        </AnimatePresence>
+        <input
+          type="range"
+          min={lo}
+          max={hi}
+          step={f.step ?? 1}
+          value={shown}
+          onChange={(e) => setFeature(f.id, Number(e.target.value))}
+          onPointerDown={() => setDragging(true)}
+          onPointerUp={() => setDragging(false)}
+          onPointerCancel={() => setDragging(false)}
+          onBlur={() => setDragging(false)}
+          style={{ ["--fill" as string]: `${clampedFill}%` }}
+          className={clsx("w-full", num == null && "opacity-40")}
+          aria-label={`${f.label} slider`}
+        />
+      </div>
       <div className="relative w-24 shrink-0">
         <input
           type="number"

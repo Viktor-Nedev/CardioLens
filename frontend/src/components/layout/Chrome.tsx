@@ -1,6 +1,7 @@
 import clsx from "clsx";
-import { ArrowRight, Box, BrainCircuit, Gauge, Heart, ShieldAlert } from "lucide-react";
+import { ArrowRight, Box, BrainCircuit, Gauge, Heart, Keyboard, ShieldAlert, X } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
+import { useEffect } from "react";
 import { useStore, type Tab } from "../../state/store";
 import { AnimatedNumber, EASE_OUT } from "../ui/primitives";
 
@@ -126,6 +127,7 @@ function ApiStatus() {
 export function Header() {
   const tab = useStore((s) => s.tab);
   const setTab = useStore((s) => s.setTab);
+  const setShortcuts = useStore((s) => s.setShortcutsOpen);
   return (
     <motion.header
       initial={{ y: -12, opacity: 0 }}
@@ -167,7 +169,17 @@ export function Header() {
       <div className="flex items-center gap-3">
         <EcgMonitor />
         <ApiStatus />
+        <button
+          type="button"
+          onClick={() => setShortcuts(true)}
+          className="btn-ghost hidden p-1.5 sm:inline-flex"
+          title="Keyboard shortcuts (?)"
+          aria-label="Keyboard shortcuts"
+        >
+          <Keyboard size={15} />
+        </button>
       </div>
+      <div className="live-line" aria-hidden />
     </motion.header>
   );
 }
@@ -209,7 +221,7 @@ export function IntroSplash() {
       {!accepted && (
         <motion.div
           key="intro"
-          className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-[#05080dcc] p-4 backdrop-blur-md"
+          className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-[#05080da6] p-4 backdrop-blur-[6px]"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0, transition: { duration: 0.6, ease: EASE_OUT } }}
@@ -299,6 +311,92 @@ export function IntroSplash() {
             >
               I understand — start the analysis <ArrowRight size={16} />
             </motion.button>
+          </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
+}
+
+const SHORTCUTS: { keys: string[]; action: string }[] = [
+  { keys: ["0"], action: "Explain overall CAD" },
+  { keys: ["1", "2", "3"], action: "Focus LAD, LCX or RCA in 3D" },
+  { keys: ["Drag"], action: "Rotate the heart" },
+  { keys: ["Scroll"], action: "Zoom in and out" },
+  { keys: ["Right-drag"], action: "Pan the view" },
+  { keys: ["Click"], action: "Inspect an artery, its label or a myocardial region" },
+  { keys: ["?"], action: "Show or hide this panel" },
+  { keys: ["Esc"], action: "Close" },
+];
+
+/** Keyboard and mouse reference, toggled with "?". */
+export function ShortcutsDialog() {
+  const open = useStore((s) => s.shortcutsOpen);
+  const setOpen = useStore((s) => s.setShortcutsOpen);
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      const el = e.target as HTMLElement | null;
+      if (el && ["INPUT", "SELECT", "TEXTAREA"].includes(el.tagName)) return;
+      if (e.key === "?") setOpen(!useStore.getState().shortcutsOpen);
+      if (e.key === "Escape") setOpen(false);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [setOpen]);
+
+  return (
+    <AnimatePresence>
+      {open && (
+        <motion.div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          onClick={() => setOpen(false)}
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="shortcuts-title"
+        >
+          <motion.div
+            className="panel w-full max-w-md p-5 shadow-2xl"
+            initial={{ opacity: 0, y: 14, scale: 0.97 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 8, scale: 0.98 }}
+            transition={{ duration: 0.25, ease: EASE_OUT }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between">
+              <h2 id="shortcuts-title" className="flex items-center gap-2 text-sm font-semibold text-ink">
+                <Keyboard size={16} className="text-accent" /> Shortcuts
+              </h2>
+              <button type="button" className="btn-ghost p-1" onClick={() => setOpen(false)} aria-label="Close">
+                <X size={14} />
+              </button>
+            </div>
+            <ul className="mt-4 space-y-2">
+              {SHORTCUTS.map((s, i) => (
+                <motion.li
+                  key={s.action}
+                  initial={{ opacity: 0, x: -8 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.04 * i, duration: 0.3, ease: EASE_OUT }}
+                  className="flex items-center justify-between gap-4 text-xs text-ink-2"
+                >
+                  <span>{s.action}</span>
+                  <span className="flex shrink-0 gap-1">
+                    {s.keys.map((k) => (
+                      <kbd
+                        key={k}
+                        className="min-w-6 rounded-md border border-line-strong bg-white/[0.05] px-1.5 py-0.5 text-center font-sans text-[11px] font-semibold text-ink shadow-[inset_0_-1px_0_rgb(255_255_255/0.08)]"
+                      >
+                        {k}
+                      </kbd>
+                    ))}
+                  </span>
+                </motion.li>
+              ))}
+            </ul>
           </motion.div>
         </motion.div>
       )}

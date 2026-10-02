@@ -72,6 +72,7 @@ export function AnatomyScene({ meta }: { meta: AnatomyMeta | null }) {
   const select = useStore((s) => s.select);
   const setHovered = useStore((s) => s.setHovered);
   const setHoverInfo = useStore((s) => s.setHoverInfo);
+  const revealed = useStore((s) => s.disclaimerAccepted);
 
   const heart = useMemo(() => createHeartMaterial(), []);
   const hologram = useMemo(() => createHologramMaterial(), []);
@@ -376,7 +377,9 @@ export function AnatomyScene({ meta }: { meta: AnatomyMeta | null }) {
         <torusGeometry args={[0.74, 0.0035, 8, 160]} />
       </mesh>
 
-      {viewer.labels && meta && <VesselLabels meta={meta} />}
+      {/* Labels mount once the scene is revealed and scored; drei Html roots created
+          earlier (behind the welcome screen) could stay empty. */}
+      {viewer.labels && meta && revealed && prediction && <VesselLabels meta={meta} />}
     </group>
   );
 }

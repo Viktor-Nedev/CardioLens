@@ -22,7 +22,16 @@ export interface ViewerSettings {
   xray: boolean;
   heartbeat: boolean;
   autoRotate: boolean;
+  bloom: boolean;
+  flow: boolean;
+  hologram: boolean;
   performance: boolean;
+}
+
+export interface Toast {
+  id: number;
+  title: string;
+  detail?: string;
 }
 
 export interface CameraRequest {
@@ -66,6 +75,9 @@ interface AppState {
   viewer: ViewerSettings;
   camera: CameraRequest | null;
   disclaimerAccepted: boolean;
+  toast: Toast | null;
+  /** Bumps on every new prediction; drives the 3D "re-analysis" scan sweep. */
+  scanNonce: number;
 
   setBoot: (data: { schema: Schema; cases: Case[]; metrics: MetricsReport; importance: Importance }) => void;
   setBootError: (msg: string) => void;
@@ -82,6 +94,8 @@ interface AppState {
   toggleViewer: (key: keyof ViewerSettings, value?: boolean) => void;
   flyTo: (view: string) => void;
   acceptDisclaimer: () => void;
+  showToast: (title: string, detail?: string) => void;
+  dismissToast: () => void;
 }
 
 const DISCLAIMER_KEY = "cardiolens.disclaimer.v1";
@@ -135,10 +149,15 @@ export const useStore = create<AppState>((set, get) => ({
     xray: false,
     heartbeat: true,
     autoRotate: false,
+    bloom: true,
+    flow: true,
+    hologram: true,
     performance: false,
   },
   camera: null,
   disclaimerAccepted: readAccepted(),
+  toast: null,
+  scanNonce: 0,
 
   setBoot: ({ schema, cases, metrics, importance }) => {
     const initial = pickShowcase(cases);
@@ -149,8 +168,19 @@ export const useStore = create<AppState>((set, get) => ({
   setBootError: (msg) => set({ bootError: msg }),
 
   setFeature: (id, value) => set((s) => ({ patient: { ...s.patient, [id]: value } })),
-  loadPatient: (patient, label, caseId) =>
-    set({ patient: { ...patient }, activeCaseId: caseId, baseline: { label, patient: { ...patient } } }),
+  loadPatient: (patient, label, caseId) => {
+    set({ patient: { ...patient }, activeCaseId: caseId, baseline: { label, patient: { ...patient } } });
+    const c = caseId ? get().cases.find((x) => x.id === caseId) : undefined;
+    if (c) {
+      const vessels = (["lad", "lcx", "rca"] as const).filter((v) => c.truth[v]).map((v) => v.toUpperCase());
+      get().showToast(
+        `${c.title} loaded`,
+        c.truth.cad ? `Angiography: CAD${vessels.length ? ` · stenotic ${vessels.join(", ")}` : ""}` : "Angiography: normal coronaries",
+      );
+    } else {
+      get().showToast(`${label} loaded`);
+    }
+  },
   resetFeature: (id) =>
     set((s) => {
       const source = s.baseline?.patient ?? s.schema?.default_patient ?? {};
@@ -160,7 +190,7 @@ export const useStore = create<AppState>((set, get) => ({
   setPrediction: (p) =>
     set((s) => {
       const baseline = s.baseline && !s.baseline.prediction ? { ...s.baseline, prediction: p } : s.baseline;
-      return { prediction: p, baseline, predictError: undefined };
+      return { prediction: p, baseline, predictError: undefined, scanNonce: s.scanNonce + 1 };
     }),
   setPredicting: (v) => set({ predicting: v }),
   setPredictError: (msg) => set({ predictError: msg }),
@@ -182,6 +212,8 @@ export const useStore = create<AppState>((set, get) => ({
     }
     set({ disclaimerAccepted: true });
   },
+  showToast: (title, detail) => set((s) => ({ toast: { id: (s.toast?.id ?? 0) + 1, title, detail } })),
+  dismissToast: () => set({ toast: null }),
 }));
 
 /** True when the current inputs differ from the loaded case (what-if mode). */

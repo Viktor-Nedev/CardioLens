@@ -1,30 +1,41 @@
-import { lazy, Suspense, useState } from "react";
 import clsx from "clsx";
+import { CheckCircle2, Stethoscope, X } from "lucide-react";
+import { AnimatePresence, motion, MotionConfig, type Variants } from "motion/react";
+import { lazy, Suspense, useEffect, useState } from "react";
 import { ExplanationPanel } from "./components/explain/ExplanationPanel";
-import { DisclaimerBanner, DisclaimerModal, Header } from "./components/layout/Chrome";
+import { DisclaimerBanner, Header, IntroSplash } from "./components/layout/Chrome";
 import { PatientPanel } from "./components/patient/PatientPanel";
 import { PhysiologyTable } from "./components/physiology/PhysiologyTable";
 import { RiskOverview } from "./components/risk/RiskOverview";
-import { Segmented } from "./components/ui/primitives";
+import { EASE_OUT, Segmented } from "./components/ui/primitives";
 import { useBoot, usePredictionSync } from "./hooks/useBoot";
 import { useStore } from "./state/store";
 
 const Viewer = lazy(() => import("./components/viewer/Viewer").then((m) => ({ default: m.Viewer })));
-const ModelPerformance = lazy(() => import("./components/model/ModelPerformance").then((m) => ({ default: m.ModelPerformance })));
+const ModelPerformance = lazy(() =>
+  import("./components/model/ModelPerformance").then((m) => ({ default: m.ModelPerformance })),
+);
 const About = lazy(() => import("./components/about/About").then((m) => ({ default: m.About })));
 
 function Fallback() {
-  return <div className="h-full w-full animate-pulse rounded-xl border border-line bg-surface" />;
+  return <div className="skeleton h-full min-h-64 w-full rounded-2xl border border-line" />;
 }
 
 type MobilePane = "patient" | "viewer" | "insights";
 
-function Analysis() {
+const columns: Variants = {
+  hidden: { opacity: 0, y: 22 },
+  show: (i: number) => ({ opacity: 1, y: 0, transition: { delay: 0.15 + i * 0.12, duration: 0.7, ease: EASE_OUT } }),
+};
+
+function Analysis({ active }: { active: boolean }) {
   const [pane, setPane] = useState<MobilePane>("viewer");
   const [insight, setInsight] = useState<"explain" | "physiology">("explain");
+  const ready = useStore((s) => s.disclaimerAccepted);
+  const reveal = ready ? "show" : "hidden";
 
   return (
-    <div className="flex min-h-0 flex-1 flex-col">
+    <div className={clsx("relative z-10 flex min-h-0 flex-1 flex-col", !active && "hidden")}>
       <div className="flex justify-center border-b border-line px-4 py-2 xl:hidden">
         <Segmented
           ariaLabel="Panel"
@@ -37,16 +48,34 @@ function Analysis() {
           ]}
         />
       </div>
-      <main className="scroll-slim grid min-h-0 flex-1 gap-3 overflow-y-auto p-3 xl:grid-cols-[320px_minmax(0,1fr)_420px] xl:grid-rows-[minmax(0,1fr)] xl:overflow-hidden">
-        <div className={clsx("min-h-0 xl:block", pane === "patient" ? "block" : "hidden")}>
+      <main className="scroll-slim grid min-h-0 flex-1 gap-3 overflow-y-auto p-3 xl:grid-cols-[320px_minmax(0,1fr)_430px] xl:grid-rows-[minmax(0,1fr)] xl:overflow-hidden">
+        <motion.div
+          variants={columns}
+          custom={0}
+          initial="hidden"
+          animate={reveal}
+          className={clsx("min-h-0 xl:block", pane === "patient" ? "block" : "hidden")}
+        >
           <PatientPanel />
-        </div>
-        <div className={clsx("h-[62vh] min-h-[380px] xl:block xl:h-auto xl:min-h-0", pane === "viewer" ? "block" : "hidden")}>
+        </motion.div>
+        <motion.div
+          variants={columns}
+          custom={1}
+          initial="hidden"
+          animate={reveal}
+          className={clsx("h-[62vh] min-h-[380px] xl:block xl:h-auto xl:min-h-0", pane === "viewer" ? "block" : "hidden")}
+        >
           <Suspense fallback={<Fallback />}>
-            <Viewer />
+            <Viewer active={active} />
           </Suspense>
-        </div>
-        <div className={clsx("scroll-slim min-h-0 space-y-3 overflow-y-auto xl:block", pane === "insights" ? "block" : "hidden")}>
+        </motion.div>
+        <motion.div
+          variants={columns}
+          custom={2}
+          initial="hidden"
+          animate={reveal}
+          className={clsx("scroll-slim min-h-0 space-y-3 overflow-y-auto pr-0.5 xl:block", pane === "insights" ? "block" : "hidden")}
+        >
           <RiskOverview />
           <div className="flex justify-center">
             <Segmented
@@ -59,8 +88,18 @@ function Analysis() {
               ]}
             />
           </div>
-          {insight === "explain" ? <ExplanationPanel /> : <PhysiologyTable />}
-        </div>
+          <AnimatePresence mode="wait" initial={false}>
+            <motion.div
+              key={insight}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -8 }}
+              transition={{ duration: 0.25, ease: EASE_OUT }}
+            >
+              {insight === "explain" ? <ExplanationPanel /> : <PhysiologyTable />}
+            </motion.div>
+          </AnimatePresence>
+        </motion.div>
       </main>
     </div>
   );
@@ -68,7 +107,7 @@ function Analysis() {
 
 function BootError({ message }: { message: string }) {
   return (
-    <div className="flex flex-1 items-center justify-center p-8">
+    <div className="relative z-10 flex flex-1 items-center justify-center p-8">
       <div className="panel max-w-md p-6 text-sm text-ink-2">
         <p className="font-semibold text-ink">Cannot reach the CardioLens API</p>
         <p className="mt-2">
@@ -81,6 +120,48 @@ function BootError({ message }: { message: string }) {
   );
 }
 
+function ToastHost() {
+  const toast = useStore((s) => s.toast);
+  const dismiss = useStore((s) => s.dismissToast);
+  const ready = useStore((s) => s.disclaimerAccepted);
+
+  useEffect(() => {
+    if (!toast) return;
+    const id = window.setTimeout(dismiss, 3800);
+    return () => window.clearTimeout(id);
+  }, [toast, dismiss]);
+
+  return (
+    <div className="pointer-events-none fixed inset-x-0 bottom-5 z-40 flex justify-center px-4" aria-live="polite">
+      <AnimatePresence>
+        {toast && ready && (
+          <motion.div
+            key={toast.id}
+            initial={{ opacity: 0, y: 24, scale: 0.96 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 12, scale: 0.98 }}
+            transition={{ type: "spring", stiffness: 420, damping: 30 }}
+            className="panel pointer-events-auto flex items-center gap-3 py-2.5 pl-3 pr-2 shadow-2xl"
+          >
+            <span className="flex h-7 w-7 items-center justify-center rounded-full bg-accent-soft">
+              <Stethoscope size={14} className="text-accent" />
+            </span>
+            <div>
+              <p className="flex items-center gap-1.5 text-xs font-semibold text-ink">
+                <CheckCircle2 size={12} className="text-risk-low" /> {toast.title}
+              </p>
+              {toast.detail && <p className="text-[11px] text-ink-3">{toast.detail}</p>}
+            </div>
+            <button type="button" onClick={dismiss} className="btn-ghost ml-1 p-1" aria-label="Dismiss">
+              <X size={13} />
+            </button>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
+
 export default function App() {
   useBoot();
   usePredictionSync();
@@ -88,21 +169,45 @@ export default function App() {
   const bootError = useStore((s) => s.bootError);
 
   return (
-    <div className="flex h-full min-h-0 flex-col">
-      <Header />
-      <DisclaimerBanner />
-      {bootError ? (
-        <BootError message={bootError} />
-      ) : tab === "analysis" ? (
-        <Analysis />
-      ) : (
-        <div className="scroll-slim min-h-0 flex-1 overflow-y-auto">
-          <Suspense fallback={<div className="p-6"><Fallback /></div>}>
-            {tab === "model" ? <ModelPerformance /> : <About />}
-          </Suspense>
-        </div>
-      )}
-      <DisclaimerModal />
-    </div>
+    <MotionConfig reducedMotion="user">
+      <div className="aurora" aria-hidden>
+        <div className="aurora-grid" />
+      </div>
+      <div className="relative flex h-full min-h-0 flex-col">
+        <Header />
+        <DisclaimerBanner />
+        {bootError ? (
+          <BootError message={bootError} />
+        ) : (
+          <>
+            <Analysis active={tab === "analysis"} />
+            <AnimatePresence mode="wait">
+              {tab !== "analysis" && (
+                <motion.div
+                  key={tab}
+                  initial={{ opacity: 0, y: 16 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  transition={{ duration: 0.35, ease: EASE_OUT }}
+                  className="scroll-slim relative z-10 min-h-0 flex-1 overflow-y-auto"
+                >
+                  <Suspense
+                    fallback={
+                      <div className="p-6">
+                        <Fallback />
+                      </div>
+                    }
+                  >
+                    {tab === "model" ? <ModelPerformance /> : <About />}
+                  </Suspense>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </>
+        )}
+      </div>
+      <ToastHost />
+      <IntroSplash />
+    </MotionConfig>
   );
 }

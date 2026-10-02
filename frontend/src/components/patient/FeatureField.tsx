@@ -1,5 +1,6 @@
 import clsx from "clsx";
 import { Info, Undo2 } from "lucide-react";
+import { AnimatePresence, motion } from "motion/react";
 import { useEffect, useState } from "react";
 import type { FeatureSchema } from "../../lib/types";
 import { useStore } from "../../state/store";
@@ -100,7 +101,18 @@ export function FeatureField({ feature: f }: { feature: FeatureSchema }) {
               <Info size={11} />
             </span>
           )}
-          {modified && <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-accent" title="Edited" />}
+          <AnimatePresence>
+            {modified && (
+              <motion.span
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                exit={{ scale: 0 }}
+                transition={{ type: "spring", stiffness: 500, damping: 20 }}
+                className="h-1.5 w-1.5 shrink-0 rounded-full bg-accent shadow-[0_0_8px_rgb(92_200_245/0.9)]"
+                title="Edited"
+              />
+            )}
+          </AnimatePresence>
         </span>
         <span className="flex shrink-0 items-center gap-1.5 text-[10px] text-ink-3">
           {f.ref && (

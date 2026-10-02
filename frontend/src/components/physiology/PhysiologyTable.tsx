@@ -1,4 +1,5 @@
-import { ArrowDown, ArrowUp, Check, Dot } from "lucide-react";
+import { ArrowDown, ArrowUp, Check, Dot, Stethoscope } from "lucide-react";
+import { motion } from "motion/react";
 import { useMemo, useState } from "react";
 import { LOWERS, RAISES } from "../../lib/colors";
 import { ordinal, signed } from "../../lib/format";
@@ -46,7 +47,7 @@ function PercentileTrack({ value }: { value: number | null }) {
     <div className="flex items-center gap-1.5" title={`${ordinal(value)} percentile of the development cohort`}>
       <div className="relative h-1 w-10 rounded-full bg-white/10">
         <div
-          className="absolute top-1/2 h-2.5 w-2.5 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-surface bg-ink-2"
+          className="absolute top-1/2 h-2.5 w-2.5 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-surface bg-ink-2 transition-[left] duration-500"
           style={{ left: `${value}%` }}
         />
       </div>
@@ -103,7 +104,8 @@ export function PhysiologyTable() {
 
   return (
     <Section
-      title="Physiological breakdown"
+      title="Physiology"
+      icon={Stethoscope}
       right={
         <Segmented
           size="xs"
@@ -112,8 +114,8 @@ export function PhysiologyTable() {
           onChange={setFilter}
           options={[
             { value: "all", label: "All" },
-            { value: "abnormal", label: "Abnormal" },
-            { value: "measured", label: "Measurements" },
+            { value: "abnormal", label: "Flagged" },
+            { value: "measured", label: "Measured" },
           ]}
         />
       }
@@ -139,10 +141,16 @@ export function PhysiologyTable() {
                   {g.label}
                 </td>
               </tr>
-              {g.rows.map((r) => {
+              {g.rows.map((r, i) => {
                 const c = r.contributions[selected] ?? 0;
                 return (
-                  <tr key={r.feature} className="border-t border-line/60 hover:bg-hover/60">
+                  <motion.tr
+                    key={`${filter}-${r.feature}`}
+                    initial={{ opacity: 0, x: -6 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ duration: 0.3, delay: Math.min(i, 12) * 0.025 }}
+                    className="border-t border-line/60 transition-colors hover:bg-white/[0.04]"
+                  >
                     <td className="py-1.5 pr-2">
                       <p className="text-ink">{r.label}</p>
                       <p className="text-[11px] text-ink-3">
@@ -159,7 +167,7 @@ export function PhysiologyTable() {
                     <td className="py-1.5">
                       <ContributionCell value={c} max={max} share={Math.abs(c) / total} />
                     </td>
-                  </tr>
+                  </motion.tr>
                 );
               })}
             </tbody>

@@ -1,13 +1,21 @@
 import { ExternalLink } from "lucide-react";
+import { motion } from "motion/react";
 import type { ReactNode } from "react";
 import { useStore } from "../../state/store";
+import { PageHeader } from "../ui/PageHeader";
 
-function Card({ title, children }: { title: string; children: ReactNode }) {
+function Card({ title, index, children }: { title: string; index: number; children: ReactNode }) {
   return (
-    <section className="panel p-5">
+    <motion.section
+      initial={{ opacity: 0, y: 18 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: index * 0.07, duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+      whileHover={{ y: -2 }}
+      className="panel p-5"
+    >
       <h2 className="text-sm font-semibold text-ink">{title}</h2>
       <div className="mt-2 space-y-2 text-sm leading-relaxed text-ink-2">{children}</div>
-    </section>
+    </motion.section>
   );
 }
 
@@ -23,8 +31,13 @@ function A({ href, children }: { href: string; children: ReactNode }) {
 export function About() {
   const schema = useStore((s) => s.schema);
   return (
-    <div className="mx-auto grid max-w-5xl gap-4 p-4 md:grid-cols-2">
-      <Card title="What CardioLens does">
+    <div className="mx-auto max-w-5xl space-y-4 p-4 sm:p-6">
+      <PageHeader eyebrow="About & data" title="Explainable coronary risk, mapped onto real anatomy">
+        CardioLens turns routine clinical data into calibrated, explained risk estimates for coronary artery disease
+        and each major coronary artery, and shows them on a 3D heart.
+      </PageHeader>
+      <div className="grid gap-4 md:grid-cols-2">
+      <Card index={0} title="What CardioLens does">
         <p>
           CardioLens estimates, from routine clinical data, the probability of coronary artery disease (CAD) and of
           significant (≥50%) stenosis in each of the three major coronary arteries: the left anterior descending (LAD),
@@ -36,7 +49,7 @@ export function About() {
         </p>
       </Card>
 
-      <Card title="Intended use and limitations">
+      <Card index={1} title="Intended use and limitations">
         <ul className="list-disc space-y-1.5 pl-4">
           <li>Educational and decision-support prototype; not a medical device and not validated for clinical use.</li>
           <li>Trained on 303 patients from a single centre. Performance on other populations is unknown.</li>
@@ -49,7 +62,7 @@ export function About() {
         </ul>
       </Card>
 
-      <Card title="Data">
+      <Card index={2} title="Data">
         <p>
           <A href="https://archive.ics.uci.edu/dataset/411/extention+of+z+alizadeh+sani+dataset">
             Extension of Z-Alizadeh Sani dataset
@@ -65,7 +78,7 @@ export function About() {
         )}
       </Card>
 
-      <Card title="Anatomy">
+      <Card index={3} title="Anatomy">
         <p>
           3D meshes from <A href="https://lifesciencedb.jp/bp3d/">BodyParts3D</A> (© The Database Center for Life
           Science, CC BY-SA 2.1 Japan), via the STL mirror by K. M. Moerman. The coronary arteries come from the
@@ -74,7 +87,7 @@ export function About() {
         </p>
       </Card>
 
-      <Card title="Method in brief">
+      <Card index={4} title="Method in brief">
         <ul className="list-disc space-y-1.5 pl-4">
           <li>Stratified 80/20 development / hold-out split; the hold-out set is used exactly once.</li>
           <li>
@@ -86,7 +99,7 @@ export function About() {
         </ul>
       </Card>
 
-      <Card title="How to use">
+      <Card index={5} title="How to use">
         <ol className="list-decimal space-y-1.5 pl-4">
           <li>Pick a hold-out patient in the case library, or edit any measurement.</li>
           <li>Rotate and zoom the heart; click an artery, its label or a region of the myocardium to inspect it.</li>
@@ -94,6 +107,7 @@ export function About() {
           <li>Open "Model performance" to see how well each model generalises.</li>
         </ol>
       </Card>
+      </div>
     </div>
   );
 }

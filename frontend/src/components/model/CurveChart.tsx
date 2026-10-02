@@ -1,3 +1,4 @@
+import { motion } from "motion/react";
 import { useEffect, useMemo, useRef, useState, type PointerEvent } from "react";
 
 export interface CurveSeries {
@@ -111,12 +112,33 @@ export function CurveChart({ series, xLabel, yLabel, mode = "interpolate", heigh
           {yLabel}
         </text>
 
-        {paths.map((s) => (
-          <g key={s.id}>
-            <path d={s.d} fill="none" stroke={s.color} strokeWidth={2} strokeLinejoin="round" strokeLinecap="round" />
+        {paths.map((s, si) => (
+          <g key={`${s.id}-${s.points.length}-${s.points[1]?.[1] ?? 0}`}>
+            <motion.path
+              d={s.d}
+              fill="none"
+              stroke={s.color}
+              strokeWidth={2}
+              strokeLinejoin="round"
+              strokeLinecap="round"
+              initial={{ pathLength: 0, opacity: 0 }}
+              animate={{ pathLength: 1, opacity: 1 }}
+              transition={{ duration: 1.1, delay: si * 0.25, ease: [0.22, 1, 0.36, 1] }}
+            />
             {s.markers &&
               s.points.map((p, i) => (
-                <circle key={i} cx={sx(p[0])} cy={sy(p[1])} r={4} fill={s.color} stroke="var(--color-surface)" strokeWidth={2} />
+                <motion.circle
+                  key={i}
+                  cx={sx(p[0])}
+                  cy={sy(p[1])}
+                  r={4}
+                  fill={s.color}
+                  stroke="var(--color-surface)"
+                  strokeWidth={2}
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ duration: 0.3, delay: 0.3 + si * 0.25 + i * 0.06 }}
+                />
               ))}
           </g>
         ))}

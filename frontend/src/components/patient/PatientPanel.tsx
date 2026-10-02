@@ -1,13 +1,88 @@
 import clsx from "clsx";
-import { ChevronDown, Download, RotateCcw, Upload, Users } from "lucide-react";
+import {
+  Activity,
+  AudioWaveform,
+  ChevronDown,
+  ClipboardList,
+  Download,
+  FlaskConical,
+  RotateCcw,
+  Stethoscope,
+  Upload,
+  UserRound,
+  Users,
+  type LucideIcon,
+} from "lucide-react";
+import { AnimatePresence, motion } from "motion/react";
 import { useMemo, useRef, useState, type ChangeEvent } from "react";
 import { pct } from "../../lib/format";
 import type { Case, FeatureSchema, Patient } from "../../lib/types";
 import { useIsModified, useStore } from "../../state/store";
+import { EASE_OUT } from "../ui/primitives";
 import { FeatureField } from "./FeatureField";
+
+const GROUP_ICON: Record<string, LucideIcon> = {
+  demographics: UserRound,
+  history: ClipboardList,
+  exam: Stethoscope,
+  ecg: Activity,
+  labs: FlaskConical,
+  echo: AudioWaveform,
+};
 
 function caseLabel(c: Case): string {
   return `#${c.patient_id} · ${c.subtitle} — CAD ${pct(c.predicted.cad)}`;
+}
+
+function PatientCard() {
+  const patient = useStore((s) => s.patient);
+  const label = useStore((s) => s.baseline?.label);
+  const c = useStore((s) => s.cases.find((x) => x.id === s.activeCaseId));
+  const modified = useIsModified();
+  const age = typeof patient.age === "number" ? Math.round(patient.age) : null;
+  const sex = patient.sex_male === 1 ? "Male" : patient.sex_male === 0 ? "Female" : "Sex unknown";
+
+  return (
+    <motion.div
+      key={c?.id ?? label}
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4, ease: EASE_OUT }}
+      className="flex items-center gap-3 rounded-xl border border-line bg-white/[0.03] p-3"
+    >
+      <div className="relative flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-[#3987e5]/40 to-[#e66767]/30 ring-1 ring-white/10">
+        <UserRound size={20} className="text-ink" aria-hidden />
+        {c && !modified && (
+          <span className="absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full border-2 border-surface bg-risk-low" title="Hold-out patient" />
+        )}
+      </div>
+      <div className="min-w-0 flex-1">
+        <p className="truncate text-sm font-semibold text-ink">{label ?? "Patient"}</p>
+        <p className="text-[11px] text-ink-3">
+          {age != null ? `${age} years` : "Age unknown"} · {sex}
+          {modified && <span className="text-[#fab219]"> · edited</span>}
+        </p>
+        {c && (
+          <div className="mt-1.5 flex flex-wrap gap-1">
+            {(["cad", "lad", "lcx", "rca"] as const).map((t) => (
+              <span
+                key={t}
+                className={clsx(
+                  "rounded-md border px-1.5 py-px text-[10px] font-semibold uppercase",
+                  c.truth[t] ? "border-[#e66767]/40 bg-[#e66767]/10 text-ink" : "border-line bg-transparent text-ink-3",
+                  modified && "opacity-50",
+                )}
+                title={`Angiography: ${t.toUpperCase()} ${c.truth[t] ? "positive" : "negative"}`}
+              >
+                {t}
+                {c.truth[t] ? " +" : " −"}
+              </span>
+            ))}
+          </div>
+        )}
+      </div>
+    </motion.div>
+  );
 }
 
 function CaseLibrary() {
@@ -19,7 +94,7 @@ function CaseLibrary() {
   const onChange = (e: ChangeEvent<HTMLSelectElement>) => {
     const id = e.target.value;
     if (id === "__median" && schema) {
-      loadPatient(schema.default_patient, "Cohort median");
+      loadPatient(schema.default_patient, "Reference patient");
       return;
     }
     const c = cases.find((x) => x.id === id);
@@ -31,13 +106,13 @@ function CaseLibrary() {
   return (
     <label className="block">
       <span className="label-caps flex items-center gap-1.5">
-        <Users size={12} /> Case library
+        <Users size={12} className="text-accent" /> Case library
       </span>
       <div className="relative mt-1.5">
         <select
           value={activeCaseId ?? "__median"}
           onChange={onChange}
-          className="w-full appearance-none rounded-lg border border-line bg-raised py-2 pl-3 pr-8 text-xs text-ink focus:border-accent focus:outline-none"
+          className="w-full cursor-pointer appearance-none rounded-lg border border-line bg-black/30 py-2 pl-3 pr-8 text-xs text-ink transition-colors hover:border-line-strong focus:border-accent focus:outline-none"
         >
           <option value="__median">Reference patient (cohort median values)</option>
           <optgroup label={`Hold-out patients — never seen in training (${cases.length})`}>
@@ -51,20 +126,6 @@ function CaseLibrary() {
         <ChevronDown size={14} className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 text-ink-3" />
       </div>
     </label>
-  );
-}
-
-function GroundTruth() {
-  const c = useStore((s) => s.cases.find((x) => x.id === s.activeCaseId));
-  const modified = useIsModified();
-  if (!c) return null;
-  const vessels = (["lad", "lcx", "rca"] as const).filter((v) => c.truth[v]).map((v) => v.toUpperCase());
-  return (
-    <p className={clsx("mt-2 rounded-lg border border-line bg-page/50 px-2.5 py-1.5 text-[11px]", modified ? "text-ink-3" : "text-ink-2")}>
-      <span className="font-semibold text-ink">Angiography: </span>
-      {c.truth.cad ? `CAD — stenotic ${vessels.length ? vessels.join(", ") : "vessel not specified"}` : "Normal coronaries"}
-      {modified && " (inputs edited since loading)"}
-    </p>
   );
 }
 
@@ -107,7 +168,7 @@ function Toolbar() {
       <div className="flex flex-wrap gap-1.5">
         <button
           type="button"
-          className="btn"
+          className={clsx("btn", modified && "border-accent/40 text-ink")}
           disabled={!modified}
           onClick={() => baseline && loadPatient(baseline.patient, baseline.label, activeCaseId)}
           title="Undo all edits"
@@ -129,51 +190,74 @@ function Toolbar() {
 
 function Group({ id, label, features }: { id: string; label: string; features: FeatureSchema[] }) {
   const [open, setOpen] = useState(id === "demographics" || id === "exam" || id === "echo");
-  const abnormal = useStore((s) =>
-    s.prediction?.physiology.filter((r) => r.group === id && (r.flag === "high" || r.flag === "low" || r.flag === "abnormal")).length,
+  const abnormal = useStore(
+    (s) =>
+      s.prediction?.physiology.filter(
+        (r) => r.group === id && (r.flag === "high" || r.flag === "low" || r.flag === "abnormal"),
+      ).length,
   );
+  const Icon = GROUP_ICON[id] ?? ClipboardList;
   return (
     <div className="border-t border-line">
       <button
         type="button"
         onClick={() => setOpen((o) => !o)}
         aria-expanded={open}
-        className="flex w-full items-center justify-between py-2.5 text-left"
+        className="group flex w-full items-center justify-between py-2.5 text-left"
       >
-        <span className="text-xs font-semibold text-ink">{label}</span>
+        <span className="flex items-center gap-2 text-xs font-semibold text-ink">
+          <span className="flex h-6 w-6 items-center justify-center rounded-md bg-white/[0.04] ring-1 ring-white/[0.06] transition-colors group-hover:bg-accent-soft">
+            <Icon size={13} className="text-accent" aria-hidden />
+          </span>
+          {label}
+        </span>
         <span className="flex items-center gap-2 text-[11px] text-ink-3">
-          {abnormal ? `${abnormal} flagged` : null}
-          <ChevronDown size={14} className={clsx("transition-transform", open && "rotate-180")} />
+          {abnormal ? (
+            <span className="rounded-full bg-[#fab219]/10 px-1.5 py-px text-[10px] font-medium text-[#fab219]">
+              {abnormal} flagged
+            </span>
+          ) : null}
+          <motion.span animate={{ rotate: open ? 180 : 0 }} transition={{ duration: 0.25 }}>
+            <ChevronDown size={14} />
+          </motion.span>
         </span>
       </button>
-      {open && (
-        <div className="space-y-3 pb-3">
-          {features.map((f) => (
-            <FeatureField key={f.id} feature={f} />
-          ))}
-        </div>
-      )}
+      <AnimatePresence initial={false}>
+        {open && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.3, ease: EASE_OUT }}
+            className="overflow-hidden"
+          >
+            <div className="space-y-3 pb-3">
+              {features.map((f) => (
+                <FeatureField key={f.id} feature={f} />
+              ))}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
 
 export function PatientPanel() {
   const schema = useStore((s) => s.schema);
-  const baselineLabel = useStore((s) => s.baseline?.label);
-  if (!schema) return <div className="panel h-full animate-pulse" aria-busy="true" />;
+  if (!schema) return <div className="panel skeleton h-full" aria-busy="true" />;
 
   return (
     <section className="panel flex h-full min-h-0 flex-col">
-      <div className="border-b border-line p-3.5">
-        <div className="mb-3 flex items-baseline justify-between gap-2">
-          <h2 className="text-sm font-semibold text-ink">Patient</h2>
-          <span className="truncate text-[11px] text-ink-3">{baselineLabel}</span>
-        </div>
+      <div className="space-y-3 border-b border-line p-4">
+        <h2 className="label-caps flex items-center gap-1.5">
+          <UserRound size={13} className="text-accent" aria-hidden /> Patient
+        </h2>
+        <PatientCard />
         <CaseLibrary />
-        <GroundTruth />
         <Toolbar />
       </div>
-      <div className="scroll-slim min-h-0 flex-1 overflow-y-auto px-3.5">
+      <div className="scroll-slim min-h-0 flex-1 overflow-y-auto px-4">
         <p className="py-2.5 text-[11px] leading-snug text-ink-3">
           Edit any value to see the prediction, 3D colouring and explanation update live. Leave a field empty to let the
           model impute it from the cohort.

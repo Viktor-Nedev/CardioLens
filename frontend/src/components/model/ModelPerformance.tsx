@@ -1,23 +1,32 @@
 import clsx from "clsx";
+import { motion } from "motion/react";
 import { useMemo, useState } from "react";
 import { CONTEXT, SERIES } from "../../lib/colors";
 import { num, pct } from "../../lib/format";
 import { TARGET_ORDER, type MetricCI, type TargetId, type TargetReport } from "../../lib/types";
 import { useStore } from "../../state/store";
-import { ChartCard, DataTable, LegendKey, Segmented } from "../ui/primitives";
+import { AnimatedNumber, ChartCard, DataTable, EASE_OUT, LegendKey, Segmented } from "../ui/primitives";
+import { PageHeader } from "../ui/PageHeader";
 import { CurveChart } from "./CurveChart";
 
 const ci = (m: MetricCI, digits = 2) => `${num(m.value, digits)} [${num(m.ci_low, digits)}–${num(m.ci_high, digits)}]`;
 
-function StatTile({ label, metric, hint }: { label: string; metric: MetricCI; hint?: string }) {
+function StatTile({ label, metric, hint, index = 0 }: { label: string; metric: MetricCI; hint?: string; index?: number }) {
   return (
-    <div className="rounded-lg border border-line bg-raised/40 px-3 py-2.5" title={hint}>
+    <motion.div
+      initial={{ opacity: 0, y: 12 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: index * 0.06, duration: 0.45, ease: EASE_OUT }}
+      whileHover={{ y: -2 }}
+      className="panel px-3 py-2.5"
+      title={hint}
+    >
       <p className="text-[11px] text-ink-3">{label}</p>
-      <p className="mt-0.5 text-2xl font-semibold text-ink">{metric.value.toFixed(2)}</p>
+      <AnimatedNumber value={metric.value} format={(v) => v.toFixed(2)} className="mt-0.5 block text-2xl font-semibold text-ink" />
       <p className="tabular text-[10px] text-ink-3">
         95% CI {metric.ci_low.toFixed(2)}–{metric.ci_high.toFixed(2)}
       </p>
-    </div>
+    </motion.div>
   );
 }
 
@@ -88,8 +97,12 @@ function ConfusionMatrix({ r }: { r: TargetReport }) {
             {cells.slice(row * 2, row * 2 + 2).map((c) => {
               const share = c.row ? c.v / c.row : 0;
               return (
-                <div
+                <motion.div
                   key={c.label}
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ type: "spring", stiffness: 300, damping: 22 }}
+                  whileHover={{ scale: 1.03 }}
                   className="flex h-20 flex-col items-center justify-center rounded-md"
                   style={{ background: `rgb(57 135 229 / ${0.08 + share * 0.5})` }}
                   title={`${c.label}: ${c.v} (${pct(share)} of the actual row)`}
@@ -98,7 +111,7 @@ function ConfusionMatrix({ r }: { r: TargetReport }) {
                   <span className="tabular text-[10px] text-ink-2">
                     {c.label} · {pct(share)}
                   </span>
-                </div>
+                </motion.div>
               );
             })}
           </div>
@@ -157,9 +170,17 @@ function FamilyComparison({ r }: { r: TargetReport }) {
                   {!c.selectable && <span className="text-ink-3"> · benchmark</span>}
                 </span>
                 <div className="relative h-5" title={`${c.label}: ${m.toFixed(3)} ± ${sd.toFixed(3)}`}>
-                  <div
+                  <motion.div
                     className="absolute top-1/2 h-3 -translate-y-1/2"
-                    style={{ left: 0, width: x(m), background: selected ? SERIES : CONTEXT, borderRadius: "0 4px 4px 0" }}
+                    initial={{ width: "0%" }}
+                    animate={{ width: x(m) }}
+                    transition={{ duration: 0.9, ease: EASE_OUT }}
+                    style={{
+                      left: 0,
+                      background: selected ? SERIES : CONTEXT,
+                      borderRadius: "0 4px 4px 0",
+                      boxShadow: selected ? "0 0 14px rgb(57 135 229 / 0.55)" : "none",
+                    }}
                   />
                   <div className="absolute top-1/2 h-px -translate-y-1/2 bg-ink-2" style={{ left: x(m - sd), width: `calc(${x(m + sd)} - ${x(m - sd)})` }} />
                   <span className="tabular absolute top-1/2 -translate-y-1/2 pl-1 text-[11px] text-ink-2" style={{ left: x(m + sd) }}>
@@ -222,9 +243,12 @@ function ImportanceChart({ target }: { target: TargetId }) {
           >
             <span className="truncate pr-2 text-xs text-ink-2">{r.label}</span>
             <div className="relative h-4">
-              <div
+              <motion.div
                 className="absolute top-1/2 h-3 -translate-y-1/2"
-                style={{ width: `${(r.mean_abs_shap / max) * 82}%`, background: SERIES, borderRadius: "0 4px 4px 0" }}
+                initial={{ width: "0%" }}
+                animate={{ width: `${(r.mean_abs_shap / max) * 82}%` }}
+                transition={{ duration: 0.8, ease: EASE_OUT }}
+                style={{ background: SERIES, borderRadius: "0 4px 4px 0" }}
               />
               <span
                 className="tabular absolute top-1/2 -translate-y-1/2 pl-1 text-[11px] text-ink-3"
@@ -280,19 +304,30 @@ export function ModelPerformance() {
   const d = metrics.dataset;
 
   return (
-    <div className="mx-auto max-w-7xl space-y-4 p-4">
+    <div className="mx-auto max-w-7xl space-y-4 p-4 sm:p-6">
+      <PageHeader eyebrow="Model performance" title="How well do the models generalise?">
+        Every number below comes from patients the deployed models never saw. Model families were compared with
+        nested cross-validation on the development set; the hold-out set was used exactly once.
+      </PageHeader>
       <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
         {[
           ["Patients", String(d.n_patients), "Z-Alizadeh Sani extension (UCI #411)"],
           ["Development / hold-out", `${metrics.split.n_dev} / ${metrics.split.n_holdout}`, "Stratified on the joint label pattern"],
           ["Model inputs", String(d.n_features), `Excluded: ${d.excluded.leakage.join(", ")} (leakage), ${d.excluded.constant.join(", ")} (constant)`],
           ["Validation", `${metrics.protocol.outer_repeats}×5-fold nested CV`, "Hyper-parameters tuned in the inner loop only"],
-        ].map(([label, value, hint]) => (
-          <div key={label} className="panel px-4 py-3">
+        ].map(([label, value, hint], i) => (
+          <motion.div
+            key={label}
+            initial={{ opacity: 0, y: 14 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: i * 0.07, duration: 0.5, ease: EASE_OUT }}
+            whileHover={{ y: -2 }}
+            className="panel px-4 py-3"
+          >
             <p className="text-[11px] text-ink-3">{label}</p>
             <p className="mt-0.5 text-xl font-semibold text-ink">{value}</p>
             <p className="mt-0.5 text-[11px] leading-snug text-ink-3">{hint}</p>
-          </div>
+          </motion.div>
         ))}
       </div>
 
@@ -312,12 +347,12 @@ export function ModelPerformance() {
       </div>
 
       <div className="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-6">
-        <StatTile label="ROC-AUC" metric={m.roc_auc} />
-        <StatTile label="Sensitivity (recall)" metric={m.recall} />
-        <StatTile label="Specificity" metric={m.specificity} />
-        <StatTile label="Precision (PPV)" metric={m.precision} />
-        <StatTile label="F1-score" metric={m.f1} />
-        <StatTile label="Brier score" metric={m.brier} hint="Lower is better; mean squared error of the probabilities" />
+        <StatTile index={0} label="ROC-AUC" metric={m.roc_auc} />
+        <StatTile index={1} label="Sensitivity (recall)" metric={m.recall} />
+        <StatTile index={2} label="Specificity" metric={m.specificity} />
+        <StatTile index={3} label="Precision (PPV)" metric={m.precision} />
+        <StatTile index={4} label="F1-score" metric={m.f1} />
+        <StatTile index={5} label="Brier score" metric={m.brier} hint="Lower is better; mean squared error of the probabilities" />
       </div>
 
       <div className="grid gap-3 lg:grid-cols-2">

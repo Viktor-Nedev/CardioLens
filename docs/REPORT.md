@@ -150,7 +150,7 @@ These drivers are clinically plausible and consistent with the literature on thi
 
 **Per-patient explanation in the dashboard.** For each target the dashboard shows:
 1. a deterministic text summary, for example *"LAD stenosis probability is 81% (high band, above the decision threshold of 43%). Factors increasing the estimate: typical chest pain (present), regions with wall-motion abnormality (2)…"*;
-2. a diverging SHAP bar chart of the top 10 factors plus "other features", labelled with the approximate change in probability each factor causes, with hover details and a table view;
+2. a SHAP waterfall that walks from the average patient to this patient factor by factor, on a log-odds axis labelled in probability. It also comes as a diverging bar chart and a table, labelled with the approximate change in probability each factor causes, with hover details;
 3. an "average patient → this patient" probability anchor;
 4. a **physiological breakdown** of all 54 inputs:
    - the value and its adult reference interval;
@@ -227,7 +227,7 @@ the 3D colours and explanations follow slider movements in real time.
 **Usage.**
 1. `docker compose up --build` and open <http://localhost:7860>, or run `uvicorn` and `npm run dev` for development.
 2. Acknowledge the disclaimer.
-3. Choose a hold-out patient or edit any input.
+3. Choose a hold-out patient from the searchable case library (risk dots and angiography result per case), or edit any input.
 4. Inspect the 3D heart, then the explanation and physiology panels.
 5. Open *Model performance* for ROC and calibration curves, confusion matrices, the family comparison and global importance.
 

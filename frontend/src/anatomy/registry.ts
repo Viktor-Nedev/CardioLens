@@ -13,6 +13,8 @@ export interface StructureDef {
   target?: TargetId;
   /** Channel of the myocardial territory weights (COLOR_0) supplied by this artery. */
   territoryChannel?: 0 | 1 | 2;
+  /** Screen side for the 3D label in the anterior view (+1 = viewer's right, patient's left). */
+  labelSide?: 1 | -1;
   /** Viewer layer toggle controlling visibility. */
   layer?: "greatVessels" | "veins" | "lungs" | "ribs" | "torso";
   pickable: boolean;
@@ -27,6 +29,7 @@ export const STRUCTURES: StructureDef[] = [
     kind: "coronary",
     target: "lad",
     territoryChannel: 0,
+    labelSide: 1,
     pickable: true,
   },
   {
@@ -35,6 +38,7 @@ export const STRUCTURES: StructureDef[] = [
     kind: "coronary",
     target: "lcx",
     territoryChannel: 1,
+    labelSide: 1,
     pickable: true,
   },
   {
@@ -43,6 +47,7 @@ export const STRUCTURES: StructureDef[] = [
     kind: "coronary",
     target: "rca",
     territoryChannel: 2,
+    labelSide: -1,
     pickable: true,
   },
   {

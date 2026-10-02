@@ -71,6 +71,7 @@ export function Viewer({ active = true }: { active?: boolean }) {
   const bloom = useStore((s) => s.viewer.bloom);
   const toggleViewer = useStore((s) => s.toggleViewer);
   const select = useStore((s) => s.select);
+  const revealed = useStore((s) => s.disclaimerAccepted);
   const backdrop = useMemo(() => createBackdropTexture(), []);
   const composited = bloom && !performance;
 
@@ -128,7 +129,7 @@ export function Viewer({ active = true }: { active?: boolean }) {
           </Environment>
           <Suspense fallback={null}>
             <Bvh firstHitOnly>
-              <AnatomyScene meta={meta} />
+              <AnatomyScene />
             </Bvh>
             <Ambience />
           </Suspense>
@@ -140,16 +141,20 @@ export function Viewer({ active = true }: { active?: boolean }) {
       {/* subtle inner vignette and scanline sheen over the canvas */}
       <div className="pointer-events-none absolute inset-0 rounded-2xl shadow-[inset_0_0_80px_rgb(0_0_0/0.55)]" aria-hidden />
       <LoadingOverlay />
-      <ViewBar />
-      <LayerMenu />
-      <ScanStatus />
-      <RiskLegend />
-      <HoverCard />
-      <p className="pointer-events-none absolute right-3 top-[3.4rem] hidden text-right text-[10px] font-medium uppercase tracking-[0.16em] text-white/30 md:block">
-        Decision support only
-        <br />
-        Not a diagnostic image
-      </p>
+      {revealed && (
+        <>
+          <ViewBar />
+          <LayerMenu />
+          <ScanStatus />
+          <RiskLegend />
+          <HoverCard />
+          <p className="pointer-events-none absolute right-3 top-[3.4rem] hidden text-right text-[10px] font-medium uppercase tracking-[0.16em] text-white/30 md:block">
+            Decision support only
+            <br />
+            Not a diagnostic image
+          </p>
+        </>
+      )}
     </div>
   );
 }

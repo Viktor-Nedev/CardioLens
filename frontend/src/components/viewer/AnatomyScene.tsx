@@ -1,4 +1,4 @@
-import { Html, useGLTF } from "@react-three/drei";
+import { Html, Line, useGLTF } from "@react-three/drei";
 import { useFrame, type ThreeEvent } from "@react-three/fiber";
 import { motion } from "motion/react";
 import { useEffect, useMemo, useRef } from "react";
@@ -8,7 +8,6 @@ import {
   STRUCTURE_BY_NODE,
   TARGET_NODE,
   TERRITORY_TARGETS,
-  type AnatomyMeta,
 } from "../../anatomy/registry";
 import { riskColor } from "../../lib/colors";
 import { pct } from "../../lib/format";
@@ -62,7 +61,7 @@ function territoryAt(geometry: THREE.BufferGeometry, face: THREE.Face | null | u
   return weight > 0.18 ? { target: TERRITORY_TARGETS[best], weight } : null;
 }
 
-export function AnatomyScene({ meta }: { meta: AnatomyMeta | null }) {
+export function AnatomyScene() {
   const parts = useAnatomyGeometry();
   const prediction = useStore((s) => s.prediction);
   const selected = useStore((s) => s.selected);
@@ -137,6 +136,57 @@ export function AnatomyScene({ meta }: { meta: AnatomyMeta | null }) {
     return { display, outline, hit };
   }, [parts]);
 
+  // Label anchors: on each artery, the front-most point above its centroid (what the
+  // anterior view shows); labels sit off to the side so leader lines stay visible, and
+  // labels on the same side are spread vertically so they never overlap.
+  const labelGeo = useMemo(() => {
+    const out = {} as Record<TargetId, LabelGeo>;
+    for (const t of VESSEL_TARGETS) {
+      const g = parts[TARGET_NODE[t]];
+      if (!g) continue;
+      const pos = g.attributes.position as THREE.BufferAttribute;
+      const side = STRUCTURE_BY_NODE[TARGET_NODE[t]].labelSide ?? 1;
+      // Only the part of the artery on the label's side of the heart is a candidate.
+      const onSide = (i: number) => pos.getX(i) * side > 0.02;
+      let cx = 0;
+      let cy = 0;
+      let n = 0;
+      for (let i = 0; i < pos.count; i++) {
+        if (!onSide(i)) continue;
+        cx += pos.getX(i);
+        cy += pos.getY(i);
+        n++;
+      }
+      cx /= Math.max(1, n);
+      cy /= Math.max(1, n);
+      const anchor = new THREE.Vector3();
+      let bestZ = -Infinity;
+      for (const r of [0.08, 0.16, 0.3, 10]) {
+        for (let i = 0; i < pos.count; i++) {
+          if (n > 0 && !onSide(i)) continue;
+          const dx = pos.getX(i) - cx;
+          const dy = pos.getY(i) - cy;
+          if (dx * dx + dy * dy > r * r) continue;
+          if (pos.getZ(i) > bestZ) {
+            bestZ = pos.getZ(i);
+            anchor.set(pos.getX(i), pos.getY(i), pos.getZ(i));
+          }
+        }
+        if (bestZ > -Infinity) break;
+      }
+      const label = new THREE.Vector3(anchor.x + side * 0.32, anchor.y, anchor.z + 0.06);
+      out[t] = { anchor: anchor.toArray() as Vec3, label: label.toArray() as Vec3 };
+    }
+    // Spread labels that share a side.
+    const ids = (Object.keys(out) as TargetId[]).sort((a, b) => out[a].label[1] - out[b].label[1]);
+    for (let i = 1; i < ids.length; i++) {
+      const prev = out[ids[i - 1]].label;
+      const cur = out[ids[i]].label;
+      if (Math.sign(prev[0]) === Math.sign(cur[0]) && cur[1] - prev[1] < 0.15) cur[1] = prev[1] + 0.15;
+    }
+    return out;
+  }, [parts]);
+
   // Heart x-ray mode toggles transparency on the myocardium.
   useEffect(() => {
     const m = heart.material;
@@ -199,7 +249,9 @@ export function AnatomyScene({ meta }: { meta: AnatomyMeta | null }) {
       k,
     );
     const selIdx = TERRITORY_TARGETS.indexOf(selected);
-    heart.uniforms.uSelected.value.set(selIdx === 0 ? 1 : 0, selIdx === 1 ? 1 : 0, selIdx === 2 ? 1 : 0);
+    const hovIdx = hovered ? TERRITORY_TARGETS.indexOf(hovered) : -1;
+    const weight = (i: number) => (selIdx === i ? 1 : 0) + (hovIdx === i && hovIdx !== selIdx ? 0.7 : 0);
+    heart.uniforms.uSelected.value.set(weight(0), weight(1), weight(2));
     heart.uniforms.uPulse.value = 0.12 + 0.12 * (0.5 + 0.5 * Math.sin(t * 3));
     staticMaterials.outline.opacity = 0.55 + 0.35 * (0.5 + 0.5 * Math.sin(t * 3.2));
 
@@ -379,12 +431,19 @@ export function AnatomyScene({ meta }: { meta: AnatomyMeta | null }) {
 
       {/* Labels mount once the scene is revealed and scored; drei Html roots created
           earlier (behind the welcome screen) could stay empty. */}
-      {viewer.labels && meta && revealed && prediction && <VesselLabels meta={meta} />}
+      {viewer.labels && revealed && prediction && <VesselLabels geo={labelGeo} />}
     </group>
   );
 }
 
-function VesselLabels({ meta }: { meta: AnatomyMeta }) {
+type Vec3 = [number, number, number];
+
+interface LabelGeo {
+  anchor: Vec3;
+  label: Vec3;
+}
+
+function VesselLabels({ geo }: { geo: Record<TargetId, LabelGeo> }) {
   const prediction = useStore((s) => s.prediction);
   const selected = useStore((s) => s.selected);
   const hovered = useStore((s) => s.hovered);
@@ -394,16 +453,27 @@ function VesselLabels({ meta }: { meta: AnatomyMeta }) {
   return (
     <>
       {VESSEL_TARGETS.map((t) => {
-        const node = meta.nodes[TARGET_NODE[t]];
-        if (!node) return null;
+        const g = geo[t];
+        if (!g) return null;
         const pred = prediction?.targets[t];
-        const [x, y, z] = node.center;
-        const len = Math.hypot(x, y, z) || 1;
-        const push = 0.22 / len;
-        const pos: [number, number, number] = [x + x * push, y + y * push, z + z * push];
+        const pos = g.label;
         const active = selected === t || hovered === t;
+        const anchor = g.anchor;
         return (
-          <Html key={t} position={pos} center zIndexRange={[30, 0]}>
+          <group key={t}>
+            <Line
+              points={[anchor, pos]}
+              color={active ? "#ffffff" : "#9fb3c8"}
+              lineWidth={active ? 1.6 : 1}
+              transparent
+              opacity={active ? 0.9 : 0.55}
+              raycast={() => null}
+            />
+            <mesh position={anchor} raycast={() => null}>
+              <sphereGeometry args={[active ? 0.011 : 0.008, 12, 12]} />
+              <meshBasicMaterial color={pred ? riskColor(pred.probability) : NEUTRAL} toneMapped={false} />
+            </mesh>
+          <Html position={pos} center zIndexRange={[30, 0]}>
             <motion.button
               initial={{ opacity: 0, scale: 0.6, y: 6 }}
               animate={{ opacity: 1, scale: active ? 1.08 : 1, y: 0 }}
@@ -432,6 +502,7 @@ function VesselLabels({ meta }: { meta: AnatomyMeta }) {
               )}
             </motion.button>
           </Html>
+          </group>
         );
       })}
     </>

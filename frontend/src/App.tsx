@@ -25,8 +25,8 @@ type MobilePane = "patient" | "viewer" | "insights";
 
 const columns: Variants = {
   hidden: { opacity: 0, y: 22 },
-  // The 3D view already plays, blurred, behind the welcome screen.
-  preview: { opacity: 0.85, y: 0, transition: { duration: 1.2 } },
+  // The 3D view already plays behind the welcome screen.
+  preview: { opacity: 1, y: 0, transition: { duration: 1.2 } },
   show: (i: number) => ({ opacity: 1, y: 0, transition: { delay: 0.15 + i * 0.12, duration: 0.7, ease: EASE_OUT } }),
 };
 
@@ -50,13 +50,20 @@ function Analysis({ active }: { active: boolean }) {
           ]}
         />
       </div>
-      <main className="scroll-slim grid min-h-0 flex-1 gap-3 overflow-y-auto p-3 xl:grid-cols-[320px_minmax(0,1fr)_430px] xl:grid-rows-[minmax(0,1fr)] xl:overflow-hidden">
+      {/* Behind the welcome screen the 3D view spans the full width; on start the side
+          columns grow in and the view docks into the centre (grid-template-columns transition). */}
+      <main
+        className={clsx(
+          "scroll-slim grid min-h-0 flex-1 gap-3 overflow-y-auto p-3 transition-[grid-template-columns,column-gap] duration-[1100ms] ease-[cubic-bezier(0.22,1,0.36,1)] xl:grid-rows-[minmax(0,1fr)] xl:overflow-hidden",
+          ready ? "xl:grid-cols-[320px_minmax(0,1fr)_430px]" : "xl:grid-cols-[0px_minmax(0,1fr)_0px] xl:gap-x-0",
+        )}
+      >
         <motion.div
           variants={columns}
           custom={0}
           initial="hidden"
           animate={reveal}
-          className={clsx("min-h-0 xl:block", pane === "patient" ? "block" : "hidden")}
+          className={clsx("min-h-0 min-w-0 overflow-hidden xl:block", pane === "patient" ? "block" : "hidden")}
         >
           <PatientPanel />
         </motion.div>
@@ -76,7 +83,10 @@ function Analysis({ active }: { active: boolean }) {
           custom={2}
           initial="hidden"
           animate={reveal}
-          className={clsx("scroll-slim min-h-0 space-y-3 overflow-y-auto pr-0.5 xl:block", pane === "insights" ? "block" : "hidden")}
+          className={clsx(
+            "scroll-slim min-h-0 min-w-0 space-y-3 overflow-y-auto overflow-x-hidden pr-0.5 xl:block",
+            pane === "insights" ? "block" : "hidden",
+          )}
         >
           <RiskOverview />
           <div className="flex justify-center">

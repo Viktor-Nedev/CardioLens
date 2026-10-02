@@ -9,6 +9,7 @@ import { AnimatedNumber, ChartCard, DataTable, EASE_OUT, LegendKey, Segmented } 
 import { PageHeader } from "../ui/PageHeader";
 import { spotlightMove } from "../ui/effects";
 import { CurveChart } from "./CurveChart";
+import { PipelineDiagram } from "./PipelineDiagram";
 
 const ci = (m: MetricCI, digits = 2) => `${num(m.value, digits)} [${num(m.ci_low, digits)}–${num(m.ci_high, digits)}]`;
 
@@ -333,6 +334,19 @@ export function ModelPerformance() {
           </motion.div>
         ))}
       </div>
+
+      <motion.section
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.25, duration: 0.55, ease: EASE_OUT }}
+        className="panel p-4"
+      >
+        <h2 className="text-sm font-semibold text-ink">How the models were built and tested</h2>
+        <p className="mb-3 mt-0.5 text-xs text-ink-3">
+          The hold-out set bypasses every modelling decision and is scored exactly once, at the end.
+        </p>
+        <PipelineDiagram />
+      </motion.section>
 
       <OverviewTable />
 

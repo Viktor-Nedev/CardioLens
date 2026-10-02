@@ -201,19 +201,41 @@ export function DisclaimerBanner() {
 }
 
 const FEATURES = [
-  { icon: Gauge, title: "4 calibrated models", text: "CAD, LAD, LCX and RCA with confidence intervals" },
-  { icon: BrainCircuit, title: "Explainable", text: "SHAP drivers and a physiological breakdown" },
-  { icon: Box, title: "Real 3D anatomy", text: "Coronary arteries coloured by predicted risk" },
+  { icon: Gauge, title: "Calibrated predictions", text: "Overall CAD plus LAD, LCX and RCA stenosis, with intervals" },
+  { icon: BrainCircuit, title: "Explained", text: "SHAP drivers and a physiological breakdown for every estimate" },
+  { icon: Box, title: "Real 3D anatomy", text: "BodyParts3D heart with each artery coloured by its risk" },
 ];
+
+function HeroStat({ value, format, label, delay }: { value: number; format: (v: number) => string; label: string; delay: number }) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 12 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay, duration: 0.6, ease: EASE_OUT }}
+      className="min-w-0"
+    >
+      <AnimatedNumber
+        value={value}
+        from={0}
+        duration={1.6}
+        format={format}
+        className="block bg-gradient-to-r from-white to-[#9fdcf7] bg-clip-text text-3xl font-semibold tracking-tight text-transparent"
+      />
+      <p className="mt-0.5 text-[11px] leading-snug text-ink-3">{label}</p>
+    </motion.div>
+  );
+}
 
 /** First screen: what CardioLens is, the safety disclaimer, and the way in. */
 export function IntroSplash() {
   const accepted = useStore((s) => s.disclaimerAccepted);
   const accept = useStore((s) => s.acceptDisclaimer);
+  const auc = useStore((s) => s.metrics?.targets.cad.holdout.metrics.roc_auc.value);
+  const cases = useStore((s) => s.cases.length);
   const stagger = (i: number) => ({
     initial: { opacity: 0, y: 14 },
     animate: { opacity: 1, y: 0 },
-    transition: { delay: 0.35 + i * 0.09, duration: 0.55, ease: EASE_OUT },
+    transition: { delay: 0.3 + i * 0.09, duration: 0.6, ease: EASE_OUT },
   });
 
   return (
@@ -221,67 +243,86 @@ export function IntroSplash() {
       {!accepted && (
         <motion.div
           key="intro"
-          className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-[#05080da6] p-4 backdrop-blur-[6px]"
+          className="fixed inset-0 z-50 flex overflow-y-auto"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          exit={{ opacity: 0, transition: { duration: 0.6, ease: EASE_OUT } }}
+          exit={{ opacity: 0, transition: { duration: 0.8, ease: EASE_OUT } }}
           role="dialog"
           aria-modal="true"
           aria-labelledby="intro-title"
         >
-          <motion.div
-            className="panel relative w-full max-w-xl overflow-hidden p-7 shadow-2xl sm:p-8"
-            initial={{ opacity: 0, y: 24, scale: 0.97 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: -16, scale: 1.02, filter: "blur(6px)" }}
-            transition={{ duration: 0.7, ease: EASE_OUT }}
-          >
-            <div
-              className="pointer-events-none absolute -right-24 -top-24 h-64 w-64 rounded-full bg-[radial-gradient(circle,rgb(92_200_245/0.22),transparent_65%)]"
-              aria-hidden
-            />
-            <div
-              className="pointer-events-none absolute -bottom-28 -left-20 h-64 w-64 rounded-full bg-[radial-gradient(circle,rgb(230_103_103/0.16),transparent_65%)]"
-              aria-hidden
-            />
+          {/* Dark on the left for the text; on wide screens the live 3D heart stays visible on the right. */}
+          <div
+            className="pointer-events-none fixed inset-0 bg-[#05080dd9] backdrop-blur-md lg:bg-transparent lg:bg-[linear-gradient(90deg,#05080d_0%,#05080df2_38%,#05080d99_56%,transparent_78%)] lg:backdrop-blur-none"
+            aria-hidden
+          />
+          <div
+            className="pointer-events-none fixed -left-40 top-1/4 h-[36rem] w-[36rem] rounded-full bg-[radial-gradient(circle,rgb(92_200_245/0.14),transparent_62%)]"
+            aria-hidden
+          />
 
-            <div className="relative flex items-center gap-3">
+          <motion.div
+            className="relative z-10 m-auto w-full max-w-xl px-5 py-10 sm:px-8 lg:m-0 lg:ml-[6vw] lg:self-center xl:ml-[8vw]"
+            initial={{ opacity: 0, x: -24 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -30, filter: "blur(6px)" }}
+            transition={{ duration: 0.8, ease: EASE_OUT }}
+          >
+            <div className="flex items-center gap-3">
               <motion.div
-                animate={{ scale: [1, 1.06, 1, 1.03, 1] }}
-                transition={{ duration: 1.1, repeat: Infinity, repeatDelay: 0.4, delay: 1.6 }}
+                animate={{ scale: [1, 1.07, 1, 1.03, 1] }}
+                transition={{ duration: 1.1, repeat: Infinity, repeatDelay: 0.45, delay: 1.6 }}
                 data-motion="decorative"
               >
-                <Logo size={48} animated />
+                <Logo size={44} animated />
               </motion.div>
-              <div>
-                <motion.h1
-                  id="intro-title"
-                  className="text-2xl font-semibold tracking-tight text-ink"
-                  initial={{ opacity: 0, letterSpacing: "0.2em" }}
-                  animate={{ opacity: 1, letterSpacing: "-0.01em" }}
-                  transition={{ duration: 0.9, ease: EASE_OUT }}
-                >
-                  CardioLens
-                </motion.h1>
-                <motion.p className="text-sm text-ink-2" {...stagger(0)}>
-                  Explainable coronary artery disease risk, mapped onto a 3D heart
-                </motion.p>
-              </div>
+              <motion.span {...stagger(0)} className="label-caps text-accent">
+                Multimodal AI Hackathon 2026 · Track A
+              </motion.span>
             </div>
 
-            <div className="relative mt-6 grid gap-2 sm:grid-cols-3">
+            <motion.h1
+              id="intro-title"
+              className="mt-6 bg-gradient-to-r from-white via-[#dcefff] to-[#7fcff5] bg-clip-text text-5xl font-semibold tracking-tight text-transparent sm:text-6xl"
+              initial={{ opacity: 0, letterSpacing: "0.18em" }}
+              animate={{ opacity: 1, letterSpacing: "-0.02em" }}
+              transition={{ duration: 1, ease: EASE_OUT }}
+            >
+              CardioLens
+            </motion.h1>
+            <motion.p {...stagger(1)} className="mt-3 max-w-md text-base leading-relaxed text-ink-2">
+              Explainable coronary artery disease risk from routine clinical data, mapped onto the arteries of a real
+              3D heart.
+            </motion.p>
+
+            <div className="mt-7 grid grid-cols-3 gap-4 border-y border-line py-5">
+              <HeroStat value={303} format={(v) => String(Math.round(v))} label="patients with angiography" delay={0.55} />
+              <HeroStat value={cases || 61} format={(v) => String(Math.round(v))} label="hold-out cases to explore" delay={0.65} />
+              <HeroStat
+                value={auc ?? 0.88}
+                format={(v) => v.toFixed(2)}
+                label="CAD ROC-AUC on unseen patients"
+                delay={0.75}
+              />
+            </div>
+
+            <div className="mt-6 space-y-3">
               {FEATURES.map((f, i) => (
-                <motion.div key={f.title} {...stagger(i + 1)} className="rounded-xl border border-line bg-white/[0.03] p-3">
-                  <f.icon size={16} className="text-accent" aria-hidden />
-                  <p className="mt-2 text-xs font-semibold text-ink">{f.title}</p>
-                  <p className="mt-0.5 text-[11px] leading-snug text-ink-3">{f.text}</p>
+                <motion.div key={f.title} {...stagger(i + 4)} className="flex items-start gap-3">
+                  <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-accent-soft ring-1 ring-accent/20">
+                    <f.icon size={15} className="text-accent" aria-hidden />
+                  </span>
+                  <div>
+                    <p className="text-sm font-semibold text-ink">{f.title}</p>
+                    <p className="text-xs leading-snug text-ink-3">{f.text}</p>
+                  </div>
                 </motion.div>
               ))}
             </div>
 
             <motion.div
-              {...stagger(4)}
-              className="relative mt-5 rounded-xl border border-[#fab219]/25 bg-[#fab219]/[0.06] p-4"
+              {...stagger(7)}
+              className="mt-6 rounded-xl border border-[#fab219]/25 bg-[#fab219]/[0.06] p-4"
             >
               <p className="flex items-center gap-2 text-sm font-semibold text-ink">
                 <ShieldAlert size={16} className="text-[#fab219]" aria-hidden /> Before you continue
@@ -301,16 +342,26 @@ export function IntroSplash() {
             </motion.div>
 
             <motion.button
-              {...stagger(5)}
+              {...stagger(8)}
               type="button"
               onClick={accept}
               whileHover={{ scale: 1.015 }}
               whileTap={{ scale: 0.985 }}
-              className="shimmer relative mt-6 flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#3987e5] to-accent px-4 py-3 text-sm font-semibold text-page shadow-[0_10px_30px_-10px_rgb(92_200_245/0.7)]"
+              className="shimmer relative mt-6 flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#3987e5] to-accent px-4 py-3.5 text-sm font-semibold text-page shadow-[0_12px_34px_-10px_rgb(92_200_245/0.75)]"
               autoFocus
             >
               I understand — start the analysis <ArrowRight size={16} />
             </motion.button>
+          </motion.div>
+
+          <motion.div
+            className="pointer-events-none fixed bottom-8 right-8 z-10 hidden text-right lg:block"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 1.4, duration: 0.8 }}
+          >
+            <p className="label-caps text-accent">Live 3D preview</p>
+            <p className="mt-1 text-xs text-ink-3">BodyParts3D anatomy · coronary arteries coloured by predicted risk</p>
           </motion.div>
         </motion.div>
       )}

@@ -36,15 +36,18 @@ export function AnimatedNumber({
   value,
   format,
   duration = 0.8,
+  from,
   className,
 }: {
   value: number;
   format: (v: number) => string;
   duration?: number;
+  /** Start value for the first animation (count-up); defaults to the value itself. */
+  from?: number;
   className?: string;
 }) {
   const ref = useRef<HTMLSpanElement>(null);
-  const current = useRef(value);
+  const current = useRef(from ?? value);
   const formatRef = useRef(format);
   formatRef.current = format;
 

@@ -14,6 +14,8 @@ export const VIEW_PRESETS: Record<string, { label: string; position: Vec; target
   posterior: { label: "Posterior", position: [-0.35, 0.35, -3.05], target: [0, 0, 0] },
 };
 
+const HERO: { position: Vec; target: Vec } = { position: [0.9, 0.35, 4.3], target: [0, -0.05, 0] };
+
 function structureView(meta: AnatomyMeta, node: string): { position: Vec; target: Vec } | null {
   const n = meta.nodes[node];
   if (!n) return null;
@@ -34,23 +36,29 @@ export function CameraRig({ meta }: { meta: AnatomyMeta | null }) {
   const autoRotate = useStore((s) => s.viewer.autoRotate);
   const interacting = useRef(false);
 
-  // Intro: hold on the torso while the welcome screen is open, then glide into the heart.
+  // Intro: while the welcome screen is open the heart turns slowly, shifted right of the
+  // welcome text on wide screens; on "start" the camera glides in and re-centres it.
   const accepted = useStore((s) => s.disclaimerAccepted);
   const introDone = useRef(false);
   useEffect(() => {
     const c = controls.current;
     if (!c || introDone.current) return;
-    const { position: p, target: t } = VIEW_PRESETS.overview_torso;
-    void c.setLookAt(...p, ...t, false);
-    if (!accepted) return;
+    if (!accepted) {
+      void c.setLookAt(...HERO.position, ...HERO.target, false);
+      void c.setFocalOffset(window.innerWidth >= 1024 ? -1.05 : 0, 0, 0, false);
+      return;
+    }
     const id = window.setTimeout(() => {
       introDone.current = true;
       const h = VIEW_PRESETS.overview_heart;
       c.smoothTime = 1.1;
+      void c.setFocalOffset(0, 0, 0, true);
       void c.setLookAt(...h.position, ...h.target, true).then(() => {
         c.smoothTime = 0.45;
+        // Safety net: never leave the hero offset behind if a transition was cut short.
+        void c.setFocalOffset(0, 0, 0, true);
       });
-    }, 450);
+    }, 350);
     return () => window.clearTimeout(id);
   }, [accepted]);
 
@@ -63,7 +71,9 @@ export function CameraRig({ meta }: { meta: AnatomyMeta | null }) {
 
   useFrame((_, delta) => {
     const c = controls.current;
-    if (c && autoRotate && !interacting.current) c.azimuthAngle += delta * 0.25;
+    if (!c) return;
+    if (!introDone.current && !useStore.getState().disclaimerAccepted) c.azimuthAngle += delta * 0.2;
+    else if (autoRotate && !interacting.current) c.azimuthAngle += delta * 0.25;
   });
 
   return (

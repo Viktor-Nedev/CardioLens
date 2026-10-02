@@ -10,15 +10,14 @@ import {
   Stethoscope,
   Upload,
   UserRound,
-  Users,
   type LucideIcon,
 } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
-import { useMemo, useRef, useState, type ChangeEvent } from "react";
-import { pct } from "../../lib/format";
-import type { Case, FeatureSchema, Patient } from "../../lib/types";
+import { useRef, useState, type ChangeEvent } from "react";
+import type { FeatureSchema, Patient } from "../../lib/types";
 import { useIsModified, useStore } from "../../state/store";
 import { EASE_OUT } from "../ui/primitives";
+import { CasePicker } from "./CasePicker";
 import { FeatureField } from "./FeatureField";
 
 const GROUP_ICON: Record<string, LucideIcon> = {
@@ -29,10 +28,6 @@ const GROUP_ICON: Record<string, LucideIcon> = {
   labs: FlaskConical,
   echo: AudioWaveform,
 };
-
-function caseLabel(c: Case): string {
-  return `#${c.patient_id} · ${c.subtitle} — CAD ${pct(c.predicted.cad)}`;
-}
 
 function PatientCard() {
   const patient = useStore((s) => s.patient);
@@ -82,50 +77,6 @@ function PatientCard() {
         )}
       </div>
     </motion.div>
-  );
-}
-
-function CaseLibrary() {
-  const cases = useStore((s) => s.cases);
-  const activeCaseId = useStore((s) => s.activeCaseId);
-  const schema = useStore((s) => s.schema);
-  const loadPatient = useStore((s) => s.loadPatient);
-
-  const onChange = (e: ChangeEvent<HTMLSelectElement>) => {
-    const id = e.target.value;
-    if (id === "__median" && schema) {
-      loadPatient(schema.default_patient, "Reference patient");
-      return;
-    }
-    const c = cases.find((x) => x.id === id);
-    if (c) loadPatient(c.features, c.title, c.id);
-  };
-
-  const sorted = useMemo(() => [...cases].sort((a, b) => b.predicted.cad - a.predicted.cad), [cases]);
-
-  return (
-    <label className="block">
-      <span className="label-caps flex items-center gap-1.5">
-        <Users size={12} className="text-accent" /> Case library
-      </span>
-      <div className="relative mt-1.5">
-        <select
-          value={activeCaseId ?? "__median"}
-          onChange={onChange}
-          className="w-full cursor-pointer appearance-none rounded-lg border border-line bg-black/30 py-2 pl-3 pr-8 text-xs text-ink transition-colors hover:border-line-strong focus:border-accent focus:outline-none"
-        >
-          <option value="__median">Reference patient (cohort median values)</option>
-          <optgroup label={`Hold-out patients — never seen in training (${cases.length})`}>
-            {sorted.map((c) => (
-              <option key={c.id} value={c.id}>
-                {caseLabel(c)}
-              </option>
-            ))}
-          </optgroup>
-        </select>
-        <ChevronDown size={14} className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 text-ink-3" />
-      </div>
-    </label>
   );
 }
 
@@ -254,7 +205,7 @@ export function PatientPanel() {
           <UserRound size={13} className="text-accent" aria-hidden /> Patient
         </h2>
         <PatientCard />
-        <CaseLibrary />
+        <CasePicker />
         <Toolbar />
       </div>
       <div className="scroll-slim min-h-0 flex-1 overflow-y-auto px-4">

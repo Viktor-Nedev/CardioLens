@@ -6,6 +6,7 @@ import { pct, pp, signed } from "../../lib/format";
 import { TARGET_ORDER, type Contribution, type TargetId } from "../../lib/types";
 import { useStore } from "../../state/store";
 import { AnimatedNumber, DataTable, EASE_OUT, LegendKey, Section, Segmented } from "../ui/primitives";
+import { ShapWaterfall } from "./ShapWaterfall";
 
 const TOP_N = 10;
 const BAR_SPRING = { type: "spring", stiffness: 140, damping: 22 } as const;
@@ -128,7 +129,7 @@ export function ExplanationPanel() {
   const prediction = useStore((s) => s.prediction);
   const selected = useStore((s) => s.selected);
   const select = useStore((s) => s.select);
-  const [view, setView] = useState<"chart" | "table">("chart");
+  const [view, setView] = useState<"waterfall" | "bars" | "table">("waterfall");
 
   const pred = prediction?.targets[selected];
   const { top, rest, max } = useMemo(() => {
@@ -183,17 +184,27 @@ export function ExplanationPanel() {
         </div>
         <Segmented
           size="xs"
-          ariaLabel="Chart or table view"
+          ariaLabel="Explanation view"
           value={view}
           onChange={setView}
           options={[
-            { value: "chart", label: "Chart" },
+            { value: "waterfall", label: "Waterfall" },
+            { value: "bars", label: "Bars" },
             { value: "table", label: "Table" },
           ]}
         />
       </div>
 
-      {view === "chart" ? (
+      {view === "waterfall" ? (
+        <>
+          <ShapWaterfall key={selected} pred={pred} />
+          <p className="mt-3 flex items-start gap-1.5 text-[11px] leading-snug text-ink-3">
+            <Info size={12} className="mt-px shrink-0" aria-hidden />
+            Each step adds one factor's SHAP contribution (calibrated log-odds) to the running total, from the average
+            patient to this patient. Labels show the change in probability.
+          </p>
+        </>
+      ) : view === "bars" ? (
         <>
           <ul key={selected} className="mt-2 space-y-0.5">
             <AnimatePresence initial={true}>

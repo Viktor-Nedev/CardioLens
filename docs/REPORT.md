@@ -193,7 +193,8 @@ Anatomical context comes from:
 - **Interaction.** The user can orbit, zoom and pan, and jump to presets (torso, anterior, left lateral, inferior, posterior).
 - **Picking.** Picking uses BVH-accelerated raycasting with enlarged invisible hit proxies around the thin arteries. Hovering shows the vessel or territory with its probability. Clicking an artery, its label, a dashboard card or a myocardial region selects the target: the camera flies to it and it gets an outline. Keys 0–3 select targets.
 - **Layers.** Torso, ribs, lungs, great vessels, veins, territories, labels, x-ray myocardium, auto-rotate, and a heartbeat at the patient's recorded pulse rate.
-- **Performance.** DPR is capped at 1.75 with adaptive DPR, and a performance monitor switches to a low-cost mode on slow devices.
+- **Feedback effects.** Each new prediction sends a scan band down the myocardium. Emissive pulses travel along every artery once per heartbeat, paced by the patient's pulse rate. A bloom pass on 8-bit buffers makes vessels above their threshold glow; it is compatible with integrated and software GPUs.
+- **Performance.** DPR is capped at 1.75 with adaptive DPR. A performance monitor first drops bloom; if the device stays slow, it switches to a low-cost mode without effects.
 
 **Consistent correspondence.**
 - `frontend/src/anatomy/registry.ts` is the only mapping from target id to GLB node, label and territory channel.

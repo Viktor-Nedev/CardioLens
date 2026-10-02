@@ -12,11 +12,13 @@ and explains every estimate with SHAP and a physiological breakdown.
 > estimates and do not replace coronary angiography, CT angiography or clinical
 > judgement. The UI shows this disclaimer permanently and on first visit.
 
-![CardioLens analysis view: LAD selected, coronary arteries coloured by predicted stenosis probability](docs/figures/screenshot_analysis.jpg)
+![CardioLens analysis view: coronary arteries coloured by predicted stenosis probability](docs/figures/screenshot_analysis.jpg)
 
 <p align="center">
+  <img src="docs/figures/screenshot_whatif.jpg" alt="What-if mode: editing the age re-scores every artery live" width="49%">
   <img src="docs/figures/screenshot_xray.jpg" alt="X-ray mode, inferior view of the coronary tree" width="49%">
-  <img src="docs/figures/screenshot_model.png" alt="Model performance dashboard" width="49%">
+  <img src="docs/figures/screenshot_model.jpg" alt="Model performance dashboard" width="49%">
+  <img src="docs/figures/screenshot_disclaimer.jpg" alt="Welcome screen with the clinical safety disclaimer" width="49%">
 </p>
 
 Multimodal AI Hackathon 2026, Track A: Cardiovascular Risk Visualization & Prediction.
@@ -34,6 +36,7 @@ Multimodal AI Hackathon 2026, Track A: Cardiovascular Risk Visualization & Predi
 | **Interaction** | Orbit, zoom, pan, view presets, click-to-select vessels or myocardial regions, fly-to camera, layer toggles, x-ray mode, and a heartbeat at the patient's recorded pulse. |
 | **Explainability** | SHAP values are folded back to clinical features, additive in calibrated log-odds (a unit test checks the additivity). Each prediction gets a text summary, a physiological table with reference ranges, cohort percentile and each factor's share of the explanation, plus global SHAP and permutation importance. |
 | **Real-time** | Any input edit re-scores all four targets with explanations and bootstrap intervals in about 30–40 ms on a laptop CPU. |
+| **Visual feedback** | Each new prediction sends a scan band down the myocardium. Emissive pulses run along the arteries at the patient's heart rate, and arteries above their threshold glow (bloom). On the dashboard, numbers ease to new values and changed cards flash with the size of the change. SHAP rows re-order with layout animations, and an ECG strip in the header beats at the patient's pulse. Effects are dropped automatically on slow devices and respect *prefers-reduced-motion*. |
 | **Extensible** | Features (`backend/config/features.yaml`), targets (`targets.yaml`), model families (`models.py`) and 3D structures (`frontend/src/anatomy/registry.ts`) are all declared in configuration. |
 
 ## Results

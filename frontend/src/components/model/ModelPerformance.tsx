@@ -11,6 +11,7 @@ import { spotlightMove } from "../ui/effects";
 import { CurveChart } from "./CurveChart";
 import { PipelineDiagram } from "./PipelineDiagram";
 import { DecisionCurve, SubgroupTable } from "./ClinicalUtility";
+import { CohortStrip } from "./CohortStrip";
 
 const ci = (m: MetricCI, digits = 2) => `${num(m.value, digits)} [${num(m.ci_low, digits)}–${num(m.ci_high, digits)}]`;
 
@@ -372,6 +373,8 @@ export function ModelPerformance() {
         <StatTile index={4} label="F1-score" metric={m.f1} />
         <StatTile index={5} label="Brier score" metric={m.brier} hint="Lower is better; mean squared error of the probabilities" />
       </div>
+
+      <CohortStrip target={target} />
 
       <div className="grid gap-3 lg:grid-cols-2">
         <ChartCard

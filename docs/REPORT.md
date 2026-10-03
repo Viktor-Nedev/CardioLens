@@ -130,6 +130,7 @@ probabilities as an 80% interval.
 - **Why vessel level is hard.** 303 patients from a single centre carry limited vessel-specific signal. A clinical ECG/echo summary locates ischaemia only coarsely.
 - **What the full models add.** Mainly calibrated probabilities and a richer, patient-specific explanation that includes ECG and echo findings.
 - **Uncertainty.** Hold-out confidence intervals are wide (61 patients). The nested-CV standard deviations (0.03–0.07) are the more stable estimate of generalisation.
+- **Clinical utility.** On the hold-out set, a decision curve shows net benefit above "treat all" for CAD across thresholds of about 0.2–0.9. A subgroup check reports AUC, sensitivity and specificity by sex and age band, and flags groups too small to judge.
 - **Calibration.** Out-of-fold calibration follows the diagonal for LAD, LCX and RCA. For CAD it is S-shaped, because of the 71% prevalence and the strong effect of typical angina.
 
 ## 4. Clinical interpretability
@@ -147,6 +148,10 @@ probabilities as an 80% interval.
 - **RCA:** diabetes, typical chest pain, age, sex, dyspnoea.
 
 These drivers are clinically plausible and consistent with the literature on this dataset.
+
+**What-if and case-based context.**
+- A what-if curve (individual conditional expectation) shows each target's probability while one factor varies and the other inputs stay fixed. It is labelled as model sensitivity, not a treatment effect.
+- Similar-patient retrieval finds the closest development patients in the standardised input space, weighted by global SHAP importance, and shows what angiography found in them.
 
 **Per-patient explanation in the dashboard.** For each target the dashboard shows:
 1. a deterministic text summary, for example *"LAD stenosis probability is 81% (high band, above the decision threshold of 43%). Factors increasing the estimate: typical chest pain (present), regions with wall-motion abnormality (2)…"*;
@@ -193,6 +198,7 @@ Anatomical context comes from:
 - **Interaction.** The user can orbit, zoom and pan, and jump to presets (torso, anterior, left lateral, inferior, posterior).
 - **Picking.** Picking uses BVH-accelerated raycasting with enlarged invisible hit proxies around the thin arteries. Hovering shows the vessel or territory with its probability. Clicking an artery, its label, a dashboard card or a myocardial region selects the target: the camera flies to it and it gets an outline. Keys 0–3 select targets.
 - **Layers.** Torso, ribs, lungs, great vessels, veins, territories, labels, x-ray myocardium, auto-rotate, and a heartbeat at the patient's recorded pulse rate.
+- **Cross-section and callouts.** A clipping plane cuts the heart front-to-back to reveal the chambers. Labels are anatomical callouts with leader lines to a visible point on each artery. The current frame can be saved as a PNG.
 - **Feedback effects.** Each new prediction sends a scan band down the myocardium. Emissive pulses travel along every artery once per heartbeat, paced by the patient's pulse rate. A bloom pass on 8-bit buffers makes vessels above their threshold glow; it is compatible with integrated and software GPUs.
 - **Performance.** DPR is capped at 1.75 with adaptive DPR. A performance monitor first drops bloom; if the device stays slow, it switches to a low-cost mode without effects.
 

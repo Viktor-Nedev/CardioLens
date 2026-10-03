@@ -4,9 +4,9 @@ import { AnimatePresence, motion } from "motion/react";
 import { useEffect, useRef, useState } from "react";
 import { riskGradient } from "../../lib/colors";
 import { pct } from "../../lib/format";
-import { useStore, type ViewerSettings } from "../../state/store";
+import { useStore } from "../../state/store";
 import { EASE_OUT } from "../ui/primitives";
-import { VIEW_PRESETS } from "./CameraRig";
+import { LAYERS, VIEW_PRESETS } from "./config";
 
 const appear = (delay: number) => ({
   initial: { opacity: 0, y: -8 },
@@ -16,7 +16,8 @@ const appear = (delay: number) => ({
 
 export function ViewBar() {
   const flyTo = useStore((s) => s.flyTo);
-  const [current, setCurrent] = useState("overview_heart");
+  // The highlighted preset follows the camera, whichever control moved it.
+  const current = useStore((s) => s.camera?.view ?? "overview_heart");
   return (
     <motion.div
       {...appear(0.9)}
@@ -30,10 +31,7 @@ export function ViewBar() {
             "relative shrink-0 whitespace-nowrap rounded-md px-2 py-1 text-xs font-medium transition-colors",
             current === id ? "text-ink" : "text-ink-3 hover:text-ink",
           )}
-          onClick={() => {
-            setCurrent(id);
-            flyTo(id);
-          }}
+          onClick={() => flyTo(id)}
         >
           {current === id && (
             <motion.span
@@ -48,23 +46,6 @@ export function ViewBar() {
     </motion.div>
   );
 }
-
-const LAYERS: { key: keyof ViewerSettings; label: string; hint?: string; section?: string }[] = [
-  { key: "territories", label: "Perfusion territories", hint: "Schematic, by nearest artery", section: "Anatomy" },
-  { key: "labels", label: "Vessel labels" },
-  { key: "xray", label: "X-ray myocardium" },
-  { key: "torso", label: "Torso surface" },
-  { key: "ribs", label: "Rib cage & sternum" },
-  { key: "lungs", label: "Lungs & trachea" },
-  { key: "greatVessels", label: "Aorta & venae cavae" },
-  { key: "veins", label: "Cardiac veins" },
-  { key: "bloom", label: "Glow (bloom)", section: "Effects" },
-  { key: "flow", label: "Blood-flow pulses", hint: "Paced by the patient's pulse rate" },
-  { key: "hologram", label: "Holographic rings & particles" },
-  { key: "heartbeat", label: "Heartbeat" },
-  { key: "autoRotate", label: "Auto-rotate" },
-  { key: "performance", label: "Performance mode", hint: "Turns every effect off", section: "Device" },
-];
 
 export function LayerMenu() {
   const viewer = useStore((s) => s.viewer);

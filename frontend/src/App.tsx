@@ -6,6 +6,7 @@ import { ExplanationPanel } from "./components/explain/ExplanationPanel";
 import { SensitivityPanel } from "./components/explain/SensitivityPanel";
 import { SimilarPatients } from "./components/explain/SimilarPatients";
 import { DisclaimerBanner, Header, IntroSplash, ShortcutsDialog } from "./components/layout/Chrome";
+import { CommandPalette } from "./components/layout/CommandPalette";
 import { PatientPanel } from "./components/patient/PatientPanel";
 import { PhysiologyTable } from "./components/physiology/PhysiologyTable";
 import { RiskOverview } from "./components/risk/RiskOverview";
@@ -234,6 +235,7 @@ export default function App() {
       </div>
       <ToastHost />
       <ShortcutsDialog />
+      <CommandPalette />
       <ReportDialog />
       <TourPrompt />
       <GuidedTour />

@@ -3,16 +3,9 @@ import { useFrame } from "@react-three/fiber";
 import { useEffect, useRef } from "react";
 import type { AnatomyMeta } from "../../anatomy/registry";
 import { useStore } from "../../state/store";
+import { VIEW_PRESETS } from "./config";
 
 type Vec = [number, number, number];
-
-export const VIEW_PRESETS: Record<string, { label: string; position: Vec; target: Vec }> = {
-  overview_torso: { label: "Torso", position: [1.1, 0.6, 7.6], target: [0, -0.35, 0] },
-  overview_heart: { label: "Anterior", position: [0.4, 0.4, 3.45], target: [0, 0, 0] },
-  left_lateral: { label: "Left lateral", position: [3.05, 0.3, -0.25], target: [0, 0, 0] },
-  inferior: { label: "Inferior", position: [0.25, -2.95, 0.85], target: [0, 0, 0] },
-  posterior: { label: "Posterior", position: [-0.35, 0.35, -3.05], target: [0, 0, 0] },
-};
 
 const HERO: { position: Vec; target: Vec } = { position: [0.9, 0.35, 4.3], target: [0, -0.05, 0] };
 

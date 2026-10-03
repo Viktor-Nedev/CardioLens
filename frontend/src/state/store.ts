@@ -78,6 +78,7 @@ interface AppState {
   toast: Toast | null;
   shortcutsOpen: boolean;
   reportOpen: boolean;
+  paletteOpen: boolean;
   /** Index of the guided-tour step on screen, or null. */
   tourStep: number | null;
   /** 3D cross-section depth: 0 = off, 1 = cut through to the back of the heart. */
@@ -106,6 +107,7 @@ interface AppState {
   dismissToast: () => void;
   setShortcutsOpen: (open: boolean) => void;
   setReportOpen: (open: boolean) => void;
+  setPaletteOpen: (open: boolean) => void;
   setTourStep: (step: number | null) => void;
   setSection: (depth: number) => void;
 }
@@ -171,6 +173,7 @@ export const useStore = create<AppState>((set, get) => ({
   toast: null,
   shortcutsOpen: false,
   reportOpen: false,
+  paletteOpen: false,
   tourStep: null,
   section: 0,
   scanNonce: 0,
@@ -232,6 +235,7 @@ export const useStore = create<AppState>((set, get) => ({
   dismissToast: () => set({ toast: null }),
   setShortcutsOpen: (open) => set({ shortcutsOpen: open }),
   setReportOpen: (open) => set({ reportOpen: open }),
+  setPaletteOpen: (open) => set({ paletteOpen: open }),
   setTourStep: (step) => set({ tourStep: step }),
   setSection: (depth) => set({ section: Math.min(1, Math.max(0, depth)) }),
 }));

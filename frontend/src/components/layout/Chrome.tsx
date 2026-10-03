@@ -1,9 +1,9 @@
 import clsx from "clsx";
-import { ArrowRight, Box, BrainCircuit, Compass, FileText, Gauge, Heart, Keyboard, ShieldAlert, X } from "lucide-react";
+import { ArrowRight, Box, BrainCircuit, Compass, FileText, Gauge, Heart, Keyboard, Search, ShieldAlert, X } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import { useEffect } from "react";
 import { useStore, type Tab } from "../../state/store";
-import { AnimatedNumber, EASE_OUT } from "../ui/primitives";
+import { AnimatedNumber, EASE_OUT, Kbd } from "../ui/primitives";
 
 const TABS: { id: Tab; label: string }[] = [
   { id: "analysis", label: "Patient analysis" },
@@ -130,6 +130,7 @@ export function Header() {
   const setShortcuts = useStore((s) => s.setShortcutsOpen);
   const setReport = useStore((s) => s.setReportOpen);
   const setTourStep = useStore((s) => s.setTourStep);
+  const setPalette = useStore((s) => s.setPaletteOpen);
   const canReport = useStore((s) => Boolean(s.prediction));
   return (
     <motion.header
@@ -172,6 +173,16 @@ export function Header() {
       <div className="flex items-center gap-3">
         <EcgMonitor />
         <ApiStatus />
+        <button
+          type="button"
+          onClick={() => setPalette(true)}
+          className="group hidden items-center gap-2 rounded-lg border border-line bg-black/25 py-1 pl-2.5 pr-1 text-xs text-ink-3 transition-colors hover:border-line-strong hover:text-ink md:inline-flex"
+          title="Search patients, views, layers and actions"
+          aria-label="Open the command palette"
+        >
+          <Search size={13} className="transition-colors group-hover:text-accent" aria-hidden /> Search
+          <Kbd className="ml-4">{MOD} K</Kbd>
+        </button>
         <button
           type="button"
           onClick={() => setTourStep(0)}
@@ -220,6 +231,10 @@ export function DisclaimerBanner() {
     </div>
   );
 }
+
+/** Modifier key label for shortcuts: ⌘ on Apple devices, Ctrl elsewhere. */
+export const MOD =
+  typeof navigator !== "undefined" && /Mac|iPhone|iPad/.test(navigator.platform || navigator.userAgent) ? "⌘" : "Ctrl";
 
 const FEATURES = [
   { icon: Gauge, title: "Calibrated predictions", text: "Overall CAD plus LAD, LCX and RCA stenosis, with intervals" },
@@ -391,6 +406,7 @@ export function IntroSplash() {
 }
 
 const SHORTCUTS: { keys: string[]; action: string }[] = [
+  { keys: [MOD, "K"], action: "Search patients, views, layers and actions" },
   { keys: ["0"], action: "Explain overall CAD" },
   { keys: ["1", "2", "3"], action: "Focus LAD, LCX or RCA in 3D" },
   { keys: ["Drag"], action: "Rotate the heart" },
@@ -458,12 +474,7 @@ export function ShortcutsDialog() {
                   <span>{s.action}</span>
                   <span className="flex shrink-0 gap-1">
                     {s.keys.map((k) => (
-                      <kbd
-                        key={k}
-                        className="min-w-6 rounded-md border border-line-strong bg-white/[0.05] px-1.5 py-0.5 text-center font-sans text-[11px] font-semibold text-ink shadow-[inset_0_-1px_0_rgb(255_255_255/0.08)]"
-                      >
-                        {k}
-                      </kbd>
+                      <Kbd key={k}>{k}</Kbd>
                     ))}
                   </span>
                 </motion.li>

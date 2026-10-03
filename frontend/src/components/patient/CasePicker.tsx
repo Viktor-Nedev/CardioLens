@@ -10,13 +10,13 @@ import { EASE_OUT, Segmented } from "../ui/primitives";
 
 type Sort = "high" | "low" | "id";
 
-function truthText(c: Case): string {
+export function truthText(c: Case): string {
   if (!c.truth.cad) return "Angio: normal coronaries";
   const v = (["lad", "lcx", "rca"] as const).filter((t) => c.truth[t]).map((t) => t.toUpperCase());
   return `Angio: CAD${v.length ? ` · ${v.join(", ")}` : ""}`;
 }
 
-function RiskDots({ c }: { c: Case }) {
+export function RiskDots({ c }: { c: Case }) {
   return (
     <span className="flex items-center gap-1" aria-hidden>
       {TARGET_ORDER.map((t) => (

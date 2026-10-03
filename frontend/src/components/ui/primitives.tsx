@@ -313,3 +313,17 @@ export function DataTable({ head, rows }: { head: ReactNode[]; rows: ReactNode[]
     </div>
   );
 }
+
+/** Keyboard key cap. */
+export function Kbd({ children, className }: { children: ReactNode; className?: string }) {
+  return (
+    <kbd
+      className={clsx(
+        "min-w-6 rounded-md border border-line-strong bg-white/[0.05] px-1.5 py-0.5 text-center font-sans text-[11px] font-semibold text-ink shadow-[inset_0_-1px_0_rgb(255_255_255/0.08)]",
+        className,
+      )}
+    >
+      {children}
+    </kbd>
+  );
+}

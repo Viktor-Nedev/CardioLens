@@ -227,7 +227,8 @@ the 3D colours and explanations follow slider movements in real time.
 - Pinned requirements, seeds and committed data/weights.
 - `python -m cardiolens.train` (≈55 min on 8 cores) and `--explain-only`.
 - `python -m cardiolens.report` generates the tables above.
-- Tests cover data integrity, leakage, SHAP additivity, train/serve parity, partial input and the API.
+- 20 backend tests cover data integrity, leakage, SHAP additivity, train/serve parity, partial input, what-if and similarity, and the API. 14 frontend tests cover the risk colour scale, formatting, ROC-AUC and net benefit.
+- A CI workflow runs both test suites, the frontend build and a Docker smoke test on every push. One-command start scripts set up the environment on first run.
 - A multi-stage Dockerfile builds the dashboard and serves it from the API on port 7860, with deployment configs for Hugging Face Spaces and Render.
 
 **Usage.**

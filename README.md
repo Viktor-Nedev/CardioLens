@@ -1,5 +1,7 @@
 # CardioLens
 
+[![CI](https://github.com/Viktor-Nedev/CardioLens/actions/workflows/ci.yml/badge.svg)](https://github.com/Viktor-Nedev/CardioLens/actions/workflows/ci.yml)
+
 **Explainable coronary artery disease risk, mapped onto an interactive 3D heart.**
 
 CardioLens predicts overall coronary artery disease (CAD) and significant stenosis
@@ -67,8 +69,21 @@ threshold choice. Brackets show the bootstrap 95% CI.
 
 Full per-target curves, confusion matrices and model comparisons are shown in the
 dashboard (**Model performance** tab) and in [`docs/REPORT.md`](docs/REPORT.md).
+Intended use, limitations and risks are summarised in the
+[model card](docs/MODEL_CARD.md).
 
 ## Quick start
+
+### One command
+
+```bash
+start.bat                      # Windows: double-click or run from a terminal
+scripts/start.sh               # macOS / Linux / Git Bash
+```
+
+The first run creates the Python environment and builds the dashboard (Python 3.11+
+and Node 20+ required). Every run serves the app on <http://127.0.0.1:8000> and
+opens it in the browser.
 
 ### Docker (single container, as deployed)
 
@@ -107,6 +122,7 @@ python -m cardiolens.train --quick   # smoke test, fewer folds and families
 python -m cardiolens.report       # Markdown tables from artifacts/metrics.json
 python -m cardiolens.train --explain-only   # recompute SHAP importance + figures from saved models
 pytest                            # 20 tests: data, leakage, SHAP additivity, train/serve parity, what-if, similarity, API
+cd ../frontend && npm test        # 14 tests: risk colour scale, formatting, ROC-AUC and net benefit
 ```
 
 The pipeline downloads the UCI dataset if the committed copy is missing. It is
@@ -148,7 +164,9 @@ python anatomy/build_heart_glb.py   # downloads ~170 MB of BodyParts3D STL once,
 | `backend/artifacts/` | Trained weights (`models/*.joblib`), `metrics.json`, `importance.json`, `schema.json`, `cases.json` |
 | `anatomy/build_heart_glb.py` | Reproducible BodyParts3D → GLB pipeline (orientation, decimation, territory weights) |
 | `frontend/src/` | Dashboard: `components/viewer` (3D), `risk`, `explain`, `physiology`, `patient`, `model` |
-| `docs/` | Project report (≤6 pages), demo video script, figures |
+| `docs/` | Project report (≤6 pages), model card, demo video script, figures |
+| `scripts/`, `start.bat` | One-command local start (sets up on first run) |
+| `.github/workflows/ci.yml` | CI: backend tests, frontend tests and build, Docker smoke test |
 | `deploy/` | Render blueprint and Hugging Face Spaces card |
 
 ### API

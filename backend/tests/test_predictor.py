@@ -91,3 +91,15 @@ def test_similar_patients_finds_itself(predictor):
 def test_similarity_pool_is_development_set_only(predictor):
     holdout_ids = {c["patient_id"] for c in predictor.cases}
     assert holdout_ids.isdisjoint({c["patient_id"] for c in predictor.cohort})
+
+
+def test_lime_agrees_with_shap_and_is_seeded(predictor):
+    case = predictor.cases[0]["features"]
+    first = predictor.lime(case, samples=400)
+    assert predictor.lime(case, samples=400)["targets"] == first["targets"]
+    for t in first["targets"].values():
+        assert len(t["weights"]) == len(predictor.feature_ids)
+        assert 0.0 <= t["r2"] <= 1.0
+        # A second, independent method tells the same story as SHAP.
+        assert t["correlation"] > 0.8
+        assert t["sign_agreement"] >= 0.8

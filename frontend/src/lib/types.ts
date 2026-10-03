@@ -259,3 +259,36 @@ export interface SimilarResult {
   k: number;
   pool: number;
 }
+
+export interface LimeWeight {
+  feature: string;
+  label: string;
+  display: string;
+  /** LIME surrogate weight, calibrated log-odds */
+  lime: number;
+  /** SHAP contribution for the same feature, calibrated log-odds */
+  shap: number;
+  imputed: boolean;
+}
+
+export interface LimeTarget {
+  intercept: number;
+  /** Weighted R² of the local linear surrogate (fidelity) */
+  r2: number;
+  /** Pearson correlation between LIME weights and SHAP values across all features */
+  correlation: number;
+  top_overlap: number;
+  top_n: number;
+  /** Share of the relevant SHAP factors whose LIME weight has the same sign */
+  sign_agreement: number;
+  weights: LimeWeight[];
+}
+
+export interface LimeResult {
+  samples: number;
+  donors: number;
+  kernel_width: number;
+  seed: number;
+  targets: Record<TargetId, LimeTarget>;
+  latency_ms: number;
+}

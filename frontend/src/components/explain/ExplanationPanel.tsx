@@ -6,6 +6,7 @@ import { pct, pp, signed } from "../../lib/format";
 import { TARGET_ORDER, type Contribution, type TargetId } from "../../lib/types";
 import { useStore } from "../../state/store";
 import { AnimatedNumber, DataTable, EASE_OUT, LegendKey, Section, Segmented } from "../ui/primitives";
+import { LimeComparison } from "./LimeComparison";
 import { ShapWaterfall } from "./ShapWaterfall";
 
 const TOP_N = 10;
@@ -129,7 +130,7 @@ export function ExplanationPanel() {
   const prediction = useStore((s) => s.prediction);
   const selected = useStore((s) => s.selected);
   const select = useStore((s) => s.select);
-  const [view, setView] = useState<"waterfall" | "bars" | "table">("waterfall");
+  const [view, setView] = useState<"waterfall" | "bars" | "lime" | "table">("waterfall");
 
   const pred = prediction?.targets[selected];
   const { top, rest, max } = useMemo(() => {
@@ -190,6 +191,7 @@ export function ExplanationPanel() {
           options={[
             { value: "waterfall", label: "Waterfall" },
             { value: "bars", label: "Bars" },
+            { value: "lime", label: "vs LIME", title: "Compare with LIME, an independent explanation method" },
             { value: "table", label: "Table" },
           ]}
         />
@@ -204,6 +206,8 @@ export function ExplanationPanel() {
             patient to this patient. Labels show the change in probability.
           </p>
         </>
+      ) : view === "lime" ? (
+        <LimeComparison target={selected} />
       ) : view === "bars" ? (
         <>
           <ul key={selected} className="mt-2 space-y-0.5">

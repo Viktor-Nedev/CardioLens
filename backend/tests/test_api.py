@@ -60,3 +60,13 @@ def test_profile_and_similar_endpoints():
         assert c.post("/api/profile", json={"features": {}, "feature": "nope"}).status_code == 404
         sim = c.post("/api/similar", json={"features": case["features"], "k": 4}).json()
         assert sim["k"] == 4 and len(sim["neighbours"]) == 4
+
+
+def test_lime_endpoint():
+    with make_client() as c:
+        case = c.get("/api/cases").json()[0]
+        body = c.post("/api/lime", json={"features": case["features"], "samples": 300}).json()
+        assert set(body["targets"]) == {"cad", "lad", "lcx", "rca"}
+        assert body["samples"] == 300
+        assert len(body["targets"]["lcx"]["weights"]) == N_FEATURES
+        assert c.post("/api/lime", json={"features": {}, "samples": 10}).status_code == 422

@@ -18,6 +18,7 @@ from .config import ARTIFACTS_DIR, Catalog, FeatureSpec, TargetSpec, load_catalo
 from .explain import FeatureExplainer
 from .features import aggregation_matrix, percentile, percentile_table
 from .models import FAMILIES, ModelFamily, model_margin
+from .surrogate import agreement, fit_surrogate, kernel_weights, sample_masks
 
 TOP_DRIVERS = 3
 
@@ -385,6 +386,7 @@ class Predictor:
     def _build_similarity_space(self) -> None:
         """Standardised feature space weighted by global importance (mean |SHAP| over targets)."""
         self._sim_matrix = None
+        self._cohort_frame: pd.DataFrame | None = None
         if not self.cohort:
             return
         weights = np.zeros(len(self.feature_ids))
@@ -396,6 +398,7 @@ class Predictor:
         M = aggregation_matrix(self._owners, self.feature_ids)  # columns -> features
         self._sim_weights = np.sqrt(M @ weights)
         frame = pd.concat([self.encode(c["features"])[0] for c in self.cohort], ignore_index=True)
+        self._cohort_frame = frame
         with sklearn.config_context(assume_finite=True, skip_parameter_validation=True):
             Z = self._prep_groups[0][0].transform(frame)
         self._sim_matrix = Z * self._sim_weights
@@ -437,6 +440,74 @@ class Predictor:
             )
         summary = {t.id: int(sum(n["truth"][t.id] for n in neighbours)) for t in self.catalog.targets}
         return {"neighbours": neighbours, "summary": summary, "k": len(neighbours), "pool": len(self.cohort)}
+
+    # ---------------------------------------------------------- LIME cross-check
+
+    def lime(self, payload: dict[str, Any], samples: int = 1000, seed: int = 0, donors: int = 5) -> dict[str, Any]:
+        """LIME-style local surrogate per target (see `surrogate.py`), compared with SHAP.
+        Seeded, so the same patient always gets the same explanation."""
+        if self._cohort_frame is None:
+            raise RuntimeError("LIME needs artifacts/cohort.json (the development patients).")
+        t0 = time.perf_counter()
+        rng = np.random.default_rng(seed)
+        frame, imputed, _ = self.encode(payload)
+        n, d = max(2, int(samples)), len(self.feature_ids)
+        width = 0.75 * math.sqrt(d)
+        m = max(1, int(donors))
+        Z = sample_masks(n, d, rng)
+        donor_rows = rng.integers(0, len(self._cohort_frame), size=n * m)
+        keep = np.repeat(Z, m, axis=0)  # every mask is evaluated with m different donor patients
+        batch = pd.DataFrame(
+            {
+                fid: np.where(keep[:, j], frame[fid].to_numpy()[0], self._cohort_frame[fid].to_numpy()[donor_rows])
+                for j, fid in enumerate(self.feature_ids)
+            }
+        )
+        with sklearn.config_context(assume_finite=True, skip_parameter_validation=True):
+            transformed: dict[str, np.ndarray] = {}
+            for prep, members in self._prep_groups:
+                out = prep.transform(batch)
+                for tid in members:
+                    transformed[tid] = out
+            logits = {
+                tid: (tm.a * model_margin(tm.model, transformed[tid], tm.family) + tm.b).reshape(n, m).mean(axis=1)
+                for tid, tm in self.models.items()
+            }
+        w = kernel_weights(Z, width)
+        shap = self.predict(payload, with_interval=False)["targets"]
+        values = self._filled_values(frame, imputed)
+
+        targets: dict[str, Any] = {}
+        for tid in self.models:
+            intercept, beta, r2 = fit_surrogate(Z, np.asarray(logits[tid], dtype=float), w)
+            by_feature = {c["feature"]: c["contribution"] for c in shap[tid]["contributions"]}
+            shap_vec = np.array([by_feature[fid] for fid in self.feature_ids])
+            rows = [
+                {
+                    "feature": fid,
+                    "label": self.catalog.feature(fid).label,
+                    "display": self.format_value(self.catalog.feature(fid), values[fid]),
+                    "lime": round(float(beta[j]), 5),
+                    "shap": round(float(shap_vec[j]), 5),
+                    "imputed": fid in imputed,
+                }
+                for j, fid in enumerate(self.feature_ids)
+            ]
+            rows.sort(key=lambda r: -abs(r["lime"]))
+            targets[tid] = {
+                "intercept": round(intercept, 5),
+                "r2": round(r2, 4),
+                **agreement(shap_vec, beta),
+                "weights": rows,
+            }
+        return {
+            "samples": n,
+            "donors": m,
+            "kernel_width": round(width, 4),
+            "seed": seed,
+            "targets": targets,
+            "latency_ms": round((time.perf_counter() - t0) * 1000, 1),
+        }
 
     def default_patient(self) -> dict[str, Any]:
         return {f["id"]: f["stats"]["default"] for f in self.schema["features"]}

@@ -83,3 +83,9 @@ class ProfileRequest(BaseModel):
 class SimilarRequest(BaseModel):
     features: dict[str, float | int | str | bool | None] = Field(default_factory=dict)
     k: int = Field(5, ge=1, le=15)
+
+
+class LimeRequest(BaseModel):
+    features: dict[str, float | int | str | bool | None] = Field(default_factory=dict)
+    samples: int = Field(1000, ge=200, le=3000, description="Number of perturbed samples (each scored with 5 donor patients)")
+    seed: int = Field(0, ge=0, le=2**31 - 1, description="Random seed; fixed seeds give stable explanations")

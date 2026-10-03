@@ -15,7 +15,7 @@ from fastapi.staticfiles import StaticFiles
 from .. import __version__
 from ..config import FRONTEND_DIST
 from ..predictor import Predictor
-from .schemas import Health, PredictRequest, PredictResponse, ProfileRequest, SimilarRequest
+from .schemas import Health, LimeRequest, PredictRequest, PredictResponse, ProfileRequest, SimilarRequest
 
 DISCLAIMER = (
     "CardioLens is a research and educational prototype for clinical decision support. "
@@ -109,6 +109,12 @@ def profile(req: ProfileRequest) -> dict:
 def similar(req: SimilarRequest) -> dict:
     """The most similar development patients and their angiography results."""
     return get_predictor().similar(req.features, req.k)
+
+
+@app.post("/api/lime")
+def lime(req: LimeRequest) -> dict:
+    """LIME-style local surrogate explanations for every target, compared with SHAP."""
+    return get_predictor().lime(req.features, req.samples, req.seed)
 
 
 # ---------------------------------------------------------------- static frontend

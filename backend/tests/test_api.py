@@ -48,3 +48,15 @@ def test_predict_empty_body_uses_imputation():
         res = c.post("/api/predict", json={})
         assert res.status_code == 200
         assert len(res.json()["imputed"]) == N_FEATURES
+
+
+def test_profile_and_similar_endpoints():
+    with make_client() as c:
+        case = c.get("/api/cases").json()[0]
+        res = c.post("/api/profile", json={"features": case["features"], "feature": "ldl", "points": 21})
+        assert res.status_code == 200
+        body = res.json()
+        assert len(body["grid"]) == 21 and len(body["targets"]["cad"]) == 21
+        assert c.post("/api/profile", json={"features": {}, "feature": "nope"}).status_code == 404
+        sim = c.post("/api/similar", json={"features": case["features"], "k": 4}).json()
+        assert sim["k"] == 4 and len(sim["neighbours"]) == 4

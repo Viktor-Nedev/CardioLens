@@ -323,6 +323,23 @@ def explain_target(
     return rows, payload
 
 
+def export_cohort(catalog: Catalog, X: pd.DataFrame, Y: pd.DataFrame, ids: np.ndarray) -> list[dict[str, Any]]:
+    """Development patients with their angiography labels, for similar-patient retrieval."""
+    rows = []
+    for pid in ids:
+        row = X.loc[pid]
+        rows.append(
+            {
+                "patient_id": int(pid),
+                "features": {
+                    f.id: (str(row[f.id]) if f.kind == "categorical" else float(row[f.id])) for f in catalog.features
+                },
+                "truth": {t.id: int(Y.loc[pid, t.id]) for t in catalog.targets},
+            }
+        )
+    return rows
+
+
 def split_frames(catalog: Catalog):
     """Load the data and reproduce the seeded development / hold-out split."""
     raw = load_raw()
@@ -355,6 +372,8 @@ def refresh_explanations() -> None:
         )
         log(f"   {target.short}: explanations refreshed")
     (ARTIFACTS_DIR / "importance.json").write_text(json.dumps(to_jsonable(importance), indent=1), encoding="utf-8")
+    cohort = export_cohort(catalog, X, Y, dev_ids)
+    (ARTIFACTS_DIR / "cohort.json").write_text(json.dumps(to_jsonable(cohort)), encoding="utf-8")
     make_figures(report, shap_payload, catalog)
 
 
@@ -549,6 +568,8 @@ def run(outer_repeats: int, n_bootstrap: int, quick: bool) -> dict[str, Any]:
     (ARTIFACTS_DIR / "importance.json").write_text(json.dumps(to_jsonable(importance), indent=1), encoding="utf-8")
     (ARTIFACTS_DIR / "schema.json").write_text(json.dumps(to_jsonable(schema), indent=1, ensure_ascii=False), encoding="utf-8")
     (ARTIFACTS_DIR / "cases.json").write_text(json.dumps(to_jsonable(cases), indent=1), encoding="utf-8")
+    cohort = export_cohort(catalog, X, Y, dev_ids)
+    (ARTIFACTS_DIR / "cohort.json").write_text(json.dumps(to_jsonable(cohort)), encoding="utf-8")
 
     make_figures(report, shap_payload, catalog)
     log(f"Done in {time.perf_counter() - started:.0f}s. Artifacts in {ARTIFACTS_DIR}")

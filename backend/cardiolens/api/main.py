@@ -15,7 +15,7 @@ from fastapi.staticfiles import StaticFiles
 from .. import __version__
 from ..config import FRONTEND_DIST
 from ..predictor import Predictor
-from .schemas import Health, PredictRequest, PredictResponse
+from .schemas import Health, PredictRequest, PredictResponse, ProfileRequest, SimilarRequest
 
 DISCLAIMER = (
     "CardioLens is a research and educational prototype for clinical decision support. "
@@ -94,6 +94,21 @@ def case(case_id: str) -> dict:
 def predict(req: PredictRequest) -> PredictResponse:
     result = get_predictor().predict(req.features, with_interval=req.with_interval)
     return PredictResponse(**result, disclaimer=DISCLAIMER)
+
+
+@app.post("/api/profile")
+def profile(req: ProfileRequest) -> dict:
+    """How each target's probability changes when one feature varies (others fixed)."""
+    p = get_predictor()
+    if req.feature not in p.feature_ids:
+        raise HTTPException(status_code=404, detail=f"Unknown feature {req.feature}")
+    return p.profile(req.features, req.feature, req.points)
+
+
+@app.post("/api/similar")
+def similar(req: SimilarRequest) -> dict:
+    """The most similar development patients and their angiography results."""
+    return get_predictor().similar(req.features, req.k)
 
 
 # ---------------------------------------------------------------- static frontend

@@ -72,3 +72,14 @@ class Health(BaseModel):
     status: str
     version: str
     models: dict[str, Any]
+
+
+class ProfileRequest(BaseModel):
+    features: dict[str, float | int | str | bool | None] = Field(default_factory=dict)
+    feature: str = Field(description="Feature id to vary, e.g. 'ldl'")
+    points: int = Field(41, ge=5, le=101, description="Grid size for numeric features")
+
+
+class SimilarRequest(BaseModel):
+    features: dict[str, float | int | str | bool | None] = Field(default_factory=dict)
+    k: int = Field(5, ge=1, le=15)

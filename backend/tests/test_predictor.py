@@ -57,3 +57,37 @@ def test_typical_angina_raises_cad_risk(predictor):
     low = predictor.predict({**base, "typical_chest_pain": 0}, with_interval=False)["targets"]["cad"]["probability"]
     high = predictor.predict({**base, "typical_chest_pain": 1}, with_interval=False)["targets"]["cad"]["probability"]
     assert high >= low
+
+
+def test_profile_matches_prediction_at_current_value(predictor):
+    case = predictor.cases[0]
+    prof = predictor.profile(case["features"], "age", points=41)
+    assert len(prof["grid"]) == 41
+    assert set(prof["targets"]) == {"cad", "lad", "lcx", "rca"}
+    # Re-score with the age set to a grid value: the curve must agree with predict().
+    i = 20
+    out = predictor.predict({**case["features"], "age": prof["grid"][i]}, with_interval=False)
+    for tid, curve in prof["targets"].items():
+        assert curve[i] == pytest.approx(out["targets"][tid]["probability"], abs=1e-4)
+
+
+def test_profile_for_binary_feature_has_two_points(predictor):
+    prof = predictor.profile(predictor.default_patient(), "typical_chest_pain")
+    assert prof["grid"] == [0.0, 1.0]
+    assert prof["labels"] == ["No", "Yes"]
+
+
+def test_similar_patients_finds_itself(predictor):
+    me = predictor.cohort[0]
+    res = predictor.similar(me["features"], k=5)
+    assert res["k"] == 5
+    assert res["neighbours"][0]["patient_id"] == me["patient_id"]
+    assert res["neighbours"][0]["similarity"] == pytest.approx(1.0)
+    sims = [n["similarity"] for n in res["neighbours"]]
+    assert sims == sorted(sims, reverse=True)
+    assert all(0 <= v <= 5 for v in res["summary"].values())
+
+
+def test_similarity_pool_is_development_set_only(predictor):
+    holdout_ids = {c["patient_id"] for c in predictor.cases}
+    assert holdout_ids.isdisjoint({c["patient_id"] for c in predictor.cohort})

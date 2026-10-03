@@ -16,7 +16,7 @@ import sklearn
 
 from .config import ARTIFACTS_DIR, Catalog, FeatureSpec, TargetSpec, load_catalog
 from .explain import FeatureExplainer
-from .features import percentile, percentile_table
+from .features import aggregation_matrix, percentile, percentile_table
 from .models import FAMILIES, ModelFamily, model_margin
 
 TOP_DRIVERS = 3
@@ -95,6 +95,9 @@ class Predictor:
                 ens_w0=np.array([e.intercept_[0] for e in ensemble]) if linear else None,
             )
         self._prep_groups = self._group_preprocessors()
+        self._owners = joblib.load(self.artifacts_dir / "models" / f"{self.catalog.targets[0].id}.joblib")["owners"]
+        self.cohort = self._read_json("cohort.json") if (self.artifacts_dir / "cohort.json").exists() else []
+        self._build_similarity_space()
 
     def _group_preprocessors(self) -> list[tuple[Any, list[str]]]:
         """Targets whose fitted preprocessors transform identically share one transform call."""
@@ -331,6 +334,109 @@ class Predictor:
         return " ".join(parts)
 
     # ------------------------------------------------------------------- helpers
+
+    # ------------------------------------------------------------- what-if profile
+
+    def profile(self, payload: dict[str, Any], feature_id: str, points: int = 41) -> dict[str, Any]:
+        """Predicted probability of every target while one feature varies and the rest stay fixed
+        (an individual conditional expectation curve: model sensitivity, not a causal effect)."""
+        spec = self.catalog.feature(feature_id)
+        frame, imputed, _ = self.encode(payload)
+        stats = self._stats[feature_id]
+        labels: list[str] | None = None
+        if spec.kind == "numeric":
+            lo, hi = spec.range if spec.range else (stats.get("min") or 0.0, stats.get("max") or 1.0)
+            grid: list[Any] = [round(float(v), 4) for v in np.linspace(lo, hi, max(5, min(points, 101)))]
+        else:
+            grid = [o["value"] if spec.kind == "categorical" else float(o["value"]) for o in spec.options]
+            labels = [str(o["label"]) for o in spec.options]
+
+        batch = pd.concat([frame] * len(grid), ignore_index=True)
+        batch[feature_id] = pd.Series(grid, dtype=object if spec.kind == "categorical" else float)
+        with sklearn.config_context(assume_finite=True, skip_parameter_validation=True):
+            transformed: dict[str, np.ndarray] = {}
+            for prep, members in self._prep_groups:
+                out = prep.transform(batch)
+                for tid in members:
+                    transformed[tid] = out
+            curves = {}
+            for tid, tm in self.models.items():
+                m = model_margin(tm.model, transformed[tid], tm.family)
+                curves[tid] = [round(float(v), 5) for v in 1.0 / (1.0 + np.exp(-(tm.a * m + tm.b)))]
+
+        current = payload.get(feature_id)
+        if feature_id in imputed or current is None:
+            current = stats["default"]
+        return {
+            "feature": feature_id,
+            "label": spec.label,
+            "kind": spec.kind,
+            "unit": spec.unit,
+            "ref": list(spec.ref) if spec.ref else None,
+            "grid": grid,
+            "labels": labels,
+            "current": current,
+            "targets": curves,
+            "thresholds": {tid: tm.threshold for tid, tm in self.models.items()},
+        }
+
+    # ------------------------------------------------------------ similar patients
+
+    def _build_similarity_space(self) -> None:
+        """Standardised feature space weighted by global importance (mean |SHAP| over targets)."""
+        self._sim_matrix = None
+        if not self.cohort:
+            return
+        weights = np.zeros(len(self.feature_ids))
+        index = {fid: i for i, fid in enumerate(self.feature_ids)}
+        for rows in self.importance.values():
+            for r in rows:
+                weights[index[r["feature"]]] += r["mean_abs_shap"]
+        weights = weights / max(weights.sum(), 1e-9)
+        M = aggregation_matrix(self._owners, self.feature_ids)  # columns -> features
+        self._sim_weights = np.sqrt(M @ weights)
+        frame = pd.concat([self.encode(c["features"])[0] for c in self.cohort], ignore_index=True)
+        with sklearn.config_context(assume_finite=True, skip_parameter_validation=True):
+            Z = self._prep_groups[0][0].transform(frame)
+        self._sim_matrix = Z * self._sim_weights
+
+    def similar(self, payload: dict[str, Any], k: int = 5) -> dict[str, Any]:
+        """The k development patients closest to this one, with their angiography results."""
+        if self._sim_matrix is None:
+            return {"neighbours": [], "summary": {}, "k": 0, "pool": 0}
+        frame, _, _ = self.encode(payload)
+        with sklearn.config_context(assume_finite=True, skip_parameter_validation=True):
+            z = self._prep_groups[0][0].transform(frame)[0] * self._sim_weights
+        d = np.sqrt(((self._sim_matrix - z) ** 2).sum(axis=1))
+        scale = float(np.percentile(d, 50)) or 1.0
+        order = np.argsort(d)[: max(1, min(k, 15))]
+        label_of = {f.id: f for f in self.catalog.features}
+        neighbours = []
+        for i in order:
+            c = self.cohort[int(i)]
+            feats = c["features"]
+            neighbours.append(
+                {
+                    "patient_id": c["patient_id"],
+                    "similarity": round(float(max(0.0, 1.0 - d[i] / (2 * scale))), 4),
+                    "distance": round(float(d[i]), 4),
+                    "summary": ", ".join(
+                        x
+                        for x in [
+                            f"{int(feats['age'])} y",
+                            "M" if feats["sex_male"] == 1 else "F",
+                            "typical angina" if feats["typical_chest_pain"] == 1 else None,
+                            "diabetic" if feats["dm"] == 1 else None,
+                            f"EF {int(feats['ejection_fraction'])}%" if "ejection_fraction" in label_of else None,
+                        ]
+                        if x
+                    ),
+                    "truth": c["truth"],
+                    "features": feats,
+                }
+            )
+        summary = {t.id: int(sum(n["truth"][t.id] for n in neighbours)) for t in self.catalog.targets}
+        return {"neighbours": neighbours, "summary": summary, "k": len(neighbours), "pool": len(self.cohort)}
 
     def default_patient(self) -> dict[str, Any]:
         return {f["id"]: f["stats"]["default"] for f in self.schema["features"]}

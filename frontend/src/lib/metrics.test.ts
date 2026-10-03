@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { netBenefit, rocAuc, treatAllBenefit } from "./metrics";
+import { confusionAt, netBenefit, rocAuc, treatAllBenefit } from "./metrics";
 
 describe("rocAuc", () => {
   it("is 1 for perfect separation and 0 for perfectly reversed scores", () => {
@@ -26,5 +26,31 @@ describe("netBenefit", () => {
   });
   it("is zero when nobody is above the threshold", () => {
     expect(netBenefit([1, 0], [0.1, 0.2], 0.5)).toBe(0);
+  });
+});
+
+describe("confusionAt", () => {
+  const y = [1, 1, 1, 0, 0];
+  const p = [0.9, 0.6, 0.2, 0.7, 0.1];
+
+  it("counts calls at the threshold and derives the clinical rates", () => {
+    const c = confusionAt(y, p, 0.5);
+    expect([c.tp, c.fn, c.fp, c.tn]).toEqual([2, 1, 1, 1]);
+    expect(c.sensitivity).toBeCloseTo(2 / 3);
+    expect(c.specificity).toBeCloseTo(1 / 2);
+    expect(c.ppv).toBeCloseTo(2 / 3);
+    expect(c.npv).toBeCloseTo(1 / 2);
+    expect(c.accuracy).toBeCloseTo(3 / 5);
+    expect(c.f1).toBeCloseTo(2 / 3);
+  });
+
+  it("calls a case positive when its probability equals the threshold", () => {
+    expect(confusionAt([1], [0.5], 0.5).tp).toBe(1);
+  });
+
+  it("returns null for rates with an empty denominator", () => {
+    const c = confusionAt(y, p, 0.99);
+    expect(c.ppv).toBeNull();
+    expect(c.sensitivity).toBe(0);
   });
 });

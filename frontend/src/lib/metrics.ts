@@ -29,3 +29,47 @@ export function netBenefit(y: number[], p: number[], t: number): number {
 export function treatAllBenefit(prevalence: number, t: number): number {
   return prevalence - (1 - prevalence) * (t / (1 - t));
 }
+
+export interface Confusion {
+  tp: number;
+  fp: number;
+  tn: number;
+  fn: number;
+  /** null when the denominator is empty */
+  sensitivity: number | null;
+  specificity: number | null;
+  ppv: number | null;
+  npv: number | null;
+  accuracy: number | null;
+  f1: number | null;
+}
+
+const ratio = (a: number, b: number) => (b > 0 ? a / b : null);
+
+/** Confusion matrix and the usual clinical rates when cases with p >= t are called positive. */
+export function confusionAt(y: number[], p: number[], t: number): Confusion {
+  let tp = 0;
+  let fp = 0;
+  let tn = 0;
+  let fn = 0;
+  p.forEach((v, i) => {
+    const positive = v >= t;
+    if (y[i] === 1) {
+      if (positive) tp++;
+      else fn++;
+    } else if (positive) fp++;
+    else tn++;
+  });
+  return {
+    tp,
+    fp,
+    tn,
+    fn,
+    sensitivity: ratio(tp, tp + fn),
+    specificity: ratio(tn, tn + fp),
+    ppv: ratio(tp, tp + fp),
+    npv: ratio(tn, tn + fn),
+    accuracy: ratio(tp + tn, y.length),
+    f1: ratio(2 * tp, 2 * tp + fp + fn),
+  };
+}

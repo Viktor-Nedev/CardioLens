@@ -12,7 +12,7 @@ The deliverables are:
 - a web application: a FastAPI backend and a React/three.js dashboard;
 - a reproducible training pipeline with the trained weights committed;
 - a reproducible 3D-anatomy build;
-- 34 automated tests and a CI workflow;
+- 45 automated tests and a CI workflow;
 - a single-container Docker image and one-command start scripts.
 
 > Decision support and education only. The outputs are statistical estimates and
@@ -24,13 +24,8 @@ The deliverables are:
 ## 1. Dataset and preprocessing
 
 **Source.** The *Extension of Z-Alizadeh Sani* dataset (UCI #411, CC BY 4.0) has
-303 patients and 59 columns in four groups:
-- demographics;
-- symptoms and examination;
-- ECG;
-- laboratory and echocardiography.
-
-It also has four angiography labels: `Cath` (CAD/Normal) and `LAD`, `LCX`, `RCA`
+303 patients and 59 columns in four groups: demographics, symptoms and examination,
+ECG, and laboratory and echocardiography. It also has four angiography labels: `Cath` (CAD/Normal) and `LAD`, `LCX`, `RCA`
 (Stenotic/Normal). There are no missing values.
 
 | Label | Positives | Prevalence |
@@ -134,7 +129,7 @@ probabilities as an 80% interval.
 - **Why vessel level is hard.** 303 patients from a single centre carry limited vessel-specific signal. A clinical ECG/echo summary locates ischaemia only coarsely.
 - **What the full models add.** Mainly calibrated probabilities and a richer, patient-specific explanation that includes ECG and echo findings.
 - **Uncertainty.** Hold-out confidence intervals are wide (61 patients). The nested-CV standard deviations (0.03–0.07) are the more stable estimate of generalisation.
-- **Clinical utility.** On the hold-out set, a decision curve shows net benefit above "treat all" for CAD across thresholds of about 0.2–0.9. A subgroup check reports AUC, sensitivity and specificity by sex and age band, and flags groups too small to judge.
+- **Clinical utility.** On the hold-out set, a decision curve shows net benefit above "treat all" for CAD across thresholds of about 0.2–0.9. A subgroup check reports AUC, sensitivity and specificity by sex and age band, and flags groups too small to judge. A threshold explorer lets the user drag the decision threshold over the hold-out patients and watch sensitivity, specificity, PPV and NPV trade off.
 - **Calibration.** Out-of-fold calibration follows the diagonal for LAD, LCX and RCA. For CAD it is S-shaped, because of the 71% prevalence and the strong effect of typical angina.
 
 ## 4. Clinical interpretability
@@ -144,6 +139,8 @@ probabilities as an 80% interval.
 - Tree models use path-dependent Tree SHAP. We first tried the interventional variant, but it drifted by up to 0.07 log-odds from the model output on a few patients.
 - SHAP values of one-hot columns are summed back to their clinical feature, so every contribution corresponds 1:1 to a measurement.
 - Contributions are expressed in calibrated log-odds, so the average patient's logit plus the sum of contributions equals the patient's logit. A unit test checks this to 10⁻⁶.
+
+**LIME cross-check.** A second, independent method shows that an explanation does not depend on one technique. Each of 1,000 perturbed copies of the patient keeps the patient's own value for a random subset of factors and takes the others from random development patients (averaged over 5 donors). A weighted ridge regression of the calibrated log-odds on the "kept" indicators (exponential kernel, width 0.75√d) gives one weight per factor. Across the 61 hold-out patients, LIME and SHAP correlate at a median r = 0.98 (minimum 0.95), share 4.5 of their top 5 factors on average and agree on the direction of every main factor. The surrogate explains a median 70% of the variance of its samples.
 
 **Global importance** (mean |SHAP| on the development set, cross-checked by permutation importance on the hold-out set):
 - **CAD:** typical chest pain (1.60), regions with RWMA (0.81), age (0.79), hypertension (0.48), T-wave inversion (0.45).
@@ -181,11 +178,9 @@ resolves the FMA primitives and groups them so each model target is exactly one 
 | `vessel_LM` | left main stem (FMA4685); shown but not a model target |
 | `heart_wall` | wall of heart (FMA7274) |
 
-Anatomical context comes from:
-- the aorta, venae cavae and cardiac veins;
-- five lung lobes and the trachea;
-- 24 ribs and the three sternal parts;
-- the body surface, cropped to the thorax with the arms removed.
+Anatomical context comes from the aorta, venae cavae and cardiac veins, five lung lobes
+and the trachea, 24 ribs and the three sternal parts, and the body surface (cropped to the
+thorax, arms removed).
 
 **Build pipeline.**
 1. Download the STLs and merge the primitives per node.
@@ -217,7 +212,7 @@ Anatomical context comes from:
 - `/api/cases`: the hold-out patients with ground truth;
 - `/api/metrics` and `/api/importance`;
 - `/api/predict`: partial inputs are accepted; the response contains probabilities, intervals, thresholds, risk bands, SHAP contributions, summaries and physiology rows;
-- `/api/profile` and `/api/similar`: what-if curves for any input, and the most similar development patients with their angiography results.
+- `/api/profile`, `/api/similar` and `/api/lime`: what-if curves for any input, the most similar development patients with their angiography results, and the LIME cross-check.
 
 One full prediction (4 targets, SHAP, bootstrap intervals) takes about 33 ms on a
 laptop CPU. The dashboard debounces edits by 140 ms and cancels stale requests, so
@@ -232,7 +227,7 @@ the 3D colours and explanations follow slider movements in real time.
 - Pinned requirements, seeds and committed data/weights.
 - `python -m cardiolens.train` (≈55 min on 8 cores) and `--explain-only`.
 - `python -m cardiolens.report` generates the tables above.
-- 20 backend tests cover data integrity, leakage, SHAP additivity, train/serve parity, partial input, what-if and similarity, and the API. 14 frontend tests cover the risk colour scale, formatting, ROC-AUC and net benefit.
+- 22 backend tests cover data integrity, leakage, SHAP additivity, train/serve parity, partial input, what-if, similarity, LIME agreement and the API. 23 frontend tests cover the risk colour scale, formatting, ROC-AUC, net benefit, threshold metrics and search.
 - A CI workflow runs both test suites, the frontend build and a Docker smoke test on every push. One-command start scripts set up the environment on first run.
 - A multi-stage Dockerfile builds the dashboard and serves it from the API on port 7860, with deployment configs for Hugging Face Spaces and Render.
 
@@ -240,8 +235,8 @@ the 3D colours and explanations follow slider movements in real time.
 1. Run `start.bat` (Windows) or `scripts/start.sh`, which sets up the environment on first run and opens <http://127.0.0.1:8000>; or `docker compose up --build` and open <http://localhost:7860>.
 2. Acknowledge the disclaimer; an optional guided tour introduces the layout.
 3. Choose a hold-out patient from the searchable case library (risk dots and angiography result per case), or edit any input.
-4. Inspect the 3D heart, then the SHAP, physiology, what-if and similar-case panels. *Report* prints a one-page patient summary.
-5. Open *Model performance* for ROC, calibration and decision curves, subgroup results, confusion matrices, the family comparison, global importance and a cohort view of every hold-out patient.
+4. Inspect the 3D heart, then the SHAP (with its LIME comparison), physiology, what-if and similar-case panels. *Report* prints a one-page patient summary; Ctrl/⌘ K searches patients, views, layers and actions.
+5. Open *Model performance* for ROC, calibration and decision curves, subgroup results, confusion matrices, the family comparison, global importance and every hold-out patient on one axis with a draggable decision threshold.
 
 ## 7. Limitations and future work
 
@@ -262,4 +257,5 @@ the 3D colours and explanations follow slider movements in real time.
 1. Alizadehsani R., Roshanzamir M., Sani Z. *Extention of Z-Alizadeh Sani dataset.* UCI Machine Learning Repository (2013). doi:10.24432/C5461K.
 2. Mitsuhashi N. et al. BodyParts3D: 3D structure database for anatomical concepts. *Nucleic Acids Research* 37, D782–D785 (2009).
 3. Lundberg S. M., Lee S.-I. A unified approach to interpreting model predictions. *NeurIPS* (2017).
-4. Platt J. Probabilistic outputs for support vector machines and comparisons to regularized likelihood methods. *Advances in Large Margin Classifiers* (1999).
+4. Ribeiro M. T., Singh S., Guestrin C. "Why should I trust you?": explaining the predictions of any classifier. *KDD* (2016).
+5. Platt J. Probabilistic outputs for support vector machines and comparisons to regularized likelihood methods. *Advances in Large Margin Classifiers* (1999).

@@ -2,33 +2,11 @@ import clsx from "clsx";
 import { useMemo } from "react";
 import { CONTEXT, SERIES } from "../../lib/colors";
 import { num, pct, rate } from "../../lib/format";
+import { netBenefit, rocAuc, treatAllBenefit } from "../../lib/metrics";
 import type { Case, TargetId } from "../../lib/types";
 import { useStore } from "../../state/store";
 import { ChartCard, DataTable, LegendKey } from "../ui/primitives";
 import { CurveChart } from "./CurveChart";
-
-/** Rank-based ROC-AUC (Mann–Whitney U); null when a class is missing. */
-export function rocAuc(y: number[], p: number[]): number | null {
-  const pos = p.filter((_, i) => y[i] === 1);
-  const neg = p.filter((_, i) => y[i] === 0);
-  if (!pos.length || !neg.length) return null;
-  let s = 0;
-  for (const a of pos) for (const b of neg) s += a > b ? 1 : a === b ? 0.5 : 0;
-  return s / (pos.length * neg.length);
-}
-
-function netBenefit(y: number[], p: number[], t: number): number {
-  const n = y.length;
-  let tp = 0;
-  let fp = 0;
-  p.forEach((v, i) => {
-    if (v >= t) {
-      if (y[i] === 1) tp++;
-      else fp++;
-    }
-  });
-  return tp / n - (fp / n) * (t / (1 - t));
-}
 
 /**
  * Decision curve analysis on the hold-out patients: net benefit of acting on the model
@@ -45,7 +23,7 @@ export function DecisionCurve({ target }: { target: TargetId }) {
     const ts = Array.from({ length: 95 }, (_, i) => (i + 1) / 100);
     // Clamp to the plotted range so a noisy tail at extreme thresholds stays inside the frame.
     const model: [number, number][] = ts.map((t) => [t, Math.max(-0.1, netBenefit(y, p, t))]);
-    const all: [number, number][] = ts.map((t) => [t, prev - (1 - prev) * (t / (1 - t))]);
+    const all: [number, number][] = ts.map((t) => [t, treatAllBenefit(prev, t)]);
     const top = Math.max(prev, ...model.map((m) => m[1]));
     const series = [
       { id: "model", label: "Model", color: SERIES, points: model },
@@ -54,7 +32,7 @@ export function DecisionCurve({ target }: { target: TargetId }) {
     const table = [0.1, 0.2, 0.3, 0.5, 0.7].map((t) => [
       rate(t),
       num(netBenefit(y, p, t), 3),
-      num(prev - (1 - prev) * (t / (1 - t)), 3),
+      num(treatAllBenefit(prev, t), 3),
       "0.000",
     ]);
     return { series, prevalence: prev, yDomain: [-0.1, Math.ceil((top + 0.05) * 10) / 10] as [number, number], table };

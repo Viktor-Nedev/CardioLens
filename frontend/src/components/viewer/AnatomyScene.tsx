@@ -1,7 +1,7 @@
 import { Html, Line, useGLTF } from "@react-three/drei";
 import { useFrame, useThree, type ThreeEvent } from "@react-three/fiber";
 import { motion } from "motion/react";
-import { useEffect, useMemo, useRef } from "react";
+import { type ComponentRef, useEffect, useMemo, useRef } from "react";
 import * as THREE from "three";
 import {
   MODEL_URL,
@@ -504,12 +504,54 @@ interface LabelGeo {
   label: Vec3;
 }
 
+// Distance (px) a callout's centre keeps from the canvas edges.
+const LABEL_MARGIN = { x: 56, y: 36 };
+
 function VesselLabels({ geo }: { geo: Record<TargetId, LabelGeo> }) {
   const prediction = useStore((s) => s.prediction);
   const selected = useStore((s) => s.selected);
   const hovered = useStore((s) => s.hovered);
   const select = useStore((s) => s.select);
   const setHovered = useStore((s) => s.setHovered);
+  const holders = useRef<Partial<Record<TargetId, THREE.Group | null>>>({});
+  const lines = useRef<Partial<Record<TargetId, ComponentRef<typeof Line> | null>>>({});
+  const tmp = useMemo(() => new THREE.Vector3(), []);
+  const points = useMemo(() => {
+    const out = {} as Record<TargetId, [Vec3, Vec3]>;
+    for (const t of VESSEL_TARGETS) if (geo[t]) out[t] = [geo[t].anchor, geo[t].label];
+    return out;
+  }, [geo]);
+
+  // Keep callouts inside the canvas: when the camera would push one past an edge, slide it
+  // back along the screen at the same depth and let its leader line follow.
+  useFrame(({ camera, size }) => {
+    const limX = 1 - (2 * LABEL_MARGIN.x) / size.width;
+    const limY = 1 - (2 * LABEL_MARGIN.y) / size.height;
+    for (const t of VESSEL_TARGETS) {
+      const holder = holders.current[t];
+      const g = geo[t];
+      if (!holder?.parent || !g) continue;
+      tmp.fromArray(g.label);
+      holder.parent.localToWorld(tmp).project(camera);
+      if (tmp.z > 1 || (Math.abs(tmp.x) <= limX && Math.abs(tmp.y) <= limY)) {
+        holder.position.fromArray(g.label);
+      } else {
+        tmp.x = THREE.MathUtils.clamp(tmp.x, -limX, limX);
+        tmp.y = THREE.MathUtils.clamp(tmp.y, -limY, limY);
+        holder.position.copy(holder.parent.worldToLocal(tmp.unproject(camera)));
+      }
+      const start = lines.current[t]?.geometry.attributes.instanceStart as THREE.InterleavedBufferAttribute | undefined;
+      if (!start) continue;
+      const seg = start.data.array as Float32Array;
+      const p = holder.position;
+      if (Math.abs(seg[3] - p.x) + Math.abs(seg[4] - p.y) + Math.abs(seg[5] - p.z) > 1e-5) {
+        seg[3] = p.x;
+        seg[4] = p.y;
+        seg[5] = p.z;
+        start.data.needsUpdate = true;
+      }
+    }
+  });
 
   return (
     <>
@@ -517,52 +559,62 @@ function VesselLabels({ geo }: { geo: Record<TargetId, LabelGeo> }) {
         const g = geo[t];
         if (!g) return null;
         const pred = prediction?.targets[t];
-        const pos = g.label;
         const active = selected === t || hovered === t;
         const anchor = g.anchor;
         return (
           <group key={t}>
             <Line
-              points={[anchor, pos]}
+              ref={(el) => {
+                lines.current[t] = el;
+              }}
+              points={points[t]}
               color={active ? "#ffffff" : "#9fb3c8"}
               lineWidth={active ? 1.6 : 1}
               transparent
               opacity={active ? 0.9 : 0.55}
+              frustumCulled={false}
               raycast={() => null}
             />
             <mesh position={anchor} raycast={() => null}>
               <sphereGeometry args={[active ? 0.011 : 0.008, 12, 12]} />
               <meshBasicMaterial color={pred ? riskColor(pred.probability) : NEUTRAL} toneMapped={false} />
             </mesh>
-          <Html position={pos} center zIndexRange={[30, 0]}>
-            <motion.button
-              initial={{ opacity: 0, scale: 0.6, y: 6 }}
-              animate={{ opacity: 1, scale: active ? 1.08 : 1, y: 0 }}
-              transition={{ type: "spring", stiffness: 380, damping: 22, delay: 0.1 * VESSEL_TARGETS.indexOf(t) }}
-              type="button"
-              onClick={() => select(t)}
-              onPointerEnter={() => setHovered(t)}
-              onPointerLeave={() => setHovered(null)}
-              className={`flex items-center gap-1.5 whitespace-nowrap rounded-full border px-2 py-0.5 text-[11px] font-semibold shadow-lg backdrop-blur-md transition-colors ${
-                active ? "border-white/60 bg-[#0b111bcc] text-ink" : "border-white/15 bg-[#0b111b99] text-ink-2"
-              }`}
-              aria-label={`Select ${pred?.short ?? t}`}
+            <group
+              ref={(el) => {
+                holders.current[t] = el;
+              }}
+              position={g.label}
             >
-              <span
-                className="inline-block h-2 w-2 rounded-full transition-colors duration-700"
-                style={{
-                  background: pred ? riskColor(pred.probability) : NEUTRAL,
-                  boxShadow: pred ? `0 0 8px ${riskColor(pred.probability)}` : "none",
-                }}
-              />
-              {pred?.short ?? t.toUpperCase()}
-              {pred ? (
-                <AnimatedNumber value={pred.probability} format={pct} className="tabular font-medium text-ink" />
-              ) : (
-                <span className="text-ink-3">…</span>
-              )}
-            </motion.button>
-          </Html>
+              <Html center zIndexRange={[30, 0]}>
+                <motion.button
+                  initial={{ opacity: 0, scale: 0.6, y: 6 }}
+                  animate={{ opacity: 1, scale: active ? 1.08 : 1, y: 0 }}
+                  transition={{ type: "spring", stiffness: 380, damping: 22, delay: 0.1 * VESSEL_TARGETS.indexOf(t) }}
+                  type="button"
+                  onClick={() => select(t)}
+                  onPointerEnter={() => setHovered(t)}
+                  onPointerLeave={() => setHovered(null)}
+                  className={`flex items-center gap-1.5 whitespace-nowrap rounded-full border px-2 py-0.5 text-[11px] font-semibold shadow-lg backdrop-blur-md transition-colors ${
+                    active ? "border-white/60 bg-[#0b111bcc] text-ink" : "border-white/15 bg-[#0b111b99] text-ink-2"
+                  }`}
+                  aria-label={`Select ${pred?.short ?? t}`}
+                >
+                  <span
+                    className="inline-block h-2 w-2 rounded-full transition-colors duration-700"
+                    style={{
+                      background: pred ? riskColor(pred.probability) : NEUTRAL,
+                      boxShadow: pred ? `0 0 8px ${riskColor(pred.probability)}` : "none",
+                    }}
+                  />
+                  {pred?.short ?? t.toUpperCase()}
+                  {pred ? (
+                    <AnimatedNumber value={pred.probability} format={pct} className="tabular font-medium text-ink" />
+                  ) : (
+                    <span className="text-ink-3">…</span>
+                  )}
+                </motion.button>
+              </Html>
+            </group>
           </group>
         );
       })}

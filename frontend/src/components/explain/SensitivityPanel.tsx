@@ -163,7 +163,15 @@ function ProfileChart({ profile, target }: { profile: Profile; target: TargetId 
         />
 
         {xTicks.map((i) => (
-          <text key={`x${i}`} x={sxIndex(i)} y={M.top + h + 16} textAnchor="middle" fontSize={10} fill="var(--color-ink-3)">
+          <text
+            key={`x${i}`}
+            x={sxIndex(i)}
+            y={M.top + h + 16}
+            // End labels align to the plot edges so they are never clipped.
+            textAnchor={discrete ? "middle" : i === 0 ? "start" : i === n - 1 ? "end" : "middle"}
+            fontSize={10}
+            fill="var(--color-ink-3)"
+          >
             {discrete ? profile.labels![i] : fmtValue(profile, profile.grid[i])}
           </text>
         ))}

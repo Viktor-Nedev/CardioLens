@@ -101,7 +101,20 @@ export function About() {
         </ul>
       </Card>
 
-      <Card index={5} title="How to use">
+      <Card index={5} title="API and integration">
+        <p>
+          The dashboard is a client of a documented REST API, so the models can be used from other systems too.
+          Interactive documentation: <A href="/docs">/docs</A>.
+        </p>
+        <ul className="space-y-1 font-mono text-xs text-ink-2">
+          <li>POST /api/predict · probabilities, intervals, SHAP</li>
+          <li>POST /api/profile · what-if curve for one factor</li>
+          <li>POST /api/similar · most similar patients</li>
+          <li>GET /api/schema · /api/cases · /api/metrics</li>
+        </ul>
+      </Card>
+
+      <Card index={6} title="How to use">
         <ol className="list-decimal space-y-1.5 pl-4">
           <li>Pick a hold-out patient in the case library, or edit any measurement.</li>
           <li>Rotate and zoom the heart; click an artery, its label or a region of the myocardium to inspect it.</li>

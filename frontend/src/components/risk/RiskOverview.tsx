@@ -3,7 +3,7 @@ import { Activity, CheckCircle2, CircleDashed, FlaskConical, XCircle } from "luc
 import { motion } from "motion/react";
 import { STRUCTURE_BY_NODE, TARGET_NODE } from "../../anatomy/registry";
 import { riskColor } from "../../lib/colors";
-import { pct, pp } from "../../lib/format";
+import { interval, pct, pp } from "../../lib/format";
 import { VESSELS, type TargetId, type TargetPrediction } from "../../lib/types";
 import { useIsModified, useStore } from "../../state/store";
 import { RadialGauge } from "../ui/RadialGauge";
@@ -45,6 +45,36 @@ function Truth({ target }: { target: TargetId }) {
   );
 }
 
+/** Where this patient's CAD probability sits among the hold-out patients. */
+function CohortPosition({ value }: { value: number }) {
+  const cases = useStore((s) => s.cases);
+  if (!cases.length) return null;
+  const below = cases.filter((c) => c.predicted.cad < value).length;
+  const share = below / cases.length;
+  return (
+    <div className="text-[11px] text-ink-3" title="Share of the 61 hold-out patients with a lower predicted CAD probability">
+      <span>
+        Higher than <span className="tabular font-semibold text-ink-2">{Math.round(share * 100)}%</span> of hold-out patients
+      </span>
+      <div className="relative mt-1 h-1.5 w-full rounded-full bg-white/[0.07]" aria-hidden>
+        {cases.map((c) => (
+          <span
+            key={c.id}
+            className="absolute top-1/2 h-1.5 w-px -translate-y-1/2 bg-white/25"
+            style={{ left: `${c.predicted.cad * 100}%` }}
+          />
+        ))}
+        <motion.span
+          className="absolute top-1/2 h-3 w-3 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-surface"
+          initial={false}
+          animate={{ left: `${value * 100}%`, backgroundColor: riskColor(value) }}
+          transition={{ type: "spring", stiffness: 120, damping: 20 }}
+        />
+      </div>
+    </div>
+  );
+}
+
 function CadHero({ pred }: { pred: TargetPrediction }) {
   const select = useStore((s) => s.select);
   const selected = useStore((s) => s.selected);
@@ -75,8 +105,9 @@ function CadHero({ pred }: { pred: TargetPrediction }) {
           {pct(pred.threshold)}
         </p>
         <p className="tabular text-[11px] text-ink-3">
-          {pred.interval ? `80% interval ${pct(pred.interval[0])}–${pct(pred.interval[1])}` : "Point estimate"}
+          {pred.interval ? `80% interval ${interval(pred.interval[0], pred.interval[1])}` : "Point estimate"}
         </p>
+        <CohortPosition value={pred.probability} />
         <div className="flex flex-col gap-1">
           <Truth target="cad" />
           <Delta target="cad" />
@@ -163,6 +194,7 @@ export function RiskOverview() {
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.55, ease: EASE_OUT }}
       className="panel space-y-3 p-4"
+      data-tour="risk"
     >
       <header className="flex items-center justify-between gap-2">
         <h2 className="label-caps flex items-center gap-1.5">

@@ -18,6 +18,14 @@ interface Props {
   height?: number;
   format?: (v: number) => string;
   ariaLabel: string;
+  /** Vertical range (default 0–1); x always spans 0–1. */
+  yDomain?: [number, number];
+  yTicks?: number[];
+  xTicks?: number[];
+  /** Draw the y = x reference (ROC, calibration). */
+  diagonal?: boolean;
+  /** Horizontal reference lines, e.g. a zero line. */
+  hLines?: number[];
 }
 
 const M = { top: 10, right: 12, bottom: 38, left: 44 };
@@ -45,7 +53,20 @@ function nearest(points: [number, number][], x: number): [number, number] | null
 }
 
 /** Unit-square line chart (ROC, calibration) with a crosshair tooltip and a y = x reference. */
-export function CurveChart({ series, xLabel, yLabel, mode = "interpolate", height = 250, format = (v) => v.toFixed(2), ariaLabel }: Props) {
+export function CurveChart({
+  series,
+  xLabel,
+  yLabel,
+  mode = "interpolate",
+  height = 250,
+  format = (v) => v.toFixed(2),
+  ariaLabel,
+  yDomain = [0, 1],
+  yTicks = TICKS,
+  xTicks = TICKS,
+  diagonal = true,
+  hLines = [],
+}: Props) {
   const wrap = useRef<HTMLDivElement>(null);
   const [width, setWidth] = useState(320);
   const [hoverX, setHoverX] = useState<number | null>(null);
@@ -61,7 +82,7 @@ export function CurveChart({ series, xLabel, yLabel, mode = "interpolate", heigh
   const w = width - M.left - M.right;
   const h = height - M.top - M.bottom;
   const sx = (v: number) => M.left + v * w;
-  const sy = (v: number) => M.top + (1 - v) * h;
+  const sy = (v: number) => M.top + (1 - (v - yDomain[0]) / (yDomain[1] - yDomain[0])) * h;
 
   const paths = useMemo(
     () =>
@@ -92,23 +113,28 @@ export function CurveChart({ series, xLabel, yLabel, mode = "interpolate", heigh
   return (
     <div ref={wrap} className="relative w-full">
       <svg width={width} height={height} role="img" aria-label={ariaLabel} className="block">
-        {TICKS.map((t) => (
-          <g key={t}>
+        {yTicks.map((t) => (
+          <g key={`y${t}`}>
             <line x1={sx(0)} x2={sx(1)} y1={sy(t)} y2={sy(t)} stroke="var(--color-grid)" strokeWidth={1} />
             <text x={M.left - 8} y={sy(t)} dy="0.32em" textAnchor="end" fontSize={10} fill="var(--color-ink-3)" className="tabular">
               {t.toFixed(2)}
             </text>
-            <text x={sx(t)} y={sy(0) + 16} textAnchor="middle" fontSize={10} fill="var(--color-ink-3)" className="tabular">
-              {t.toFixed(2)}
-            </text>
           </g>
         ))}
-        <line x1={sx(0)} x2={sx(1)} y1={sy(0)} y2={sy(0)} stroke="var(--color-axis)" strokeWidth={1} />
-        <line x1={sx(0)} y1={sy(0)} x2={sx(1)} y2={sy(1)} stroke="var(--color-axis)" strokeWidth={1} />
+        {xTicks.map((t) => (
+          <text key={`x${t}`} x={sx(t)} y={sy(yDomain[0]) + 16} textAnchor="middle" fontSize={10} fill="var(--color-ink-3)" className="tabular">
+            {t.toFixed(2)}
+          </text>
+        ))}
+        <line x1={sx(0)} x2={sx(1)} y1={sy(yDomain[0])} y2={sy(yDomain[0])} stroke="var(--color-axis)" strokeWidth={1} />
+        {hLines.map((v) => (
+          <line key={`h${v}`} x1={sx(0)} x2={sx(1)} y1={sy(v)} y2={sy(v)} stroke="var(--color-axis)" strokeWidth={1} />
+        ))}
+        {diagonal && <line x1={sx(0)} y1={sy(0)} x2={sx(1)} y2={sy(1)} stroke="var(--color-axis)" strokeWidth={1} />}
         <text x={sx(0.5)} y={height - 4} textAnchor="middle" fontSize={11} fill="var(--color-ink-2)">
           {xLabel}
         </text>
-        <text transform={`translate(12 ${sy(0.5)}) rotate(-90)`} textAnchor="middle" fontSize={11} fill="var(--color-ink-2)">
+        <text transform={`translate(12 ${M.top + h / 2}) rotate(-90)`} textAnchor="middle" fontSize={11} fill="var(--color-ink-2)">
           {yLabel}
         </text>
 
@@ -145,7 +171,9 @@ export function CurveChart({ series, xLabel, yLabel, mode = "interpolate", heigh
 
         {readout && hoverX != null && (
           <g pointerEvents="none">
-            {mode === "interpolate" && <line x1={sx(hoverX)} x2={sx(hoverX)} y1={sy(0)} y2={sy(1)} stroke="var(--color-ink-3)" strokeWidth={1} />}
+            {mode === "interpolate" && (
+              <line x1={sx(hoverX)} x2={sx(hoverX)} y1={M.top + h} y2={M.top} stroke="var(--color-ink-3)" strokeWidth={1} />
+            )}
             {readout.map(({ s, x, y }) =>
               x != null && y != null ? (
                 <circle key={s.id} cx={sx(x)} cy={sy(y)} r={4.5} fill={s.color} stroke="var(--color-surface)" strokeWidth={2} />
@@ -156,7 +184,7 @@ export function CurveChart({ series, xLabel, yLabel, mode = "interpolate", heigh
 
         <rect
           x={sx(0)}
-          y={sy(1)}
+          y={M.top}
           width={w}
           height={h}
           fill="transparent"

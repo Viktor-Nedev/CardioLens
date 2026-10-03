@@ -3,11 +3,15 @@ import { CheckCircle2, Stethoscope, X } from "lucide-react";
 import { AnimatePresence, motion, MotionConfig, type Variants } from "motion/react";
 import { lazy, Suspense, useEffect, useState } from "react";
 import { ExplanationPanel } from "./components/explain/ExplanationPanel";
+import { SensitivityPanel } from "./components/explain/SensitivityPanel";
+import { SimilarPatients } from "./components/explain/SimilarPatients";
 import { DisclaimerBanner, Header, IntroSplash, ShortcutsDialog } from "./components/layout/Chrome";
 import { PatientPanel } from "./components/patient/PatientPanel";
 import { PhysiologyTable } from "./components/physiology/PhysiologyTable";
 import { RiskOverview } from "./components/risk/RiskOverview";
 import { EASE_OUT, Segmented } from "./components/ui/primitives";
+import { ReportDialog } from "./components/report/ReportDialog";
+import { GuidedTour, TourPrompt } from "./components/tour/GuidedTour";
 import { useBoot, usePredictionSync } from "./hooks/useBoot";
 import { useStore } from "./state/store";
 
@@ -32,7 +36,7 @@ const columns: Variants = {
 
 function Analysis({ active }: { active: boolean }) {
   const [pane, setPane] = useState<MobilePane>("viewer");
-  const [insight, setInsight] = useState<"explain" | "physiology">("explain");
+  const [insight, setInsight] = useState<"explain" | "physiology" | "whatif" | "similar">("explain");
   const ready = useStore((s) => s.disclaimerAccepted);
   const reveal = ready ? "show" : "hidden";
 
@@ -89,14 +93,16 @@ function Analysis({ active }: { active: boolean }) {
           )}
         >
           <RiskOverview />
-          <div className="flex justify-center">
+          <div className="flex justify-center" data-tour="insights">
             <Segmented
               ariaLabel="Insight"
               value={insight}
               onChange={setInsight}
               options={[
-                { value: "explain", label: "Explanation (SHAP)" },
-                { value: "physiology", label: "Physiological breakdown" },
+                { value: "explain", label: "SHAP" },
+                { value: "physiology", label: "Physiology" },
+                { value: "whatif", label: "What-if" },
+                { value: "similar", label: "Similar cases" },
               ]}
             />
           </div>
@@ -108,7 +114,15 @@ function Analysis({ active }: { active: boolean }) {
               exit={{ opacity: 0, y: -8 }}
               transition={{ duration: 0.25, ease: EASE_OUT }}
             >
-              {insight === "explain" ? <ExplanationPanel /> : <PhysiologyTable />}
+              {insight === "explain" ? (
+                <ExplanationPanel />
+              ) : insight === "physiology" ? (
+                <PhysiologyTable />
+              ) : insight === "whatif" ? (
+                <SensitivityPanel />
+              ) : (
+                <SimilarPatients />
+              )}
             </motion.div>
           </AnimatePresence>
         </motion.div>
@@ -220,6 +234,9 @@ export default function App() {
       </div>
       <ToastHost />
       <ShortcutsDialog />
+      <ReportDialog />
+      <TourPrompt />
+      <GuidedTour />
       <IntroSplash />
     </MotionConfig>
   );

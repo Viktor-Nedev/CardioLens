@@ -17,3 +17,13 @@ export function ordinal(n: number): string {
   const v = r % 100;
   return `${r}${s[(v - 20) % 10] || s[v] || s[0]}`;
 }
+
+/** A proportion such as sensitivity: exact rounding (0% is a real value, not "<1%"). */
+export const rate = (v: number) => `${Math.round(v * 100)}%`;
+
+/** Probability interval; collapses to one value when both ends round the same. */
+export function interval(lo: number, hi: number): string {
+  const a = pct(lo);
+  const b = pct(hi);
+  return a === b ? a : `${a} – ${b}`;
+}

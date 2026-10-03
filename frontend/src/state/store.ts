@@ -77,6 +77,13 @@ interface AppState {
   disclaimerAccepted: boolean;
   toast: Toast | null;
   shortcutsOpen: boolean;
+  reportOpen: boolean;
+  /** Index of the guided-tour step on screen, or null. */
+  tourStep: number | null;
+  /** 3D cross-section depth: 0 = off, 1 = cut through to the back of the heart. */
+  section: number;
+  /** Registered by the 3D viewer: PNG data URL of the current frame. */
+  snapshot?: () => string | null;
   /** Bumps on every new prediction; drives the 3D "re-analysis" scan sweep. */
   scanNonce: number;
 
@@ -98,6 +105,9 @@ interface AppState {
   showToast: (title: string, detail?: string) => void;
   dismissToast: () => void;
   setShortcutsOpen: (open: boolean) => void;
+  setReportOpen: (open: boolean) => void;
+  setTourStep: (step: number | null) => void;
+  setSection: (depth: number) => void;
 }
 
 const DISCLAIMER_KEY = "cardiolens.disclaimer.v1";
@@ -160,6 +170,9 @@ export const useStore = create<AppState>((set, get) => ({
   disclaimerAccepted: readAccepted(),
   toast: null,
   shortcutsOpen: false,
+  reportOpen: false,
+  tourStep: null,
+  section: 0,
   scanNonce: 0,
 
   setBoot: ({ schema, cases, metrics, importance }) => {
@@ -218,6 +231,9 @@ export const useStore = create<AppState>((set, get) => ({
   showToast: (title, detail) => set((s) => ({ toast: { id: (s.toast?.id ?? 0) + 1, title, detail } })),
   dismissToast: () => set({ toast: null }),
   setShortcutsOpen: (open) => set({ shortcutsOpen: open }),
+  setReportOpen: (open) => set({ reportOpen: open }),
+  setTourStep: (step) => set({ tourStep: step }),
+  setSection: (depth) => set({ section: Math.min(1, Math.max(0, depth)) }),
 }));
 
 /** True when the current inputs differ from the loaded case (what-if mode). */

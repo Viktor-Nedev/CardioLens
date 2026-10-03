@@ -199,7 +199,7 @@ export function PatientPanel() {
   if (!schema) return <div className="panel skeleton h-full" aria-busy="true" />;
 
   return (
-    <section className="panel flex h-full min-h-0 flex-col">
+    <section className="panel flex h-full min-h-0 flex-col" data-tour="patient">
       <div className="space-y-3 border-b border-line p-4">
         <h2 className="label-caps flex items-center gap-1.5">
           <UserRound size={13} className="text-accent" aria-hidden /> Patient

@@ -1,5 +1,5 @@
 import { Html, Line, useGLTF } from "@react-three/drei";
-import { useFrame, type ThreeEvent } from "@react-three/fiber";
+import { useFrame, useThree, type ThreeEvent } from "@react-three/fiber";
 import { motion } from "motion/react";
 import { useEffect, useMemo, useRef } from "react";
 import * as THREE from "three";
@@ -72,6 +72,10 @@ export function AnatomyScene() {
   const setHovered = useStore((s) => s.setHovered);
   const setHoverInfo = useStore((s) => s.setHoverInfo);
   const revealed = useStore((s) => s.disclaimerAccepted);
+  const section = useStore((s) => s.section);
+  const gl = useThree((s) => s.gl);
+  const cutPlane = useMemo(() => new THREE.Plane(new THREE.Vector3(0, 0, -1), 10), []);
+  const cutFrame = useRef<THREE.Group>(null);
 
   const heart = useMemo(() => createHeartMaterial(), []);
   const hologram = useMemo(() => createHologramMaterial(), []);
@@ -187,15 +191,36 @@ export function AnatomyScene() {
     return out;
   }, [parts]);
 
-  // Heart x-ray mode toggles transparency on the myocardium.
+  // Heart x-ray mode toggles transparency on the myocardium; a cross-section shows the inner walls.
+  const cutting = section > 0;
   useEffect(() => {
     const m = heart.material;
     m.transparent = viewer.xray;
     m.opacity = viewer.xray ? 0.3 : 1;
     m.depthWrite = !viewer.xray;
-    m.side = viewer.xray ? THREE.DoubleSide : THREE.FrontSide;
+    m.side = viewer.xray || cutting ? THREE.DoubleSide : THREE.FrontSide;
     m.needsUpdate = true;
-  }, [viewer.xray, heart.material]);
+  }, [viewer.xray, cutting, heart.material]);
+
+  useEffect(() => {
+    gl.localClippingEnabled = true;
+  }, [gl]);
+  useEffect(() => {
+    const planes = cutting ? [cutPlane] : [];
+    const clipped = [
+      heart.material,
+      ...VESSEL_TARGETS.map((t) => vesselMaterials[t].material),
+      staticMaterials.lm,
+      staticMaterials.aorta,
+      staticMaterials.cava,
+      staticMaterials.veins,
+      staticMaterials.outline,
+    ];
+    for (const m of clipped) {
+      m.clippingPlanes = planes;
+      m.needsUpdate = true;
+    }
+  }, [cutting, cutPlane, heart.material, vesselMaterials, staticMaterials]);
 
   const targetColors = useMemo(() => {
     const out = {} as Record<TargetId, THREE.Color>;
@@ -271,6 +296,14 @@ export function AnatomyScene() {
       scanRing.current.position.y = scanY;
       scanRing.current.visible = strength > 0.01;
       scanRingMaterial.opacity = 0.75 * strength;
+    }
+
+    // Cross-section plane eases to its depth; the frame marks where the cut is.
+    const cutZ = 0.62 - 1.24 * section;
+    cutPlane.constant = cutPlane.constant > 5 ? cutZ : THREE.MathUtils.lerp(cutPlane.constant, cutZ, k);
+    if (cutFrame.current) {
+      cutFrame.current.position.z = cutPlane.constant;
+      cutFrame.current.visible = cutting;
     }
 
     // Heartbeat at the patient's recorded pulse rate.
@@ -424,6 +457,34 @@ export function AnatomyScene() {
       {viewer.ribs && parts.ribs && <mesh geometry={parts.ribs} material={staticMaterials.bone} raycast={noRaycast} />}
       {viewer.ribs && parts.sternum && <mesh geometry={parts.sternum} material={staticMaterials.bone} raycast={noRaycast} />}
       {viewer.torso && parts.skin && <mesh geometry={parts.skin} material={hologram} raycast={noRaycast} renderOrder={10} />}
+
+      <group ref={cutFrame} visible={false}>
+        <Line
+          points={[
+            [-0.85, -0.75, 0],
+            [0.85, -0.75, 0],
+            [0.85, 0.9, 0],
+            [-0.85, 0.9, 0],
+            [-0.85, -0.75, 0],
+          ]}
+          color="#5cc8f5"
+          lineWidth={1.2}
+          transparent
+          opacity={0.7}
+          raycast={noRaycast}
+        />
+        <mesh raycast={noRaycast}>
+          <planeGeometry args={[1.7, 1.65]} />
+          <meshBasicMaterial
+            color="#5cc8f5"
+            transparent
+            opacity={0.04}
+            side={THREE.DoubleSide}
+            depthWrite={false}
+            blending={THREE.AdditiveBlending}
+          />
+        </mesh>
+      </group>
 
       <mesh ref={scanRing} rotation-x={Math.PI / 2} material={scanRingMaterial} raycast={noRaycast} visible={false}>
         <torusGeometry args={[0.74, 0.0035, 8, 160]} />

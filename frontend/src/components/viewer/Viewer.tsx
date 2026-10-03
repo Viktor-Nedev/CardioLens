@@ -1,5 +1,5 @@
 import { AdaptiveDpr, Bvh, Environment, Lightformer, PerformanceMonitor, useProgress } from "@react-three/drei";
-import { Canvas } from "@react-three/fiber";
+import { Canvas, useThree } from "@react-three/fiber";
 import { AnimatePresence, motion } from "motion/react";
 import { Component, Suspense, useEffect, useMemo, useState, type ReactNode } from "react";
 import { META_URL, type AnatomyMeta } from "../../anatomy/registry";
@@ -9,7 +9,7 @@ import { AnatomyScene } from "./AnatomyScene";
 import { CameraRig } from "./CameraRig";
 import { Ambience, PostFX } from "./Effects";
 import { createBackdropTexture } from "./materials";
-import { HoverCard, LayerMenu, RiskLegend, ScanStatus, ViewBar } from "./ViewerOverlays";
+import { HoverCard, LayerMenu, RiskLegend, ScanStatus, SectionControl, SnapshotButton, ViewBar } from "./ViewerOverlays";
 
 const KEY_TARGET: Record<string, TargetId> = { "0": "cad", "1": "lad", "2": "lcx", "3": "rca" };
 
@@ -28,6 +28,24 @@ class CanvasBoundary extends Component<{ children: ReactNode }, { failed: boolea
     }
     return this.props.children;
   }
+}
+
+/** Lets the rest of the app grab the current frame (report, PNG download). */
+function SnapshotBridge() {
+  const gl = useThree((s) => s.gl);
+  useEffect(() => {
+    useStore.setState({
+      snapshot: () => {
+        try {
+          return gl.domElement.toDataURL("image/png");
+        } catch {
+          return null;
+        }
+      },
+    });
+    return () => useStore.setState({ snapshot: undefined });
+  }, [gl]);
+  return null;
 }
 
 function LoadingOverlay() {
@@ -95,12 +113,15 @@ export function Viewer({ active = true }: { active?: boolean }) {
   }, [select, active]);
 
   return (
-    <div className="relative h-full w-full overflow-hidden rounded-2xl border border-white/[0.08] bg-[#06090f] shadow-[0_20px_60px_-30px_rgb(0_0_0/0.9)]">
+    <div
+      className="relative h-full w-full overflow-hidden rounded-2xl border border-white/[0.08] bg-[#06090f] shadow-[0_20px_60px_-30px_rgb(0_0_0/0.9)]"
+      data-tour="viewer"
+    >
       <CanvasBoundary>
         <Canvas
           frameloop={active ? "always" : "never"}
           dpr={performance ? 1 : [1, 1.75]}
-          gl={{ antialias: !composited && !performance, powerPreference: "high-performance" }}
+          gl={{ antialias: !composited && !performance, powerPreference: "high-performance", preserveDrawingBuffer: true }}
           camera={{ fov: 34, near: 0.05, far: 60, position: [1.1, 0.6, 7.6] }}
           onPointerMissed={() => useStore.getState().setHoverInfo(null)}
           aria-label="Interactive 3D heart with coronary arteries coloured by predicted stenosis probability"
@@ -134,6 +155,7 @@ export function Viewer({ active = true }: { active?: boolean }) {
             <Ambience />
           </Suspense>
           <CameraRig meta={meta} />
+          <SnapshotBridge />
           <PostFX />
         </Canvas>
       </CanvasBoundary>
@@ -144,7 +166,9 @@ export function Viewer({ active = true }: { active?: boolean }) {
       {revealed && (
         <>
           <ViewBar />
+          <SnapshotButton />
           <LayerMenu />
+          <SectionControl />
           <ScanStatus />
           <RiskLegend />
           <HoverCard />

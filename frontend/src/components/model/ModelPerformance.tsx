@@ -10,6 +10,7 @@ import { PageHeader } from "../ui/PageHeader";
 import { spotlightMove } from "../ui/effects";
 import { CurveChart } from "./CurveChart";
 import { PipelineDiagram } from "./PipelineDiagram";
+import { DecisionCurve, SubgroupTable } from "./ClinicalUtility";
 
 const ci = (m: MetricCI, digits = 2) => `${num(m.value, digits)} [${num(m.ci_low, digits)}–${num(m.ci_high, digits)}]`;
 
@@ -407,6 +408,11 @@ export function ModelPerformance() {
         >
           <CurveChart series={calSeries} mode="nearest" xLabel="Predicted probability" yLabel="Observed frequency" ariaLabel={`Calibration curve for ${r.short}`} />
         </ChartCard>
+      </div>
+
+      <div className="grid gap-3 lg:grid-cols-2">
+        <DecisionCurve target={target} />
+        <SubgroupTable target={target} />
       </div>
 
       <div className="grid gap-3 lg:grid-cols-3">

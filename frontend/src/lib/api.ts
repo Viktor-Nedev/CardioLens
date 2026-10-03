@@ -1,4 +1,4 @@
-import type { Case, Importance, MetricsReport, Patient, Prediction, Schema } from "./types";
+import type { Case, Importance, MetricsReport, Patient, Prediction, Profile, Schema, SimilarResult } from "./types";
 
 const BASE = (import.meta.env.VITE_API_BASE as string | undefined)?.replace(/\/$/, "") ?? "";
 
@@ -25,4 +25,12 @@ export const api = {
       body: JSON.stringify({ features, with_interval: true }),
       signal,
     }),
+  profile: (features: Patient, feature: string, signal?: AbortSignal) =>
+    request<Profile>("/api/profile", {
+      method: "POST",
+      body: JSON.stringify({ features, feature, points: 41 }),
+      signal,
+    }),
+  similar: (features: Patient, k = 5, signal?: AbortSignal) =>
+    request<SimilarResult>("/api/similar", { method: "POST", body: JSON.stringify({ features, k }), signal }),
 };

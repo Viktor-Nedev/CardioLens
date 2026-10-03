@@ -1,5 +1,5 @@
 import clsx from "clsx";
-import { Check, Layers, Loader2, MousePointerClick, ScanLine } from "lucide-react";
+import { Camera, Check, Layers, Loader2, MousePointerClick, ScanLine, Scissors } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import { useEffect, useRef, useState } from "react";
 import { riskGradient } from "../../lib/colors";
@@ -222,5 +222,57 @@ export function HoverCard() {
         </motion.div>
       )}
     </>
+  );
+}
+
+export function SnapshotButton() {
+  const showToast = useStore((s) => s.showToast);
+  const save = () => {
+    const url = useStore.getState().snapshot?.();
+    if (!url) return;
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `cardiolens-3d-${new Date().toISOString().slice(0, 19).replace(/[:T]/g, "-")}.png`;
+    a.click();
+    showToast("Snapshot saved", "PNG of the current 3D view");
+  };
+  return (
+    <motion.button
+      {...appear(1)}
+      type="button"
+      onClick={save}
+      className="btn glass-chip absolute right-[6.4rem] top-3 z-20"
+      title="Save a PNG of the 3D view"
+      aria-label="Save a snapshot of the 3D view"
+    >
+      <Camera size={14} />
+    </motion.button>
+  );
+}
+
+/** Cuts the heart front-to-back with a clipping plane to reveal the chambers. */
+export function SectionControl() {
+  const section = useStore((s) => s.section);
+  const setSection = useStore((s) => s.setSection);
+  return (
+    <motion.div {...appear(1.15)} className="glass-chip absolute bottom-14 right-3 z-10 hidden w-52 px-3 py-2 lg:block">
+      <div className="flex items-center justify-between text-[11px]">
+        <span className="flex items-center gap-1.5 font-medium text-ink-2">
+          <Scissors size={12} className="text-accent" /> Cross-section
+        </span>
+        <span className="tabular text-ink-3">{section === 0 ? "off" : `${Math.round(section * 100)}%`}</span>
+      </div>
+      <input
+        type="range"
+        min={0}
+        max={1}
+        step={0.01}
+        value={section}
+        onChange={(e) => setSection(Number(e.target.value))}
+        style={{ ["--fill" as string]: `${section * 100}%` }}
+        className="mt-1 w-full"
+        aria-label="Cross-section depth"
+      />
+    </motion.div>
   );
 }

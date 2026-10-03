@@ -1,5 +1,5 @@
 import clsx from "clsx";
-import { ArrowRight, Box, BrainCircuit, Gauge, Heart, Keyboard, ShieldAlert, X } from "lucide-react";
+import { ArrowRight, Box, BrainCircuit, Compass, FileText, Gauge, Heart, Keyboard, ShieldAlert, X } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import { useEffect } from "react";
 import { useStore, type Tab } from "../../state/store";
@@ -128,6 +128,9 @@ export function Header() {
   const tab = useStore((s) => s.tab);
   const setTab = useStore((s) => s.setTab);
   const setShortcuts = useStore((s) => s.setShortcutsOpen);
+  const setReport = useStore((s) => s.setReportOpen);
+  const setTourStep = useStore((s) => s.setTourStep);
+  const canReport = useStore((s) => Boolean(s.prediction));
   return (
     <motion.header
       initial={{ y: -12, opacity: 0 }}
@@ -142,7 +145,7 @@ export function Header() {
           <p className="text-[10px] text-ink-3">Explainable coronary risk in 3D</p>
         </div>
       </div>
-      <nav className="order-3 flex w-full gap-1 overflow-x-auto sm:order-none sm:w-auto" aria-label="Main">
+      <nav className="order-3 flex w-full gap-1 overflow-x-auto sm:order-none sm:w-auto" aria-label="Main" data-tour="tabs">
         {TABS.map((t) => (
           <button
             key={t.id}
@@ -169,6 +172,24 @@ export function Header() {
       <div className="flex items-center gap-3">
         <EcgMonitor />
         <ApiStatus />
+        <button
+          type="button"
+          onClick={() => setTourStep(0)}
+          className="btn-ghost hidden lg:inline-flex"
+          title="Guided tour"
+        >
+          <Compass size={14} /> Tour
+        </button>
+        <button
+          type="button"
+          onClick={() => setReport(true)}
+          disabled={!canReport}
+          className="btn border-accent/40 bg-accent-soft text-ink"
+          title="Patient report (print or save as PDF)"
+          data-tour="report"
+        >
+          <FileText size={14} /> <span className="hidden sm:inline">Report</span>
+        </button>
         <button
           type="button"
           onClick={() => setShortcuts(true)}

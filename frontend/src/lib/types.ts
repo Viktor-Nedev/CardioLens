@@ -230,3 +230,32 @@ export type Importance = Record<TargetId, ImportanceRow[]>;
 
 export const TARGET_ORDER: TargetId[] = ["cad", "lad", "lcx", "rca"];
 export const VESSELS: TargetId[] = ["lad", "lcx", "rca"];
+
+export interface Profile {
+  feature: string;
+  label: string;
+  kind: FeatureKind;
+  unit: string | null;
+  ref: [number, number] | null;
+  grid: (number | string)[];
+  labels: string[] | null;
+  current: number | string;
+  targets: Record<TargetId, number[]>;
+  thresholds: Record<TargetId, number>;
+}
+
+export interface Neighbour {
+  patient_id: number;
+  similarity: number;
+  distance: number;
+  summary: string;
+  truth: Record<TargetId, 0 | 1>;
+  features: Patient;
+}
+
+export interface SimilarResult {
+  neighbours: Neighbour[];
+  summary: Record<TargetId, number>;
+  k: number;
+  pool: number;
+}

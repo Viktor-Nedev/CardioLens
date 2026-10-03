@@ -12,11 +12,14 @@ The deliverables are:
 - a web application: a FastAPI backend and a React/three.js dashboard;
 - a reproducible training pipeline with the trained weights committed;
 - a reproducible 3D-anatomy build;
-- 15 automated tests;
-- a single-container Docker image.
+- 34 automated tests and a CI workflow;
+- a single-container Docker image and one-command start scripts.
 
 > Decision support and education only. The outputs are statistical estimates and
 > do not replace coronary angiography, CT angiography or clinical judgement.
+
+![The CardioLens analysis view](figures/screenshot_analysis.jpg)
+*Figure 1. The analysis view for hold-out patient #29: clinical inputs (left), the 3D heart with each artery coloured by its predicted stenosis probability (centre), and the calibrated risks with their SHAP explanation (right).*
 
 ## 1. Dataset and preprocessing
 
@@ -119,6 +122,7 @@ probabilities as an 80% interval.
 | RCA | **0.703 ± 0.057** | 0.679 ± 0.070 | 0.704 ± 0.065 | 0.705 ± 0.061 | 0.723 ± 0.068 |
 
 ![ROC and calibration per target](figures/roc_calibration.png)
+*Figure 2. Top: hold-out ROC curves with AUC and 95% CI. Bottom: calibration of the out-of-fold development predictions (blue) and of the hold-out predictions (grey).*
 
 **Discussion.**
 - **CAD.** Overall CAD is predicted well: hold-out AUC 0.88 and F1 0.88, with a Brier score of 0.121 against 0.201 for the prevalence baseline.
@@ -212,7 +216,8 @@ Anatomical context comes from:
 - `/api/schema`: the feature catalogue with cohort statistics;
 - `/api/cases`: the hold-out patients with ground truth;
 - `/api/metrics` and `/api/importance`;
-- `/api/predict`: partial inputs are accepted; the response contains probabilities, intervals, thresholds, risk bands, SHAP contributions, summaries and physiology rows.
+- `/api/predict`: partial inputs are accepted; the response contains probabilities, intervals, thresholds, risk bands, SHAP contributions, summaries and physiology rows;
+- `/api/profile` and `/api/similar`: what-if curves for any input, and the most similar development patients with their angiography results.
 
 One full prediction (4 targets, SHAP, bootstrap intervals) takes about 33 ms on a
 laptop CPU. The dashboard debounces edits by 140 ms and cancels stale requests, so
@@ -232,11 +237,11 @@ the 3D colours and explanations follow slider movements in real time.
 - A multi-stage Dockerfile builds the dashboard and serves it from the API on port 7860, with deployment configs for Hugging Face Spaces and Render.
 
 **Usage.**
-1. `docker compose up --build` and open <http://localhost:7860>, or run `uvicorn` and `npm run dev` for development.
-2. Acknowledge the disclaimer.
+1. Run `start.bat` (Windows) or `scripts/start.sh`, which sets up the environment on first run and opens <http://127.0.0.1:8000>; or `docker compose up --build` and open <http://localhost:7860>.
+2. Acknowledge the disclaimer; an optional guided tour introduces the layout.
 3. Choose a hold-out patient from the searchable case library (risk dots and angiography result per case), or edit any input.
-4. Inspect the 3D heart, then the explanation and physiology panels.
-5. Open *Model performance* for ROC and calibration curves, confusion matrices, the family comparison and global importance.
+4. Inspect the 3D heart, then the SHAP, physiology, what-if and similar-case panels. *Report* prints a one-page patient summary.
+5. Open *Model performance* for ROC, calibration and decision curves, subgroup results, confusion matrices, the family comparison, global importance and a cohort view of every hold-out patient.
 
 ## 7. Limitations and future work
 

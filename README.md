@@ -17,11 +17,11 @@ and explains every estimate with SHAP and a physiological breakdown.
 ![CardioLens analysis view: coronary arteries coloured by predicted stenosis probability](docs/figures/screenshot_analysis.jpg)
 
 <p align="center">
-  <img src="docs/figures/screenshot_whatif.jpg" alt="What-if mode: editing the age re-scores every artery live" width="49%">
+  <img src="docs/figures/screenshot_whatif.jpg" alt="What-if mode: a younger age re-scores every artery live, and the curve shows how LAD risk varies with age" width="49%">
   <img src="docs/figures/screenshot_xray.jpg" alt="X-ray mode, inferior view of the coronary tree" width="49%">
   <img src="docs/figures/screenshot_section.jpg" alt="Cross-section through the heart revealing the chambers" width="49%">
   <img src="docs/figures/screenshot_report.jpg" alt="Printable patient report" width="49%">
-  <img src="docs/figures/screenshot_model.jpg" alt="Model performance dashboard" width="49%">
+  <img src="docs/figures/screenshot_model.jpg" alt="Model performance: validation pipeline, hold-out metrics and every unseen patient on one probability axis" width="49%">
   <img src="docs/figures/screenshot_disclaimer.jpg" alt="Welcome screen: live 3D heart, key numbers and the clinical safety disclaimer" width="49%">
 </p>
 
@@ -68,7 +68,8 @@ threshold choice. Brackets show the bootstrap 95% CI.
 </p>
 
 Full per-target curves, confusion matrices and model comparisons are shown in the
-dashboard (**Model performance** tab) and in [`docs/REPORT.md`](docs/REPORT.md).
+dashboard (**Model performance** tab) and in the project report
+([PDF](docs/REPORT.pdf), [Markdown](docs/REPORT.md)).
 Intended use, limitations and risks are summarised in the
 [model card](docs/MODEL_CARD.md).
 
@@ -135,6 +136,15 @@ pip install -r backend/requirements-anatomy.txt
 python anatomy/build_heart_glb.py   # downloads ~170 MB of BodyParts3D STL once, writes frontend/public/models/heart.glb
 ```
 
+### Rebuild the report PDF (optional)
+
+```bash
+backend/.venv/Scripts/python scripts/build_report.py   # macOS/Linux: backend/.venv/bin/python
+```
+
+Renders `docs/REPORT.md` to an A4 PDF with Chrome or Edge and fails if it exceeds
+the 6-page limit.
+
 ## Architecture
 
 ```
@@ -164,8 +174,8 @@ python anatomy/build_heart_glb.py   # downloads ~170 MB of BodyParts3D STL once,
 | `backend/artifacts/` | Trained weights (`models/*.joblib`), `metrics.json`, `importance.json`, `schema.json`, `cases.json` |
 | `anatomy/build_heart_glb.py` | Reproducible BodyParts3D → GLB pipeline (orientation, decimation, territory weights) |
 | `frontend/src/` | Dashboard: `components/viewer` (3D), `risk`, `explain`, `physiology`, `patient`, `model` |
-| `docs/` | Project report (≤6 pages), model card, demo video script, figures |
-| `scripts/`, `start.bat` | One-command local start (sets up on first run) |
+| `docs/` | Project report (≤6 pages, PDF and Markdown), model card, demo video script, figures |
+| `scripts/`, `start.bat` | One-command local start (sets up on first run); report PDF build |
 | `.github/workflows/ci.yml` | CI: backend tests, frontend tests and build, Docker smoke test |
 | `deploy/` | Render blueprint and Hugging Face Spaces card |
 

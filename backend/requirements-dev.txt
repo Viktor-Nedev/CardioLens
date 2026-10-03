@@ -3,3 +3,5 @@
 matplotlib==3.11.2
 pytest==9.1.1
 httpx==0.28.1
+# Report PDF (scripts/build_report.py)
+markdown-it-py==4.2.0

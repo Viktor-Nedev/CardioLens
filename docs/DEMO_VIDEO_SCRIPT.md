@@ -1,8 +1,9 @@
 # CardioLens demo video script (≈ 8 minutes)
 
 Recording setup: 1920×1080, browser at 100% zoom, the production build served by
-`uvicorn` (or `docker compose up`) at <http://localhost:7860>. Close other tabs,
-hide bookmarks, and start on the disclaimer screen.
+`start.bat` / `scripts/start.sh` at <http://127.0.0.1:8000> (or `docker compose up`
+at <http://localhost:7860>). Close other tabs, hide bookmarks, and start on the
+disclaimer screen.
 
 | Time | Screen | Narration (suggested) |
 |---|---|---|
@@ -15,8 +16,8 @@ hide bookmarks, and start on the disclaimer screen.
 | 4:15–5:00 | **What-if** tab, then **Similar cases** tab | "What-if curves vary one factor while everything else stays as entered. Here LDL: the dot is this patient, the line the model's response, the band the reference range. It is model sensitivity, not a treatment effect. Similar cases finds the five closest patients the models learnt from: four of five had CAD." |
 | 5:00–5:45 | Left panel: change typical chest pain, age slider, ejection fraction | "Inputs are fully editable. Watch the scan band sweep down the heart as the model re-scores, the artery colours shift, and each card flash with the size of the change; the SHAP bars re-order themselves. A full prediction with explanations takes about 35 milliseconds on the server. The delta against the loaded case stays next to every probability, and the ECG strip in the header beats at the patient's pulse rate." Then **Reset edits**. Open the case library, type "normal", pick a low-risk patient: "These 61 patients were never seen during training; every row shows the predicted risk of each artery and the angiography result." |
 | 5:45–6:30 | 3D cross-section slider, snapshot, **Report** | "A cross-section cuts through the heart to show the chambers. The report button produces a one-page printable report with the predictions, drivers, flagged measurements and a 3D snapshot." Click **Print / save as PDF**. |
-| 6:30–7:15 | Model performance tab | "This diagram is the validation protocol: every model was chosen with nested cross-validation on the development set, and the hold-out set bypasses all of it and is used exactly once. Here are ROC-AUC, sensitivity, specificity, F1 and Brier score with 95% confidence intervals, ROC and calibration curves, the confusion matrix, the comparison of four model families against a risk-factor baseline, and global SHAP importance." Scroll to the decision curve: "acting on the model gives more net benefit than treating everyone, across most thresholds"; then the subgroup check. Switch between CAD, LAD, LCX and RCA. |
-| 7:15–7:45 | Code / README (optional) | "The repository contains the training pipeline, the saved model weights, the reproducible anatomy build, tests, and a Docker image. Features, targets and 3D structures are declared in configuration, so the system extends without a redesign." |
+| 6:30–7:25 | Model performance tab | "This diagram is the validation protocol: every model was chosen with nested cross-validation on the development set, and the hold-out set bypasses all of it and is used exactly once. Here are ROC-AUC, sensitivity, specificity, F1 and Brier score with 95% confidence intervals, ROC and calibration curves, the confusion matrix, the comparison of four model families against a risk-factor baseline, and global SHAP importance." Point at the cohort strip: "every unseen patient on one probability axis, split by what angiography found; the amber dots are the misclassified ones, and clicking one opens that patient." Scroll to the decision curve: "acting on the model gives more net benefit than treating everyone, across most thresholds"; then the subgroup check. Switch between CAD, LAD, LCX and RCA. |
+| 7:25–7:55 | Code / README (optional) | "The repository contains the training pipeline, the saved model weights, the reproducible anatomy build, 34 automated tests that run in CI, a one-command start script and a Docker image. Features, targets and 3D structures are declared in configuration, so the system extends without a redesign." |
 
 Tips: move the mouse slowly during camera transitions; keep the SHAP chart on
 screen for a few seconds after each edit so viewers can see the bars animate.

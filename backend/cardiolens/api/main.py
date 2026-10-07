@@ -33,6 +33,7 @@ def get_predictor() -> Predictor:
 async def lifespan(_: FastAPI):
     predictor = get_predictor()  # load models and warm up explainers before serving
     predictor.predict(predictor.default_patient())
+    predictor.cohort_map()  # the t-SNE map is computed once, before the first request
     yield
 
 
@@ -109,6 +110,12 @@ def profile(req: ProfileRequest) -> dict:
 def similar(req: SimilarRequest) -> dict:
     """The most similar development patients and their angiography results."""
     return get_predictor().similar(req.features, req.k)
+
+
+@app.get("/api/cohort/map")
+def cohort_map() -> dict:
+    """2D map (t-SNE) of the development patients in the similarity space, with their angiography results."""
+    return get_predictor().cohort_map()
 
 
 @app.post("/api/lime")

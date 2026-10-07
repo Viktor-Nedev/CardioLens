@@ -258,6 +258,23 @@ export interface SimilarResult {
   summary: Record<TargetId, number>;
   k: number;
   pool: number;
+  /** The patient's place on the cohort map (0..1), interpolated from its nearest neighbours */
+  position: [number, number] | null;
+}
+
+export interface MapPoint {
+  patient_id: number;
+  x: number;
+  y: number;
+  cad: 0 | 1;
+  /** Number of stenotic arteries at angiography (0-3) */
+  vessels: number;
+}
+
+export interface CohortMap {
+  method: string | null;
+  pool: number;
+  points: MapPoint[];
 }
 
 export interface LimeWeight {

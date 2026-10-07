@@ -6,6 +6,7 @@ import { api } from "../../lib/api";
 import { TARGET_ORDER, type SimilarResult } from "../../lib/types";
 import { useStore } from "../../state/store";
 import { EASE_OUT, Section } from "../ui/primitives";
+import { CohortMap } from "./CohortMap";
 
 const NAMES: Record<string, string> = { cad: "CAD", lad: "LAD", lcx: "LCX", rca: "RCA" };
 
@@ -13,6 +14,7 @@ const NAMES: Record<string, string> = { cad: "CAD", lad: "LAD", lcx: "LCX", rca:
 export function SimilarPatients() {
   const patient = useStore((s) => s.patient);
   const loadPatient = useStore((s) => s.loadPatient);
+  const risk = useStore((s) => s.prediction?.targets.cad.probability ?? 0.5);
   const [result, setResult] = useState<SimilarResult | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -77,6 +79,12 @@ export function SimilarPatients() {
           );
         })}
       </div>
+
+      <CohortMap result={result} risk={risk} />
+      <p className="mt-1.5 text-[10.5px] leading-snug text-ink-3">
+        Map of all {result.pool} development patients (t-SNE of the similarity space): patients with similar inputs sit
+        close together. The marker follows this patient as you edit; dashed lines lead to its nearest neighbours.
+      </p>
 
       <ul className="mt-3 space-y-1.5">
         {result.neighbours.map((n, i) => (

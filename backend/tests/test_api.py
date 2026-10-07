@@ -70,3 +70,12 @@ def test_lime_endpoint():
         assert body["samples"] == 300
         assert len(body["targets"]["lcx"]["weights"]) == N_FEATURES
         assert c.post("/api/lime", json={"features": {}, "samples": 10}).status_code == 422
+
+
+def test_cohort_map_endpoint():
+    with make_client() as c:
+        body = c.get("/api/cohort/map").json()
+        assert body["pool"] == len(body["points"]) > 0
+        assert {"patient_id", "x", "y", "cad", "vessels"} <= set(body["points"][0])
+        case = c.get("/api/cases").json()[0]
+        assert len(c.post("/api/similar", json={"features": case["features"]}).json()["position"]) == 2

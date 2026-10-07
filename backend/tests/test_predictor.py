@@ -103,3 +103,12 @@ def test_lime_agrees_with_shap_and_is_seeded(predictor):
         # A second, independent method tells the same story as SHAP.
         assert t["correlation"] > 0.8
         assert t["sign_agreement"] >= 0.8
+
+
+def test_cohort_map_places_a_development_patient_on_its_own_point(predictor):
+    m = predictor.cohort_map()
+    assert m["pool"] == len(predictor.cohort) == len(m["points"])
+    assert all(0 <= pt["x"] <= 1 and 0 <= pt["y"] <= 1 for pt in m["points"])
+    me = predictor.cohort[3]
+    own = next(pt for pt in m["points"] if pt["patient_id"] == me["patient_id"])
+    assert predictor.similar(me["features"])["position"] == pytest.approx([own["x"], own["y"]], abs=1e-3)

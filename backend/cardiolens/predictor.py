@@ -98,6 +98,8 @@ class Predictor:
         self._prep_groups = self._group_preprocessors()
         self._owners = joblib.load(self.artifacts_dir / "models" / f"{self.catalog.targets[0].id}.joblib")["owners"]
         self.cohort = self._read_json("cohort.json") if (self.artifacts_dir / "cohort.json").exists() else []
+        self._map: dict[str, Any] | None = None
+        self._map_xy: np.ndarray | None = None
         self._build_similarity_space()
 
     def _group_preprocessors(self) -> list[tuple[Any, list[str]]]:
@@ -406,7 +408,7 @@ class Predictor:
     def similar(self, payload: dict[str, Any], k: int = 5) -> dict[str, Any]:
         """The k development patients closest to this one, with their angiography results."""
         if self._sim_matrix is None:
-            return {"neighbours": [], "summary": {}, "k": 0, "pool": 0}
+            return {"neighbours": [], "summary": {}, "k": 0, "pool": 0, "position": None}
         frame, _, _ = self.encode(payload)
         with sklearn.config_context(assume_finite=True, skip_parameter_validation=True):
             z = self._prep_groups[0][0].transform(frame)[0] * self._sim_weights
@@ -439,7 +441,58 @@ class Predictor:
                 }
             )
         summary = {t.id: int(sum(n["truth"][t.id] for n in neighbours)) for t in self.catalog.targets}
-        return {"neighbours": neighbours, "summary": summary, "k": len(neighbours), "pool": len(self.cohort)}
+        # Position on the cohort map: inverse-distance average of the 5 nearest patients
+        # (exactly a patient's own point when it is one of them).
+        xy = self.cohort_map_xy()
+        near = np.argsort(d)[:5]
+        w = 1.0 / (d[near] + 1e-6) ** 2
+        position = [round(float(v), 4) for v in (xy[near] * w[:, None]).sum(axis=0) / w.sum()]
+        return {
+            "neighbours": neighbours,
+            "summary": summary,
+            "k": len(neighbours),
+            "pool": len(self.cohort),
+            "position": position,
+        }
+
+    # ----------------------------------------------------------------- cohort map
+
+    def cohort_map_xy(self) -> np.ndarray:
+        """2D t-SNE coordinates (0..1) of the development patients in the similarity space.
+        Computed once (about 2 s) and cached; seeded, so the map is stable between runs."""
+        if self._map_xy is None:
+            from sklearn.manifold import TSNE
+
+            E = TSNE(n_components=2, perplexity=30, init="pca", learning_rate="auto", random_state=0).fit_transform(
+                self._sim_matrix
+            )
+            lo, hi = E.min(axis=0), E.max(axis=0)
+            self._map_xy = (E - lo) / np.maximum(hi - lo, 1e-9)
+        return self._map_xy
+
+    def cohort_map(self) -> dict[str, Any]:
+        """The development cohort as map points, coloured client-side by the angiography result."""
+        if self._map is None:
+            if self._sim_matrix is None:
+                return {"method": None, "pool": 0, "points": []}
+            xy = self.cohort_map_xy()
+            vessels = [t.id for t in self.catalog.targets if t.kind != "overall"]
+            overall = next(t.id for t in self.catalog.targets if t.kind == "overall")
+            self._map = {
+                "method": "t-SNE (perplexity 30) of the similarity space",
+                "pool": len(self.cohort),
+                "points": [
+                    {
+                        "patient_id": c["patient_id"],
+                        "x": round(float(xy[i, 0]), 4),
+                        "y": round(float(xy[i, 1]), 4),
+                        "cad": int(c["truth"][overall]),
+                        "vessels": int(sum(c["truth"][v] for v in vessels)),
+                    }
+                    for i, c in enumerate(self.cohort)
+                ],
+            }
+        return self._map
 
     # ---------------------------------------------------------- LIME cross-check
 

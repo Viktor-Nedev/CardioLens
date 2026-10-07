@@ -2,6 +2,7 @@ import clsx from "clsx";
 import { CheckCircle2, Stethoscope, X } from "lucide-react";
 import { AnimatePresence, motion, MotionConfig, type Variants } from "motion/react";
 import { lazy, Suspense, useEffect, useState } from "react";
+import { ComparePanel } from "./components/explain/ComparePanel";
 import { ExplanationPanel } from "./components/explain/ExplanationPanel";
 import { SensitivityPanel } from "./components/explain/SensitivityPanel";
 import { SimilarPatients } from "./components/explain/SimilarPatients";
@@ -37,7 +38,7 @@ const columns: Variants = {
 
 function Analysis({ active }: { active: boolean }) {
   const [pane, setPane] = useState<MobilePane>("viewer");
-  const [insight, setInsight] = useState<"explain" | "physiology" | "whatif" | "similar">("explain");
+  const [insight, setInsight] = useState<"explain" | "physiology" | "whatif" | "similar" | "compare">("explain");
   const ready = useStore((s) => s.disclaimerAccepted);
   const reveal = ready ? "show" : "hidden";
 
@@ -104,6 +105,7 @@ function Analysis({ active }: { active: boolean }) {
                 { value: "physiology", label: "Physiology" },
                 { value: "whatif", label: "What-if" },
                 { value: "similar", label: "Similar cases" },
+                { value: "compare", label: "Compare" },
               ]}
             />
           </div>
@@ -121,8 +123,10 @@ function Analysis({ active }: { active: boolean }) {
                 <PhysiologyTable />
               ) : insight === "whatif" ? (
                 <SensitivityPanel />
-              ) : (
+              ) : insight === "similar" ? (
                 <SimilarPatients />
+              ) : (
+                <ComparePanel />
               )}
             </motion.div>
           </AnimatePresence>

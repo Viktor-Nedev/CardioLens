@@ -26,7 +26,15 @@ interface Step {
  * SHAP waterfall: starts at the average patient, adds each feature's contribution in
  * calibrated log-odds and ends at this patient. The axis is labelled in probability.
  */
-export function ShapWaterfall({ pred }: { pred: TargetPrediction }) {
+export function ShapWaterfall({
+  pred,
+  startLabel = "Average patient",
+  endLabel = "This patient",
+}: {
+  pred: TargetPrediction;
+  startLabel?: string;
+  endLabel?: string;
+}) {
   const [hover, setHover] = useState<string | null>(null);
 
   const { steps, domain, ticks } = useMemo(() => {
@@ -96,8 +104,8 @@ export function ShapWaterfall({ pred }: { pred: TargetPrediction }) {
         </div>
 
         {/* average patient */}
-        <div className="flex items-center pr-2 text-[11px] text-ink-3" style={{ height: ROW_H }}>
-          Average patient
+        <div className="flex items-center truncate pr-2 text-[11px] text-ink-3" style={{ height: ROW_H }}>
+          {startLabel}
         </div>
         <div className="relative" style={{ height: ROW_H }}>
           <motion.span
@@ -213,8 +221,8 @@ export function ShapWaterfall({ pred }: { pred: TargetPrediction }) {
         </AnimatePresence>
 
         {/* this patient */}
-        <div className="flex items-center pr-2 text-[11px] font-semibold text-ink" style={{ height: ROW_H }}>
-          This patient
+        <div className="flex items-center truncate pr-2 text-[11px] font-semibold text-ink" style={{ height: ROW_H }}>
+          {endLabel}
         </div>
         <div className="relative" style={{ height: ROW_H }}>
           <motion.span

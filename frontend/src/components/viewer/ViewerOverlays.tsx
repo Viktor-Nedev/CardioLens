@@ -7,6 +7,7 @@ import { pct } from "../../lib/format";
 import { useStore } from "../../state/store";
 import { EASE_OUT } from "../ui/primitives";
 import { LAYERS, VIEW_PRESETS } from "./config";
+import { FlythroughButton } from "./Flythrough";
 
 const appear = (delay: number) => ({
   initial: { opacity: 0, y: -8 },
@@ -21,7 +22,7 @@ export function ViewBar() {
   return (
     <motion.div
       {...appear(0.9)}
-      className="glass-chip scroll-slim absolute left-3 top-3 z-10 flex max-w-[calc(100%-7.5rem)] gap-0.5 overflow-x-auto p-1"
+      className="glass-chip scroll-slim absolute left-3 top-3 z-10 flex max-w-[calc(100%-9.5rem)] gap-0.5 overflow-x-auto p-1"
     >
       {Object.entries(VIEW_PRESETS).map(([id, v]) => (
         <button
@@ -43,6 +44,7 @@ export function ViewBar() {
           <span className="relative">{v.label}</span>
         </button>
       ))}
+      <FlythroughButton />
     </motion.div>
   );
 }

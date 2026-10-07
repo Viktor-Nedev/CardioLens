@@ -7,6 +7,7 @@ import type { TargetId } from "../../lib/types";
 import { useStore } from "../../state/store";
 import { AnatomyScene } from "./AnatomyScene";
 import { CameraRig } from "./CameraRig";
+import { Flythrough } from "./Flythrough";
 import { Ambience, PostFX } from "./Effects";
 import { createBackdropTexture } from "./materials";
 import { HoverCard, LayerMenu, RiskLegend, ScanStatus, SectionControl, SnapshotButton, ViewBar } from "./ViewerOverlays";
@@ -90,6 +91,13 @@ export function Viewer({ active = true }: { active?: boolean }) {
   const toggleViewer = useStore((s) => s.toggleViewer);
   const select = useStore((s) => s.select);
   const revealed = useStore((s) => s.disclaimerAccepted);
+  const flythrough = useStore((s) => s.flythrough);
+  const setFlythrough = useStore((s) => s.setFlythrough);
+
+  // The fly-through stops when the view is hidden.
+  useEffect(() => {
+    if (!active) setFlythrough(false);
+  }, [active, setFlythrough]);
   const backdrop = useMemo(() => createBackdropTexture(), []);
   const composited = bloom && !performance;
 
@@ -116,6 +124,10 @@ export function Viewer({ active = true }: { active?: boolean }) {
     <div
       className="relative h-full w-full overflow-hidden rounded-2xl border border-white/[0.08] bg-[#06090f] shadow-[0_20px_60px_-30px_rgb(0_0_0/0.9)]"
       data-tour="viewer"
+      onPointerDownCapture={(e) => {
+        // Any interaction with the 3D view hands control back from the fly-through.
+        if (flythrough && !(e.target as HTMLElement).closest("[data-flythrough]")) setFlythrough(false);
+      }}
     >
       <CanvasBoundary>
         <Canvas
@@ -165,14 +177,23 @@ export function Viewer({ active = true }: { active?: boolean }) {
       <LoadingOverlay />
       {revealed && (
         <>
-          <ViewBar />
-          <SnapshotButton />
-          <LayerMenu />
-          <SectionControl />
-          <ScanStatus />
-          <RiskLegend />
-          <HoverCard />
-          <p className="pointer-events-none absolute right-3 top-[3.4rem] hidden text-right text-[10px] font-medium uppercase tracking-[0.16em] text-white/30 md:block">
+          {/* Static wrapper: overlays keep positioning against the viewer and fade out during the fly-through. */}
+          <motion.div
+            initial={false}
+            animate={{ opacity: flythrough ? 0 : 1 }}
+            transition={{ duration: 0.45 }}
+            style={{ pointerEvents: flythrough ? "none" : undefined }}
+          >
+            <ViewBar />
+            <SnapshotButton />
+            <LayerMenu />
+            <SectionControl />
+            <ScanStatus />
+            <RiskLegend />
+            <HoverCard />
+          </motion.div>
+          <Flythrough />
+          <p className="pointer-events-none absolute right-3 top-[3.4rem] z-40 hidden text-right text-[10px] font-medium uppercase tracking-[0.16em] text-white/30 md:block">
             Decision support only
             <br />
             Not a diagnostic image

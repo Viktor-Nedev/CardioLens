@@ -6,6 +6,7 @@ import {
   ClipboardList,
   Download,
   FlaskConical,
+  Link2,
   RotateCcw,
   Stethoscope,
   Upload,
@@ -15,6 +16,7 @@ import {
 import { AnimatePresence, motion } from "motion/react";
 import { useRef, useState, type ChangeEvent } from "react";
 import type { FeatureSchema, Patient } from "../../lib/types";
+import { copyShareLink } from "../../state/share";
 import { useIsModified, useStore } from "../../state/store";
 import { EASE_OUT } from "../ui/primitives";
 import { CasePicker } from "./CasePicker";
@@ -131,6 +133,9 @@ function Toolbar() {
         </button>
         <button type="button" className="btn" onClick={() => fileInput.current?.click()}>
           <Upload size={13} /> Import
+        </button>
+        <button type="button" className="btn" onClick={() => void copyShareLink()} title="Copy a link that reopens this patient">
+          <Link2 size={13} /> Share
         </button>
         <input ref={fileInput} type="file" accept="application/json" className="hidden" onChange={importJson} />
       </div>

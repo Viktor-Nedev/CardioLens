@@ -1,4 +1,5 @@
 import { create } from "zustand";
+import { decodeShare } from "../lib/share";
 import type {
   Case,
   Importance,
@@ -79,6 +80,8 @@ interface AppState {
   shortcutsOpen: boolean;
   reportOpen: boolean;
   paletteOpen: boolean;
+  /** Cinematic camera fly-through of the arteries is playing. */
+  flythrough: boolean;
   /** Index of the guided-tour step on screen, or null. */
   tourStep: number | null;
   /** 3D cross-section depth: 0 = off, 1 = cut through to the back of the heart. */
@@ -108,6 +111,7 @@ interface AppState {
   setShortcutsOpen: (open: boolean) => void;
   setReportOpen: (open: boolean) => void;
   setPaletteOpen: (open: boolean) => void;
+  setFlythrough: (on: boolean) => void;
   setTourStep: (step: number | null) => void;
   setSection: (depth: number) => void;
 }
@@ -174,15 +178,22 @@ export const useStore = create<AppState>((set, get) => ({
   shortcutsOpen: false,
   reportOpen: false,
   paletteOpen: false,
+  flythrough: false,
   tourStep: null,
   section: 0,
   scanNonce: 0,
 
   setBoot: ({ schema, cases, metrics, importance }) => {
-    const initial = pickShowcase(cases);
     set({ schema, cases, metrics, importance });
-    if (initial) get().loadPatient(initial.features, initial.title, initial.id);
+    // A shared link (#case=… or #p=…) opens that patient instead of the showcase case.
+    const shared = typeof window === "undefined" ? null : decodeShare(window.location.hash, schema.default_patient);
+    const sharedCase = shared?.caseId ? cases.find((c) => c.id === shared.caseId) : undefined;
+    const initial = pickShowcase(cases);
+    if (sharedCase) get().loadPatient(sharedCase.features, sharedCase.title, sharedCase.id);
+    else if (shared?.patient) get().loadPatient(shared.patient, "Shared patient");
+    else if (initial) get().loadPatient(initial.features, initial.title, initial.id);
     else get().loadPatient(schema.default_patient, "Cohort median");
+    if (shared?.target) set({ selected: shared.target });
   },
   setBootError: (msg) => set({ bootError: msg }),
 
@@ -236,6 +247,7 @@ export const useStore = create<AppState>((set, get) => ({
   setShortcutsOpen: (open) => set({ shortcutsOpen: open }),
   setReportOpen: (open) => set({ reportOpen: open }),
   setPaletteOpen: (open) => set({ paletteOpen: open }),
+  setFlythrough: (on) => set({ flythrough: on }),
   setTourStep: (step) => set({ tourStep: step }),
   setSection: (depth) => set({ section: Math.min(1, Math.max(0, depth)) }),
 }));

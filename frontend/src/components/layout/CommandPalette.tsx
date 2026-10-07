@@ -4,6 +4,7 @@ import {
   BarChart3,
   Box,
   Camera,
+  Clapperboard,
   Compass,
   CornerDownLeft,
   FileText,
@@ -11,6 +12,7 @@ import {
   Info,
   Keyboard,
   Layers,
+  Link2,
   RotateCcw,
   Scissors,
   Search,
@@ -22,6 +24,7 @@ import { useEffect, useMemo, useRef, useState, type KeyboardEvent as ReactKeyboa
 import { pct } from "../../lib/format";
 import { fuzzyIndices, fuzzyScore } from "../../lib/fuzzy";
 import { TARGET_ORDER } from "../../lib/types";
+import { copyShareLink } from "../../state/share";
 import { useIsModified, useStore } from "../../state/store";
 import { RiskDots, truthText } from "../patient/CasePicker";
 import { Kbd } from "../ui/primitives";
@@ -147,6 +150,18 @@ function useCommands(): Command[] {
         run: () => st().setReportOpen(true),
       },
       {
+        id: "flythrough",
+        group: "Actions",
+        title: "Play the 3D fly-through",
+        subtitle: "Cinematic tour of the arteries with their risks",
+        keywords: "cinematic camera tour animation video",
+        icon: Clapperboard,
+        run: () => {
+          toAnalysis();
+          st().setFlythrough(true);
+        },
+      },
+      {
         id: "tour",
         group: "Actions",
         title: "Start the guided tour",
@@ -190,6 +205,15 @@ function useCommands(): Command[] {
           a.click();
           st().showToast("Snapshot saved", "PNG of the current 3D view");
         },
+      },
+      {
+        id: "share",
+        group: "Actions",
+        title: "Copy a link to this patient",
+        subtitle: "Reopens the same inputs and explained target",
+        keywords: "share url link clipboard",
+        icon: Link2,
+        run: () => void copyShareLink(),
       },
       {
         id: "shortcuts",

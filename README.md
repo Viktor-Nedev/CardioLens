@@ -18,9 +18,11 @@ and explains every estimate with SHAP, cross-checked by LIME, and a physiologica
 
 <p align="center">
   <img src="docs/figures/screenshot_lime.jpg" alt="SHAP compared with LIME, an independent explanation method: strong agreement on the main factors" width="49%">
+  <img src="docs/figures/screenshot_compare.jpg" alt="Contrastive comparison: why this patient's LCX risk is 64% and 21% for the most similar patient with normal angiography" width="49%">
+  <img src="docs/figures/screenshot_flythrough.jpg" alt="Cinematic 3D fly-through: the camera visits each artery with its probability and main driver" width="49%">
+  <img src="docs/figures/screenshot_map.jpg" alt="Cohort map: the patient among the 242 development patients, linked to its nearest neighbours" width="49%">
   <img src="docs/figures/screenshot_whatif.jpg" alt="What-if mode: a younger age re-scores every artery live, and the curve shows how LAD risk varies with age" width="49%">
   <img src="docs/figures/screenshot_threshold.jpg" alt="Threshold explorer: drag the decision threshold over every hold-out patient and watch sensitivity, specificity, PPV and NPV change" width="49%">
-  <img src="docs/figures/screenshot_palette.jpg" alt="Command palette (Ctrl/Cmd K): search patients, views, layers and actions" width="49%">
   <img src="docs/figures/screenshot_xray.jpg" alt="X-ray mode, inferior view of the coronary tree" width="49%">
   <img src="docs/figures/screenshot_disclaimer.jpg" alt="Welcome screen: live 3D heart, key numbers and the clinical safety disclaimer" width="49%">
   <img src="docs/figures/screenshot_section.jpg" alt="Cross-section through the heart revealing the chambers" width="49%">
@@ -43,7 +45,7 @@ Multimodal AI Hackathon 2026, Track A: Cardiovascular Risk Visualization & Predi
 | **Explainability** | SHAP values are folded back to clinical features, additive in calibrated log-odds (a unit test checks the additivity). Each prediction gets a text summary and a SHAP waterfall from the average patient to this patient (also as bars and a table). A physiological table lists reference ranges, cohort percentile and each factor's share of the explanation. Global SHAP and permutation importance are shown too. LIME, an independent local surrogate, is computed on demand and compared with SHAP: across the 61 hold-out patients they correlate at a median r = 0.98, share 4.5 of their top 5 factors on average and agree on the direction of every main factor. |
 | **Real-time** | Any input edit re-scores all four targets with explanations and bootstrap intervals in about 30–40 ms on a laptop CPU. |
 | **Visual feedback** | Each new prediction sends a scan band down the myocardium. Emissive pulses run along the arteries at the patient's heart rate, and arteries above their threshold glow (bloom). On the dashboard, numbers ease to new values and changed cards flash with the size of the change. SHAP rows re-order with layout animations, and an ECG strip in the header beats at the patient's pulse. Effects are dropped automatically on slow devices and respect *prefers-reduced-motion*. |
-| **Clinical tools** | What-if curves show how each target responds when one factor varies, with the rest fixed. Similar patients come from the training cohort with their angiography results. A printable patient report includes a 3D snapshot. A guided tour, a searchable case library, a cross-section through the heart and a command palette (Ctrl/⌘ K: patients, views, layers, actions) round out the tools. |
+| **Clinical tools** | What-if curves show how each target responds when one factor varies, with the rest fixed. Similar patients come from the training cohort with their angiography results, shown on a t-SNE map of the cohort where the patient's marker moves as inputs change. A Compare view explains the gap to another patient (by default the most similar one with a different angiography result) as the exact difference of the two SHAP explanations. A printable patient report includes a 3D snapshot. A guided tour, a searchable case library, a cross-section through the heart, a cinematic 3D fly-through of the arteries, shareable patient links and a command palette (Ctrl/⌘ K: patients, views, layers, actions) round out the tools. |
 | **Clinical utility** | A decision curve (net benefit against treating all or none) and a subgroup check by sex and age on the hold-out set. A threshold explorer places every hold-out patient on one axis: drag the decision threshold and sensitivity, specificity, PPV and NPV update live. |
 | **Extensible** | Features (`backend/config/features.yaml`), targets (`targets.yaml`), model families (`models.py`) and 3D structures (`frontend/src/anatomy/registry.ts`) are all declared in configuration. |
 
@@ -124,8 +126,8 @@ python -m cardiolens.train        # ~55 min on 8 cores (5x repeated nested CV, 4
 python -m cardiolens.train --quick   # smoke test, fewer folds and families
 python -m cardiolens.report       # Markdown tables from artifacts/metrics.json
 python -m cardiolens.train --explain-only   # recompute SHAP importance + figures from saved models
-pytest                            # 22 tests: data, leakage, SHAP additivity, train/serve parity, what-if, similarity, LIME, API
-cd ../frontend && npm test        # 23 tests: risk colour scale, formatting, ROC-AUC, net benefit, threshold metrics, search
+pytest                            # 24 tests: data, leakage, SHAP additivity, train/serve parity, what-if, similarity, cohort map, LIME, API
+cd ../frontend && npm test        # 29 tests: risk colour scale, formatting, ROC-AUC, net benefit, threshold metrics, contrast, share links, search
 ```
 
 The pipeline downloads the UCI dataset if the committed copy is missing. It is
@@ -191,7 +193,8 @@ the 6-page limit.
 | GET | `/api/metrics` | Full evaluation report |
 | GET | `/api/importance` | Global SHAP and permutation importance |
 | POST | `/api/profile` | `{"features", "feature"}` → probability of every target across the factor's range (what-if curve) |
-| POST | `/api/similar` | `{"features", "k"}` → the most similar development patients with their angiography results |
+| POST | `/api/similar` | `{"features", "k"}` → the most similar development patients with their angiography results, and the patient's position on the cohort map |
+| GET | `/api/cohort/map` | t-SNE map of the development patients in the similarity space, with their angiography results |
 | POST | `/api/lime` | `{"features", "samples"}` → LIME weights per target, the surrogate's fit (R²) and its agreement with SHAP |
 | POST | `/api/predict` | `{"features": {...}}` → probabilities, intervals, thresholds, SHAP contributions, text summaries, physiology rows. Missing features are imputed. |
 

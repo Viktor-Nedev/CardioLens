@@ -12,7 +12,7 @@ The deliverables are:
 - a web application: a FastAPI backend and a React/three.js dashboard;
 - a reproducible training pipeline with the trained weights committed;
 - a reproducible 3D-anatomy build;
-- 45 automated tests and a CI workflow;
+- 53 automated tests and a CI workflow;
 - a single-container Docker image and one-command start scripts.
 
 > Decision support and education only. The outputs are statistical estimates and
@@ -152,7 +152,8 @@ These drivers are clinically plausible and consistent with the literature on thi
 
 **What-if and case-based context.**
 - A what-if curve (individual conditional expectation) shows each target's probability while one factor varies and the other inputs stay fixed. It is labelled as model sensitivity, not a treatment effect.
-- Similar-patient retrieval finds the closest development patients in the standardised input space, weighted by global SHAP importance, and shows what angiography found in them.
+- Similar-patient retrieval finds the closest development patients in the standardised input space, weighted by global SHAP importance, and shows what angiography found in them and where the patient sits on a t-SNE map of the cohort.
+- A contrastive view explains the gap to another patient, by default the most similar one with a different angiography result. The difference of two SHAP explanations of the same model adds up exactly to the gap in log-odds.
 
 **Per-patient explanation in the dashboard.** For each target the dashboard shows:
 1. a deterministic text summary, for example *"LAD stenosis probability is 81% (high band, above the decision threshold of 43%). Factors increasing the estimate: typical chest pain (present), regions with wall-motion abnormality (2)…"*;
@@ -212,7 +213,7 @@ thorax, arms removed).
 - `/api/cases`: the hold-out patients with ground truth;
 - `/api/metrics` and `/api/importance`;
 - `/api/predict`: partial inputs are accepted; the response contains probabilities, intervals, thresholds, risk bands, SHAP contributions, summaries and physiology rows;
-- `/api/profile`, `/api/similar` and `/api/lime`: what-if curves for any input, the most similar development patients with their angiography results, and the LIME cross-check.
+- `/api/profile`, `/api/similar`, `/api/cohort/map` and `/api/lime`: what-if curves, similar development patients and their place on the cohort map, and the LIME cross-check.
 
 One full prediction (4 targets, SHAP, bootstrap intervals) takes about 33 ms on a
 laptop CPU. The dashboard debounces edits by 140 ms and cancels stale requests, so
@@ -227,7 +228,7 @@ the 3D colours and explanations follow slider movements in real time.
 - Pinned requirements, seeds and committed data/weights.
 - `python -m cardiolens.train` (≈55 min on 8 cores) and `--explain-only`.
 - `python -m cardiolens.report` generates the tables above.
-- 22 backend tests cover data integrity, leakage, SHAP additivity, train/serve parity, partial input, what-if, similarity, LIME agreement and the API. 23 frontend tests cover the risk colour scale, formatting, ROC-AUC, net benefit, threshold metrics and search.
+- 24 backend tests cover data integrity, leakage, SHAP additivity, train/serve parity, partial input, what-if, similarity, the cohort map, LIME and the API. 29 frontend tests cover colours, formatting, ROC-AUC, net benefit, threshold metrics, contrasts, links and search.
 - A CI workflow runs both test suites, the frontend build and a Docker smoke test on every push. One-command start scripts set up the environment on first run.
 - A multi-stage Dockerfile builds the dashboard and serves it from the API on port 7860, with deployment configs for Hugging Face Spaces and Render.
 
@@ -235,7 +236,7 @@ the 3D colours and explanations follow slider movements in real time.
 1. Run `start.bat` (Windows) or `scripts/start.sh`, which sets up the environment on first run and opens <http://127.0.0.1:8000>; or `docker compose up --build` and open <http://localhost:7860>.
 2. Acknowledge the disclaimer; an optional guided tour introduces the layout.
 3. Choose a hold-out patient from the searchable case library (risk dots and angiography result per case), or edit any input.
-4. Inspect the 3D heart, then the SHAP (with its LIME comparison), physiology, what-if and similar-case panels. *Report* prints a one-page patient summary; Ctrl/⌘ K searches patients, views, layers and actions.
+4. Inspect the 3D heart (or play the fly-through), then the SHAP (with its LIME comparison), physiology, what-if, similar-case and compare panels. *Report* prints a one-page patient summary; Ctrl/⌘ K searches patients, views, layers and actions.
 5. Open *Model performance* for ROC, calibration and decision curves, subgroup results, confusion matrices, the family comparison, global importance and every hold-out patient on one axis with a draggable decision threshold.
 
 ## 7. Limitations and future work

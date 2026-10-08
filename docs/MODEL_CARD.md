@@ -54,6 +54,7 @@ Hold-out ROC-AUC with bootstrap 95% CI:
 - SHAP values come from the linear explainer for logistic regression and path-dependent Tree SHAP for gradient boosting.
 - They are expressed in calibrated log-odds and folded back to clinical features. They sum exactly (to 10⁻⁶) from the average patient to the prediction.
 - LIME (a weighted local linear surrogate fitted to 1,000 perturbed copies of the patient) is computed on demand as an independent check. Across the 61 hold-out patients it correlates with SHAP at a median r = 0.98 (minimum 0.95), shares 4.5 of the top 5 factors on average and agrees on the direction of every main factor.
+- Contrastive comparisons subtract two SHAP explanations of the same model, so the steps add up exactly to the gap in log-odds between two patients.
 - What-if curves vary one input while holding the others fixed. They describe how the model responds, not causal or treatment effects.
 
 ## Ethical considerations and risks

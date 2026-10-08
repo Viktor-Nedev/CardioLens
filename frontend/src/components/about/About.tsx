@@ -111,6 +111,7 @@ export function About() {
           <li>POST /api/predict · probabilities, intervals, SHAP</li>
           <li>POST /api/profile · what-if curve for one factor</li>
           <li>POST /api/similar · most similar patients</li>
+          <li>GET /api/cohort/map · map of the development cohort</li>
           <li>POST /api/lime · LIME weights compared with SHAP</li>
           <li>GET /api/schema · /api/cases · /api/metrics</li>
         </ul>
@@ -121,6 +122,7 @@ export function About() {
           <li>Pick a hold-out patient in the case library, or edit any measurement.</li>
           <li>Rotate and zoom the heart; click an artery, its label or a region of the myocardium to inspect it.</li>
           <li>Read the SHAP explanation (and its LIME cross-check) and the physiological breakdown for the selected target.</li>
+          <li>Use Compare to see why the estimate differs from another patient, and Fly-through for a guided 3D tour.</li>
           <li>Open "Model performance" to see how well each model generalises; drag the threshold over the hold-out patients.</li>
           <li>Press Ctrl/⌘ K to search patients, views, layers and actions.</li>
         </ol>

@@ -118,24 +118,29 @@ function Toolbar() {
 
   return (
     <div className="mt-2.5">
-      <div className="flex flex-wrap gap-1.5">
+      <div className="grid grid-cols-2 gap-1.5">
         <button
           type="button"
-          className={clsx("btn", modified && "border-accent/40 text-ink")}
+          className={clsx("btn justify-center", modified && "border-accent/40 text-ink")}
           disabled={!modified}
           onClick={() => baseline && loadPatient(baseline.patient, baseline.label, activeCaseId)}
           title="Undo all edits"
         >
           <RotateCcw size={13} /> Reset edits
         </button>
-        <button type="button" className="btn" onClick={exportJson}>
+        <button
+          type="button"
+          className="btn justify-center"
+          onClick={() => void copyShareLink()}
+          title="Copy a link that reopens this patient"
+        >
+          <Link2 size={13} /> Share
+        </button>
+        <button type="button" className="btn justify-center" onClick={exportJson}>
           <Download size={13} /> Export
         </button>
-        <button type="button" className="btn" onClick={() => fileInput.current?.click()}>
+        <button type="button" className="btn justify-center" onClick={() => fileInput.current?.click()}>
           <Upload size={13} /> Import
-        </button>
-        <button type="button" className="btn" onClick={() => void copyShareLink()} title="Copy a link that reopens this patient">
-          <Link2 size={13} /> Share
         </button>
         <input ref={fileInput} type="file" accept="application/json" className="hidden" onChange={importJson} />
       </div>

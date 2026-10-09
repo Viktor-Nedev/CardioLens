@@ -309,3 +309,25 @@ export interface LimeResult {
   targets: Record<TargetId, LimeTarget>;
   latency_ms: number;
 }
+
+export interface DependenceCurves {
+  /** Average over the hold-out patients (partial dependence) */
+  pdp: number[];
+  lo: number[];
+  hi: number[];
+  /** One curve per hold-out patient (individual conditional expectation) */
+  ice: number[][];
+  threshold: number;
+}
+
+export interface Dependence {
+  feature: string;
+  label: string;
+  kind: FeatureKind;
+  unit: string | null;
+  grid: (number | string)[];
+  labels: string[] | null;
+  values: (number | string | null)[];
+  n: number;
+  targets: Record<TargetId, DependenceCurves>;
+}

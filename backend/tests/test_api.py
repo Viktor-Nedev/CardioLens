@@ -79,3 +79,10 @@ def test_cohort_map_endpoint():
         assert {"patient_id", "x", "y", "cad", "vessels"} <= set(body["points"][0])
         case = c.get("/api/cases").json()[0]
         assert len(c.post("/api/similar", json={"features": case["features"]}).json()["position"]) == 2
+
+
+def test_dependence_endpoint():
+    with make_client() as c:
+        body = c.get("/api/dependence/age?points=11").json()
+        assert len(body["grid"]) == 11 and len(body["targets"]["lad"]["ice"]) == body["n"]
+        assert c.get("/api/dependence/nope").status_code == 404

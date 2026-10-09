@@ -12,6 +12,7 @@ import { CurveChart } from "./CurveChart";
 import { PipelineDiagram } from "./PipelineDiagram";
 import { DecisionCurve, SubgroupTable } from "./ClinicalUtility";
 import { CohortStrip } from "./CohortStrip";
+import { GlobalEffects } from "./GlobalEffects";
 
 const ci = (m: MetricCI, digits = 2) => `${num(m.value, digits)} [${num(m.ci_low, digits)}–${num(m.ci_high, digits)}]`;
 
@@ -449,6 +450,8 @@ export function ModelPerformance() {
           </p>
         </div>
       </div>
+
+      <GlobalEffects target={target} />
     </div>
   );
 }

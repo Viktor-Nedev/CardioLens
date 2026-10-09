@@ -346,13 +346,7 @@ class Predictor:
         spec = self.catalog.feature(feature_id)
         frame, imputed, _ = self.encode(payload)
         stats = self._stats[feature_id]
-        labels: list[str] | None = None
-        if spec.kind == "numeric":
-            lo, hi = spec.range if spec.range else (stats.get("min") or 0.0, stats.get("max") or 1.0)
-            grid: list[Any] = [round(float(v), 4) for v in np.linspace(lo, hi, max(5, min(points, 101)))]
-        else:
-            grid = [o["value"] if spec.kind == "categorical" else float(o["value"]) for o in spec.options]
-            labels = [str(o["label"]) for o in spec.options]
+        grid, labels = self._grid(spec, points)
 
         batch = pd.concat([frame] * len(grid), ignore_index=True)
         batch[feature_id] = pd.Series(grid, dtype=object if spec.kind == "categorical" else float)
@@ -381,6 +375,57 @@ class Predictor:
             "current": current,
             "targets": curves,
             "thresholds": {tid: tm.threshold for tid, tm in self.models.items()},
+        }
+
+    def _grid(self, spec: FeatureSpec, points: int) -> tuple[list[Any], list[str] | None]:
+        """Values to sweep a feature over: its plausible range for numbers, its options otherwise."""
+        if spec.kind == "numeric":
+            stats = self._stats[spec.id]
+            lo, hi = spec.range if spec.range else (stats.get("min") or 0.0, stats.get("max") or 1.0)
+            return [round(float(v), 4) for v in np.linspace(lo, hi, max(5, min(points, 101)))], None
+        grid = [o["value"] if spec.kind == "categorical" else float(o["value"]) for o in spec.options]
+        return grid, [str(o["label"]) for o in spec.options]
+
+    # --------------------------------------------------------- global dependence
+
+    def dependence(self, feature_id: str, points: int = 25) -> dict[str, Any]:
+        """Partial dependence over the hold-out patients: each patient's curve (ICE) while one
+        feature varies, their average (PDP) and the 10-90th percentile band, for every target."""
+        spec = self.catalog.feature(feature_id)
+        grid, labels = self._grid(spec, points)
+        frames = [self.encode(c["features"])[0] for c in self.cases]
+        base = pd.concat(frames, ignore_index=True)
+        n, g = len(base), len(grid)
+        batch = base.loc[base.index.repeat(g)].reset_index(drop=True)
+        batch[feature_id] = pd.Series(grid * n, dtype=object if spec.kind == "categorical" else float)
+        with sklearn.config_context(assume_finite=True, skip_parameter_validation=True):
+            transformed: dict[str, np.ndarray] = {}
+            for prep, members in self._prep_groups:
+                out = prep.transform(batch)
+                for tid in members:
+                    transformed[tid] = out
+            targets = {}
+            for tid, tm in self.models.items():
+                m = model_margin(tm.model, transformed[tid], tm.family)
+                P = (1.0 / (1.0 + np.exp(-(tm.a * m + tm.b)))).reshape(n, g)
+                targets[tid] = {
+                    "pdp": [round(float(v), 4) for v in P.mean(axis=0)],
+                    "lo": [round(float(v), 4) for v in np.percentile(P, 10, axis=0)],
+                    "hi": [round(float(v), 4) for v in np.percentile(P, 90, axis=0)],
+                    "ice": [[round(float(v), 3) for v in row] for row in P],
+                    "threshold": tm.threshold,
+                }
+        return {
+            "feature": feature_id,
+            "label": spec.label,
+            "kind": spec.kind,
+            "unit": spec.unit,
+            "grid": grid,
+            "labels": labels,
+            # Each hold-out patient's own value, for a rug under the curves.
+            "values": [c["features"].get(feature_id) for c in self.cases],
+            "n": n,
+            "targets": targets,
         }
 
     # ------------------------------------------------------------ similar patients

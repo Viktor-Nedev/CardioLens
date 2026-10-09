@@ -112,3 +112,14 @@ def test_cohort_map_places_a_development_patient_on_its_own_point(predictor):
     me = predictor.cohort[3]
     own = next(pt for pt in m["points"] if pt["patient_id"] == me["patient_id"])
     assert predictor.similar(me["features"])["position"] == pytest.approx([own["x"], own["y"]], abs=1e-3)
+
+
+def test_partial_dependence_passes_through_each_patients_prediction(predictor):
+    d = predictor.dependence("typical_chest_pain")
+    assert d["n"] == len(predictor.cases) and len(d["grid"]) == 2
+    for i, c in enumerate(predictor.cases):
+        j = d["grid"].index(float(c["features"]["typical_chest_pain"]))
+        for t, curves in d["targets"].items():
+            assert curves["ice"][i][j] == pytest.approx(c["predicted"][t], abs=2e-3)
+    cad = d["targets"]["cad"]
+    assert all(lo <= m <= hi for lo, m, hi in zip(cad["lo"], cad["pdp"], cad["hi"]))

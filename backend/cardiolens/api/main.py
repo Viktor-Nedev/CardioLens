@@ -106,6 +106,15 @@ def profile(req: ProfileRequest) -> dict:
     return p.profile(req.features, req.feature, req.points)
 
 
+@app.get("/api/dependence/{feature}")
+def dependence(feature: str, points: int = 25) -> dict:
+    """Partial dependence (and individual curves) of every target on one feature, over the hold-out patients."""
+    p = get_predictor()
+    if feature not in p.feature_ids:
+        raise HTTPException(status_code=404, detail=f"Unknown feature {feature}")
+    return p.dependence(feature, max(5, min(points, 61)))
+
+
 @app.post("/api/similar")
 def similar(req: SimilarRequest) -> dict:
     """The most similar development patients and their angiography results."""

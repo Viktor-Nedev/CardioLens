@@ -407,6 +407,7 @@ export function IntroSplash() {
 
 const SHORTCUTS: { keys: string[]; action: string }[] = [
   { keys: [MOD, "K"], action: "Search patients, views, layers and actions" },
+  { keys: [MOD, "Z"], action: "Undo the last edit (Shift for redo)" },
   { keys: ["0"], action: "Explain overall CAD" },
   { keys: ["1", "2", "3"], action: "Focus LAD, LCX or RCA in 3D" },
   { keys: ["Drag"], action: "Rotate the heart" },

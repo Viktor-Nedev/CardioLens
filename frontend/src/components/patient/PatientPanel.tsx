@@ -20,6 +20,7 @@ import { copyShareLink } from "../../state/share";
 import { useIsModified, useStore } from "../../state/store";
 import { EASE_OUT } from "../ui/primitives";
 import { CasePicker } from "./CasePicker";
+import { EditHistory } from "./EditHistory";
 import { FeatureField } from "./FeatureField";
 
 const GROUP_ICON: Record<string, LucideIcon> = {
@@ -217,6 +218,7 @@ export function PatientPanel() {
         <PatientCard />
         <CasePicker />
         <Toolbar />
+        <EditHistory />
       </div>
       <div className="scroll-slim min-h-0 flex-1 overflow-y-auto px-4">
         <p className="py-2.5 text-[11px] leading-snug text-ink-3">

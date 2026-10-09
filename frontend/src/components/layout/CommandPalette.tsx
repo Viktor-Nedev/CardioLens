@@ -15,7 +15,9 @@ import {
   Link2,
   RotateCcw,
   Scissors,
+  Redo2,
   Search,
+  Undo2,
   User,
   type LucideIcon,
 } from "lucide-react";
@@ -28,6 +30,7 @@ import { copyShareLink } from "../../state/share";
 import { useIsModified, useStore } from "../../state/store";
 import { RiskDots, truthText } from "../patient/CasePicker";
 import { Kbd } from "../ui/primitives";
+import { MOD } from "./Chrome";
 import { LAYERS, VIEW_PRESETS } from "../viewer/config";
 
 interface Command {
@@ -90,6 +93,8 @@ function useCommands(): Command[] {
   const section = useStore((s) => s.section);
   const activeCaseId = useStore((s) => s.activeCaseId);
   const modified = useIsModified();
+  const trailLength = useStore((s) => s.trail.length);
+  const cursor = useStore((s) => s.cursor);
 
   return useMemo(() => {
     const st = useStore.getState;
@@ -224,6 +229,30 @@ function useCommands(): Command[] {
         run: () => st().setShortcutsOpen(true),
       },
     );
+    const { trail, cursor } = st();
+    if (cursor > 0) {
+      list.push({
+        id: "undo",
+        group: "Actions",
+        title: "Undo the last edit",
+        subtitle: trail[cursor]?.label,
+        keywords: "history back revert",
+        icon: Undo2,
+        right: <Kbd>{MOD} Z</Kbd>,
+        run: () => st().undo(),
+      });
+    }
+    if (cursor < trail.length - 1) {
+      list.push({
+        id: "redo",
+        group: "Actions",
+        title: "Redo",
+        subtitle: trail[cursor + 1]?.label,
+        keywords: "history forward",
+        icon: Redo2,
+        run: () => st().redo(),
+      });
+    }
     if (modified) {
       list.push({
         id: "reset",
@@ -283,7 +312,7 @@ function useCommands(): Command[] {
       });
     }
     return list;
-  }, [cases, prediction, viewer, section, activeCaseId, modified]);
+  }, [cases, prediction, viewer, section, activeCaseId, modified, trailLength, cursor]);
 }
 
 // With a query, results scoring below this share of the best match are dropped as noise

@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import { decodeShare } from "../lib/share";
+import { advanceTrail, type TrailEntry } from "../lib/trail";
 import type {
   Case,
   Importance,
@@ -80,6 +81,11 @@ interface AppState {
   shortcutsOpen: boolean;
   reportOpen: boolean;
   paletteOpen: boolean;
+  /** Edit history of the current patient and the position in it (undo/redo). */
+  trail: TrailEntry[];
+  cursor: number;
+  /** The next prediction follows an undo/redo rather than a new edit. */
+  restoring: boolean;
   /** Cinematic camera fly-through of the arteries is playing. */
   flythrough: boolean;
   /** Index of the guided-tour step on screen, or null. */
@@ -112,6 +118,9 @@ interface AppState {
   setReportOpen: (open: boolean) => void;
   setPaletteOpen: (open: boolean) => void;
   setFlythrough: (on: boolean) => void;
+  undo: () => void;
+  redo: () => void;
+  jumpTo: (index: number) => void;
   setTourStep: (step: number | null) => void;
   setSection: (depth: number) => void;
 }
@@ -178,6 +187,9 @@ export const useStore = create<AppState>((set, get) => ({
   shortcutsOpen: false,
   reportOpen: false,
   paletteOpen: false,
+  trail: [],
+  cursor: -1,
+  restoring: false,
   flythrough: false,
   tourStep: null,
   section: 0,
@@ -199,7 +211,14 @@ export const useStore = create<AppState>((set, get) => ({
 
   setFeature: (id, value) => set((s) => ({ patient: { ...s.patient, [id]: value } })),
   loadPatient: (patient, label, caseId) => {
-    set({ patient: { ...patient }, activeCaseId: caseId, baseline: { label, patient: { ...patient } } });
+    set({
+      patient: { ...patient },
+      activeCaseId: caseId,
+      baseline: { label, patient: { ...patient } },
+      trail: [],
+      cursor: -1,
+      restoring: false,
+    });
     const c = caseId ? get().cases.find((x) => x.id === caseId) : undefined;
     if (c) {
       const vessels = (["lad", "lcx", "rca"] as const).filter((v) => c.truth[v]).map((v) => v.toUpperCase());
@@ -220,7 +239,19 @@ export const useStore = create<AppState>((set, get) => ({
   setPrediction: (p) =>
     set((s) => {
       const baseline = s.baseline && !s.baseline.prediction ? { ...s.baseline, prediction: p } : s.baseline;
-      return { prediction: p, baseline, predictError: undefined, scanNonce: s.scanNonce + 1 };
+      const probs = {
+        cad: p.targets.cad.probability,
+        lad: p.targets.lad.probability,
+        lcx: p.targets.lcx.probability,
+        rca: p.targets.rca.probability,
+      };
+      const { trail, cursor } = advanceTrail(s.trail, s.cursor, s.patient, probs, {
+        features: s.schema?.features ?? [],
+        startLabel: s.baseline?.label ?? "Loaded patient",
+        now: Date.now(),
+        restoring: s.restoring,
+      });
+      return { prediction: p, baseline, predictError: undefined, scanNonce: s.scanNonce + 1, trail, cursor, restoring: false };
     }),
   setPredicting: (v) => set({ predicting: v }),
   setPredictError: (msg) => set({ predictError: msg }),
@@ -248,6 +279,13 @@ export const useStore = create<AppState>((set, get) => ({
   setReportOpen: (open) => set({ reportOpen: open }),
   setPaletteOpen: (open) => set({ paletteOpen: open }),
   setFlythrough: (on) => set({ flythrough: on }),
+  undo: () => get().jumpTo(get().cursor - 1),
+  redo: () => get().jumpTo(get().cursor + 1),
+  jumpTo: (index) => {
+    const { trail, cursor } = get();
+    if (index === cursor || !trail[index]) return;
+    set({ cursor: index, patient: { ...trail[index].patient }, restoring: true });
+  },
   setTourStep: (step) => set({ tourStep: step }),
   setSection: (depth) => set({ section: Math.min(1, Math.max(0, depth)) }),
 }));

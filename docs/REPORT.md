@@ -12,7 +12,7 @@ The deliverables are:
 - a web application: a FastAPI backend and a React/three.js dashboard;
 - a reproducible training pipeline with the trained weights committed;
 - a reproducible 3D-anatomy build;
-- 53 automated tests and a CI workflow;
+- 59 automated tests and a CI workflow;
 - a single-container Docker image and one-command start scripts.
 
 > Decision support and education only. The outputs are statistical estimates and
@@ -148,7 +148,7 @@ probabilities as an 80% interval.
 - **LCX:** age, typical chest pain, fasting blood sugar, triglycerides, creatinine.
 - **RCA:** diabetes, typical chest pain, age, sex, dyspnoea.
 
-These drivers are clinically plausible and consistent with the literature on this dataset.
+These drivers are clinically plausible and consistent with the literature on this dataset. Partial-dependence plots over the hold-out patients show each factor's average effect and its spread.
 
 **What-if and case-based context.**
 - A what-if curve (individual conditional expectation) shows each target's probability while one factor varies and the other inputs stay fixed. It is labelled as model sensitivity, not a treatment effect.
@@ -228,7 +228,7 @@ the 3D colours and explanations follow slider movements in real time.
 - Pinned requirements, seeds and committed data/weights.
 - `python -m cardiolens.train` (≈55 min on 8 cores) and `--explain-only`.
 - `python -m cardiolens.report` generates the tables above.
-- 24 backend tests cover data integrity, leakage, SHAP additivity, train/serve parity, partial input, what-if, similarity, the cohort map, LIME and the API. 29 frontend tests cover colours, formatting, ROC-AUC, net benefit, threshold metrics, contrasts, links and search.
+- 26 backend tests cover data, leakage, SHAP additivity, train/serve parity, partial input, what-if, similarity, the cohort map, partial dependence, LIME and the API. 33 frontend tests cover colours, formats, metrics, contrasts, links, edit history and search.
 - A CI workflow runs both test suites, the frontend build and a Docker smoke test on every push. One-command start scripts set up the environment on first run.
 - A multi-stage Dockerfile builds the dashboard and serves it from the API on port 7860, with deployment configs for Hugging Face Spaces and Render.
 

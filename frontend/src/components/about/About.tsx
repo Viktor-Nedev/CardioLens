@@ -112,6 +112,7 @@ export function About() {
           <li>POST /api/profile · what-if curve for one factor</li>
           <li>POST /api/similar · most similar patients</li>
           <li>GET /api/cohort/map · map of the development cohort</li>
+          <li>GET /api/dependence/&#123;feature&#125; · partial dependence</li>
           <li>POST /api/lime · LIME weights compared with SHAP</li>
           <li>GET /api/schema · /api/cases · /api/metrics</li>
         </ul>

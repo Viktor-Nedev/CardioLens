@@ -1,9 +1,10 @@
 import clsx from "clsx";
-import { Activity, CheckCircle2, CircleDashed, FlaskConical, XCircle } from "lucide-react";
+import { Activity, CheckCircle2, CircleDashed, FlaskConical, ShieldCheck, XCircle } from "lucide-react";
 import { motion } from "motion/react";
 import { STRUCTURE_BY_NODE, TARGET_NODE } from "../../anatomy/registry";
 import { riskColor } from "../../lib/colors";
 import { interval, pct, pp } from "../../lib/format";
+import { getGuidelineStratification } from "../../lib/interventions";
 import { VESSELS, type TargetId, type TargetPrediction } from "../../lib/types";
 import { useIsModified, useStore } from "../../state/store";
 import { RadialGauge } from "../ui/RadialGauge";
@@ -80,6 +81,12 @@ function CadHero({ pred }: { pred: TargetPrediction }) {
   const selected = useStore((s) => s.selected);
   const active = selected === "cad";
   const change = useValueChange(pred.probability);
+  const vesselProbs = useStore((s) => {
+    const p = s.prediction?.targets;
+    return p ? { lad: p.lad.probability, lcx: p.lcx.probability, rca: p.rca.probability } : {};
+  });
+  const guideline = getGuidelineStratification(pred.probability, vesselProbs);
+
   return (
     <motion.button
       type="button"
@@ -99,7 +106,20 @@ function CadHero({ pred }: { pred: TargetPrediction }) {
       </div>
       <div className="min-w-0 space-y-2">
         <p className="text-xs font-medium text-ink-2">Overall coronary artery disease</p>
-        <BandChip band={pred.risk_band.id} label={pred.risk_band.label} />
+        <div className="flex flex-wrap items-center gap-1.5">
+          <BandChip band={pred.risk_band.id} label={pred.risk_band.label} />
+          <span
+            className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-semibold"
+            style={{
+              backgroundColor: `${guideline.color}22`,
+              color: guideline.color,
+              border: `1px solid ${guideline.color}44`,
+            }}
+            title={guideline.escCriteria}
+          >
+            <ShieldCheck size={11} /> ESC {guideline.tier === "very-high" ? "Very High" : guideline.tier === "high" ? "High" : guideline.tier === "moderate" ? "Moderate" : "Low"}
+          </span>
+        </div>
         <p className="text-[11px] leading-snug text-ink-2">
           <span className="font-semibold text-ink">{pred.positive ? "Above" : "Below"}</span> the decision threshold of{" "}
           {pct(pred.threshold)}

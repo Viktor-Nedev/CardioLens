@@ -10,7 +10,7 @@ import { CameraRig } from "./CameraRig";
 import { Flythrough } from "./Flythrough";
 import { Ambience, PostFX } from "./Effects";
 import { createBackdropTexture } from "./materials";
-import { HoverCard, LayerMenu, RiskLegend, ScanStatus, SectionControl, SnapshotButton, ViewBar } from "./ViewerOverlays";
+import { HoverCard, HudTelemetry, LayerMenu, RiskLegend, ScanStatus, SectionControl, SnapshotButton, ViewBar } from "./ViewerOverlays";
 
 const KEY_TARGET: Record<string, TargetId> = { "0": "cad", "1": "lad", "2": "lcx", "3": "rca" };
 
@@ -184,6 +184,7 @@ export function Viewer({ active = true }: { active?: boolean }) {
             transition={{ duration: 0.45 }}
             style={{ pointerEvents: flythrough ? "none" : undefined }}
           >
+            <HudTelemetry />
             <ViewBar />
             <SnapshotButton />
             <LayerMenu />

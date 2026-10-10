@@ -19,10 +19,12 @@ import {
   Search,
   Undo2,
   User,
+  Volume2,
   type LucideIcon,
 } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import { useEffect, useMemo, useRef, useState, type KeyboardEvent as ReactKeyboardEvent, type ReactNode } from "react";
+import { cardiacAudio } from "../../lib/audio";
 import { pct } from "../../lib/format";
 import { fuzzyIndices, fuzzyScore } from "../../lib/fuzzy";
 import { TARGET_ORDER } from "../../lib/types";
@@ -219,6 +221,19 @@ function useCommands(): Command[] {
         keywords: "share url link clipboard",
         icon: Link2,
         run: () => void copyShareLink(),
+      },
+      {
+        id: "audio-toggle",
+        group: "Actions",
+        title: "Toggle cardiac auscultation audio",
+        subtitle: "Simulated lub-dub valve closure at patient pulse rate",
+        keywords: "sound audio heartbeat stethoscope bpm auscultation",
+        icon: Volume2,
+        right: <OnOff on={cardiacAudio.isEnabled} />,
+        run: () => {
+          const next = cardiacAudio.toggle();
+          st().showToast(next ? "Cardiac audio enabled" : "Cardiac audio muted");
+        },
       },
       {
         id: "shortcuts",

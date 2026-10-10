@@ -259,3 +259,36 @@ export function SectionControl() {
     </motion.div>
   );
 }
+
+/** Holographic telemetry corner brackets and status HUD. */
+export function HudTelemetry() {
+  const selected = useStore((s) => s.selected);
+  const performance = useStore((s) => s.viewer.performance);
+  if (performance) return null;
+
+  return (
+    <div className="pointer-events-none absolute inset-0 z-0 p-3 select-none" aria-hidden="true">
+      {/* Top-Left Corner Bracket */}
+      <div className="absolute top-2.5 left-2.5 h-6 w-6 rounded-tl-sm border-l border-t border-accent/30">
+        <span className="absolute left-1.5 top-1 font-mono text-[8px] uppercase tracking-widest text-accent/40">
+          CARDIOLENS // 3D
+        </span>
+      </div>
+
+      {/* Top-Right Corner Bracket */}
+      <div className="absolute right-2.5 top-2.5 h-6 w-6 rounded-tr-sm border-r border-t border-accent/30" />
+
+      {/* Bottom-Left Corner Bracket */}
+      <div className="absolute bottom-2.5 left-2.5 h-6 w-6 rounded-bl-sm border-b border-l border-accent/30" />
+
+      {/* Bottom-Right Corner Bracket */}
+      <div className="absolute bottom-2.5 right-2.5 h-6 w-6 rounded-br-sm border-b border-r border-accent/30" />
+
+      <div className="absolute bottom-3.5 right-8 hidden items-center gap-2 font-mono text-[9px] uppercase tracking-wider text-ink-3/60 md:flex">
+        <span className="h-1.5 w-1.5 rounded-full bg-accent/70 animate-ping-soft" />
+        <span>FMA: HEART // TARGET: {selected.toUpperCase()}</span>
+      </div>
+    </div>
+  );
+}
+

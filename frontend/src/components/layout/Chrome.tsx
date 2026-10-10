@@ -1,7 +1,8 @@
 import clsx from "clsx";
-import { ArrowRight, Box, BrainCircuit, Compass, FileText, Gauge, Heart, Keyboard, Search, ShieldAlert, X } from "lucide-react";
+import { ArrowRight, Box, BrainCircuit, Compass, FileText, Gauge, Heart, Keyboard, Search, ShieldAlert, Volume2, VolumeX, X } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import { cardiacAudio } from "../../lib/audio";
 import { useStore, type Tab } from "../../state/store";
 import { AnimatedNumber, EASE_OUT, Kbd } from "../ui/primitives";
 
@@ -62,7 +63,7 @@ function beatPath(x0: number, w: number): string {
   ].join(" ");
 }
 
-/** Scrolling ECG strip that beats at the current patient's recorded pulse rate. */
+/** Scrolling ECG strip that beats at the current patient's recorded pulse rate with optional cardiac audio biofeedback. */
 function EcgMonitor() {
   const pulse = useStore((s) => s.patient.pulse_rate);
   const bpm = typeof pulse === "number" && pulse >= 30 && pulse <= 220 ? pulse : 72;
@@ -71,6 +72,16 @@ function EcgMonitor() {
   const w = beats * beatW;
   const d = Array.from({ length: beats * 2 }, (_, i) => beatPath(i * beatW, beatW)).join(" ");
   const period = 60 / bpm;
+  const [audioActive, setAudioActive] = useState(false);
+
+  useEffect(() => {
+    cardiacAudio.setBpm(bpm);
+  }, [bpm]);
+
+  const toggleAudio = () => {
+    const next = cardiacAudio.toggle();
+    setAudioActive(next);
+  };
 
   return (
     <div className="hidden items-center gap-2 rounded-lg border border-line bg-black/25 px-2.5 py-1 md:flex" title="Pulse rate of the current patient">
@@ -98,6 +109,21 @@ function EcgMonitor() {
       <span className="tabular text-[11px] text-ink-2">
         <AnimatedNumber value={bpm} format={(v) => String(Math.round(v))} className="font-semibold text-ink" /> bpm
       </span>
+      <button
+        type="button"
+        onClick={toggleAudio}
+        className={clsx(
+          "ml-0.5 flex items-center gap-1 rounded px-1.5 py-0.5 text-[10px] font-medium transition-all",
+          audioActive
+            ? "bg-accent-soft text-accent ring-1 ring-accent/40"
+            : "text-ink-3 hover:bg-white/[0.06] hover:text-ink-2",
+        )}
+        title={audioActive ? "Mute cardiac auscultation audio" : "Play live cardiac auscultation (lub-dub) at patient pulse"}
+        aria-label={audioActive ? "Mute heart sound" : "Play heart sound"}
+      >
+        {audioActive ? <Volume2 size={12} className="animate-pulse" /> : <VolumeX size={12} />}
+        <span className="hidden xl:inline">{audioActive ? "Auscultation" : "Audio"}</span>
+      </button>
     </div>
   );
 }

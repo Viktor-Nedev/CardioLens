@@ -355,11 +355,30 @@ input[type="range"]::-moz-range-thumb {
   }
 }
 
+@keyframes sound-wave {
+  0%, 100% {
+    transform: scaleY(0.3);
+  }
+  50% {
+    transform: scaleY(1);
+  }
+}
+
 .animate-pulse-soft {
   animation: pulse-soft 1.6s ease-in-out infinite;
 }
 .animate-ping-soft {
   animation: ping-soft 1.8s cubic-bezier(0, 0, 0.2, 1) infinite;
+}
+.animate-sound-wave {
+  animation: sound-wave 0.8s ease-in-out infinite;
+  transform-origin: bottom;
+}
+.glow-accent {
+  box-shadow: 0 0 20px -4px rgb(92 200 245 / 0.35);
+}
+.glow-success {
+  box-shadow: 0 0 20px -4px rgb(25 158 112 / 0.35);
 }
 
 @media (prefers-reduced-motion: reduce) {

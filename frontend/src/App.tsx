@@ -4,6 +4,7 @@ import { AnimatePresence, motion, MotionConfig, type Variants } from "motion/rea
 import { lazy, Suspense, useEffect, useState } from "react";
 import { ComparePanel } from "./components/explain/ComparePanel";
 import { ExplanationPanel } from "./components/explain/ExplanationPanel";
+import { InterventionPlanner } from "./components/explain/InterventionPlanner";
 import { SensitivityPanel } from "./components/explain/SensitivityPanel";
 import { SimilarPatients } from "./components/explain/SimilarPatients";
 import { DisclaimerBanner, Header, IntroSplash, ShortcutsDialog } from "./components/layout/Chrome";
@@ -38,7 +39,7 @@ const columns: Variants = {
 
 function Analysis({ active }: { active: boolean }) {
   const [pane, setPane] = useState<MobilePane>("viewer");
-  const [insight, setInsight] = useState<"explain" | "physiology" | "whatif" | "similar" | "compare">("explain");
+  const [insight, setInsight] = useState<"explain" | "physiology" | "whatif" | "interventions" | "similar" | "compare">("explain");
   const ready = useStore((s) => s.disclaimerAccepted);
   const reveal = ready ? "show" : "hidden";
 
@@ -104,6 +105,7 @@ function Analysis({ active }: { active: boolean }) {
                 { value: "explain", label: "SHAP" },
                 { value: "physiology", label: "Physiology" },
                 { value: "whatif", label: "What-if" },
+                { value: "interventions", label: "Interventions" },
                 { value: "similar", label: "Similar cases" },
                 { value: "compare", label: "Compare" },
               ]}
@@ -123,6 +125,8 @@ function Analysis({ active }: { active: boolean }) {
                 <PhysiologyTable />
               ) : insight === "whatif" ? (
                 <SensitivityPanel />
+              ) : insight === "interventions" ? (
+                <InterventionPlanner />
               ) : insight === "similar" ? (
                 <SimilarPatients />
               ) : (
